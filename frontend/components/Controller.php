@@ -14,7 +14,7 @@ class Controller extends \yii\web\Controller
                 Yii::$app->user->logout(false);
                 Yii::$app->session->destroy();
                 if (!Yii::$app->request->isAjax) {
-                    Yii::$app->session->setFlash('warning', 'Сессия завершена. Войдите снова.');
+                    Yii::$app->session->setFlash('warning', Yii::t('ui', 'Сессия завершена. Войдите снова.'));
                     Yii::$app->response->redirect(['/auth/login']);
                     return false;
                 }

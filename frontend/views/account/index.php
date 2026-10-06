@@ -9,6 +9,40 @@ $status = Yii::t(
     (string)$user->getDisplayStatus()
 );
 
+$translateShopText = static function (?string $value): string {
+    $value = trim((string)$value);
+
+    if($value === '' || Yii::$app->language === 'ru')
+    {
+        return $value;
+    }
+
+    $normalized = preg_replace('/\\s+/u', ' ', $value);
+
+    if(!is_string($normalized) || $normalized === '')
+    {
+        return $value;
+    }
+
+    if(preg_match(
+        '/^(VIP|Premium|Elite|Legend)\\s+на\\s+(\\d+)\\s+дн(?:я|ей)?\\.?$/u',
+        $normalized,
+        $matches
+    ))
+    {
+        return Yii::t('ui', '{status} на {days} дней', [
+            'status' => $matches[1],
+            'days' => (int)$matches[2],
+        ]);
+    }
+
+    $translated = Yii::t('ui', $normalized);
+
+    return $translated !== $normalized
+        ? $translated
+        : $value;
+};
+
 ?>
 
 <div class="container ht-section">
@@ -120,8 +154,9 @@ $status = Yii::t(
 
                                 <td>
                                     <?= Html::encode(
-                                        $purchase->product?->name
-                                        ?: Yii::t('ui', 'Товар')
+                                        $purchase->product
+                                            ? $translateShopText((string)$purchase->product->name)
+                                            : Yii::t('ui', 'Товар')
                                     ) ?>
                                 </td>
 
@@ -135,7 +170,11 @@ $status = Yii::t(
                                 </td>
 
                                 <td>
-                                    <?= Html::encode($purchase->status) ?>
+                                    <?= Html::encode(
+                                        $purchase->status === 'paid'
+                                            ? Yii::t('ui', 'Оплачено')
+                                            : $purchase->status
+                                    ) ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

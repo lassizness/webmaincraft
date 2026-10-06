@@ -41,7 +41,7 @@ final class AuthController extends Controller
                 if(!$recaptcha->isConfigured())
                 {
                     Yii::error('reCAPTCHA is enabled for login but is not configured', 'recaptcha');
-                    $model->addError('password', 'Защита от ботов временно недоступна.');
+                    $model->addError('password', Yii::t('app', 'Защита от ботов временно недоступна.'));
                     $captchaPassed = false;
                 }
                 elseif(!$recaptcha->verify(
@@ -49,7 +49,7 @@ final class AuthController extends Controller
                     Yii::$app->request->userIP
                 ))
                 {
-                    $model->addError('password', 'Подтвердите, что вы не робот.');
+                    $model->addError('password', Yii::t('app', 'Подтвердите, что вы не робот.'));
                     $captchaPassed = false;
                 }
             }
@@ -61,7 +61,7 @@ final class AuthController extends Controller
 
                 if($service->isBlocked($model->login, $ip))
                 {
-                    $model->addError('password', 'Слишком много попыток. Повторите через 15 минут.');
+                    $model->addError('password', Yii::t('app', 'Слишком много попыток. Повторите через 15 минут.'));
                 }
                 else
                 {
@@ -81,7 +81,7 @@ final class AuthController extends Controller
                         return $this->redirect(['/account/index']);
                     }
 
-                    $model->addError('password', 'Неверный логин/почта или пароль.');
+                    $model->addError('password', Yii::t('app', 'Неверный логин/почта или пароль.'));
                 }
             }
         }
@@ -96,7 +96,7 @@ final class AuthController extends Controller
     {
         if((string)Setting::value('registration.enabled', '1') !== '1')
         {
-            throw new \yii\web\ServiceUnavailableHttpException('Регистрация временно отключена.');
+            throw new \yii\web\ServiceUnavailableHttpException(Yii::t('app', 'Регистрация временно отключена.'));
         }
 
         if(!Yii::$app->user->isGuest) return $this->goHome();
@@ -113,7 +113,7 @@ final class AuthController extends Controller
                 if(!$recaptcha->isConfigured())
                 {
                     Yii::error('reCAPTCHA is enabled for registration but is not configured', 'recaptcha');
-                    $model->addError('username', 'Защита от ботов временно недоступна.');
+                    $model->addError('username', Yii::t('app', 'Защита от ботов временно недоступна.'));
                     $captchaPassed = false;
                 }
                 elseif(!$recaptcha->verify(
@@ -121,7 +121,7 @@ final class AuthController extends Controller
                     Yii::$app->request->userIP
                 ))
                 {
-                    $model->addError('username', 'Подтвердите, что вы не робот.');
+                    $model->addError('username', Yii::t('app', 'Подтвердите, что вы не робот.'));
                     $captchaPassed = false;
                 }
             }
@@ -139,14 +139,14 @@ final class AuthController extends Controller
                     AuditService::log('user.register', 'user', (string)$user->id);
                     Yii::$app->session->setFlash(
                         'success',
-                        'Аккаунт создан. Подтвердите email, после этого он станет доступен и в лаунчере.'
+                        Yii::t('app', 'Аккаунт создан. Подтвердите email, после этого он станет доступен и в лаунчере.')
                     );
                     return $this->redirect(['login']);
                 }
                 catch(\Throwable $e)
                 {
                     Yii::error($e);
-                    $model->addError('username', 'Не удалось создать аккаунт.');
+                    $model->addError('username', Yii::t('app', 'Не удалось создать аккаунт.'));
                 }
             }
         }
@@ -169,18 +169,24 @@ final class AuthController extends Controller
                 $url = Yii::$app->params['appUrl'].'/verify-email?token='.rawurlencode($raw);
                 try
                 {
-                    Yii::$app->mailer
-                        ->compose('verify-email', ['user' => $user, 'url' => $url])
-                        ->setTo($user->email)
-                        ->setSubject('Подтверждение регистрации HiveTech')
-                        ->send();
+                    $this->withUserLanguage(
+                        $user,
+                        static function() use ($user, $url): void
+                        {
+                            Yii::$app->mailer
+                                ->compose('verify-email', ['user' => $user, 'url' => $url])
+                                ->setTo($user->email)
+                                ->setSubject(Yii::t('app', 'Подтверждение регистрации HiveTech'))
+                                ->send();
+                        }
+                    );
                 }
                 catch(\Throwable $e)
                 {
                     Yii::error($e, 'mail');
                 }
             }
-            Yii::$app->session->setFlash('success', 'Если аккаунт ожидает подтверждения, новое письмо сформировано.');
+            Yii::$app->session->setFlash('success', Yii::t('app', 'Если аккаунт ожидает подтверждения, новое письмо сформировано.'));
             return $this->refresh();
         }
         return $this->render('resend-verification', ['model' => $model]);
@@ -191,10 +197,10 @@ final class AuthController extends Controller
         $user = (new RegistrationService())->verify($token);
         if(!$user)
         {
-            Yii::$app->session->setFlash('error', 'Ссылка недействительна или истекла.');
+            Yii::$app->session->setFlash('error', Yii::t('app', 'Ссылка недействительна или истекла.'));
             return $this->redirect(['login']);
         }
-        Yii::$app->session->setFlash('success', 'Email подтверждён. Теперь можно входить на сайт и в HiveTech Launcher.');
+        Yii::$app->session->setFlash('success', Yii::t('app', 'Email подтверждён. Теперь можно входить на сайт и в HiveTech Launcher.'));
         return $this->redirect(['login']);
     }
 
@@ -217,16 +223,41 @@ final class AuthController extends Controller
             {
                 $raw = (new TokenService())->issue((int)$user->id, UserToken::TYPE_PASSWORD_RESET, 3600);
                 $url = Yii::$app->params['appUrl'].'/reset-password?token='.rawurlencode($raw);
-                Yii::$app->mailer
-                    ->compose('password-reset', ['user' => $user, 'url' => $url])
-                    ->setTo($user->email)
-                    ->setSubject('Восстановление пароля HiveTech')
-                    ->send();
+                $this->withUserLanguage(
+                    $user,
+                    static function() use ($user, $url): void
+                    {
+                        Yii::$app->mailer
+                            ->compose('password-reset', ['user' => $user, 'url' => $url])
+                            ->setTo($user->email)
+                            ->setSubject(Yii::t('app', 'Восстановление пароля HiveTech'))
+                            ->send();
+                    }
+                );
             }
-            Yii::$app->session->setFlash('success', 'Если такой email зарегистрирован, мы отправили ссылку для сброса пароля.');
+            Yii::$app->session->setFlash('success', Yii::t('app', 'Если такой email зарегистрирован, мы отправили ссылку для сброса пароля.'));
             return $this->refresh();
         }
         return $this->render('request-password-reset', ['model' => $model]);
+    }
+
+    private function withUserLanguage(User $user, callable $callback): mixed
+    {
+        $previousLanguage = Yii::$app->language;
+        $language = in_array((string)$user->language, ['ru', 'en', 'de'], true)
+            ? (string)$user->language
+            : 'ru';
+
+        Yii::$app->language = $language;
+
+        try
+        {
+            return $callback();
+        }
+        finally
+        {
+            Yii::$app->language = $previousLanguage;
+        }
     }
 
     public function actionResetPassword(string $token)
@@ -243,7 +274,7 @@ final class AuthController extends Controller
 
         if(!$tokenModel)
         {
-            throw new \yii\web\BadRequestHttpException('Ссылка недействительна или истекла.');
+            throw new \yii\web\BadRequestHttpException(Yii::t('app', 'Ссылка недействительна или истекла.'));
         }
 
         $model = new ResetPasswordForm();
@@ -256,7 +287,7 @@ final class AuthController extends Controller
             $tokenModel->save(false, ['used_at']);
             (new SessionTracker())->revokeAll((int)$user->id);
             AuditService::log('user.password_reset', 'user', (string)$user->id);
-            Yii::$app->session->setFlash('success', 'Пароль изменён. Старые web/launcher-сессии сброшены.');
+            Yii::$app->session->setFlash('success', Yii::t('app', 'Пароль изменён. Старые web/launcher-сессии сброшены.'));
             return $this->redirect(['login']);
         }
         return $this->render('reset-password', ['model' => $model]);

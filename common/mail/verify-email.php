@@ -1,1 +1,11 @@
-<?php use yii\helpers\{Html,Url};?><h2>Добро пожаловать в HiveTech, <?= Html::encode($user->username) ?>!</h2><p>Подтвердите email. До подтверждения аккаунт имеет статус <b>pending</b> и не может войти в HiveTech Launcher.</p><p><?= Html::a('Подтвердить email',$url) ?></p><p>Ссылка действует 24 часа.</p>
+<?php
+
+use yii\helpers\Html;
+
+?>
+<h2><?= Yii::t('app', 'Добро пожаловать в HiveTech, {username}!', [
+    'username' => Html::encode($user->username),
+]) ?></h2>
+<p><?= Yii::t('app', 'Подтвердите email. До подтверждения аккаунт имеет статус pending и не может войти в HiveTech Launcher.') ?></p>
+<p><?= Html::a(Yii::t('app', 'Подтвердить email'), $url) ?></p>
+<p><?= Yii::t('app', 'Ссылка действует 24 часа.') ?></p>

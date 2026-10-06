@@ -1,6 +1,7 @@
 <?php
 
 use yii\helpers\Html;
+use yii\helpers\Json;
 use yii\helpers\Url;
 
 /**
@@ -38,51 +39,6 @@ $cloakUrl = $hasCloak
     : '';
 
 
-// HIVEGRID_I18N_BUFFER_START
-$__hgI18nKeys = [
-    'Персонализация персонажа',
-    'Скин и плащ',
-    'Настройте внешний вид персонажа: скин, плащ и цвет ника.',
-    'Скин',
-    'Плащ',
-    'Удалить',
-    'Удалить текущий скин?',
-    'Удалить текущий плащ?',
-    'PNG · 64×64 или 64×32',
-    'PNG · 64×32 или 22×17',
-    'Перетащите скин сюда',
-    'Перетащите плащ сюда',
-    'или нажмите для выбора файла',
-    'Отпустите файл',
-    'Персонализация',
-    'Цвет ника',
-    'Выбор цвета ника доступен начиная',
-    'со статуса Premium.',
-    'Посмотреть привилегии',
-    'Выберите цвет ника из стандартной',
-    'палитры Minecraft. Цвет префикса',
-    'статуса при этом не изменяется.',
-    'Как будет выглядеть ник:',
-    'Сбросить цвет',
-    'Можно загрузить только PNG.',
-    'Загрузка файла...',
-    'Тёмно-синий',
-    'Тёмно-зелёный',
-    'Бирюзовый',
-    'Тёмно-красный',
-    'Фиолетовый',
-    'Золотой',
-    'Серый',
-    'Синий',
-    'Зелёный',
-    'Голубой',
-    'Красный',
-    'Розово-фиолетовый',
-    'Жёлтый',
-    'Белый',
-];
-
-ob_start();
 ?>
 
 <div class="container ht-section skin-page">
@@ -97,11 +53,11 @@ ob_start();
 
                 <div class="mb-4">
                     <h2 class="mb-1">
-                        Персонализация персонажа
+                        <?= Yii::t('ui', 'Персонализация персонажа') ?>
                     </h2>
 
                     <div class="muted">
-                        Настройте внешний вид персонажа: скин, плащ и цвет ника.
+                        <?= Yii::t('ui', 'Настройте внешний вид персонажа: скин, плащ и цвет ника.') ?>
                     </div>
                 </div>
 
@@ -124,10 +80,10 @@ ob_start();
                         <div class="texture-card-header">
 
                             <div>
-                                <strong>Скин</strong>
+                                <strong><?= Yii::t('ui', 'Скин') ?></strong>
 
                                 <div class="texture-format">
-                                    PNG · 64×64 или 64×32
+                                    <?= Yii::t('ui', 'PNG · 64×64 или 64×32') ?>
                                 </div>
                             </div>
 
@@ -135,7 +91,7 @@ ob_start();
                             <?php if($hasSkin): ?>
 
                                 <?= Html::a(
-                                    'Удалить',
+                                    Yii::t('ui', 'Удалить'),
                                     [
                                         '/skin/delete',
                                         'type' => 'skin',
@@ -143,7 +99,7 @@ ob_start();
                                     [
                                         'class' => 'btn btn-sm btn-outline-danger',
                                         'data-method' => 'post',
-                                        'data-confirm' => 'Удалить текущий скин?',
+                                        'data-confirm' => Yii::t('ui', 'Удалить текущий скин?'),
                                         'data-drop-ignore' => '1',
                                     ]
                                 ) ?>
@@ -176,17 +132,17 @@ ob_start();
                                 </div>
 
                                 <strong>
-                                    Перетащите скин сюда
+                                    <?= Yii::t('ui', 'Перетащите скин сюда') ?>
                                 </strong>
 
                                 <span>
-                                    или нажмите для выбора файла
+                                    <?= Yii::t('ui', 'или нажмите для выбора файла') ?>
                                 </span>
                             </div>
 
 
                             <div class="drop-overlay">
-                                Отпустите файл
+                                <?= Yii::t('ui', 'Отпустите файл') ?>
                             </div>
 
                         </div>
@@ -209,10 +165,10 @@ ob_start();
                         <div class="texture-card-header">
 
                             <div>
-                                <strong>Плащ</strong>
+                                <strong><?= Yii::t('ui', 'Плащ') ?></strong>
 
                                 <div class="texture-format">
-                                    PNG · 64×32 или 22×17
+                                    <?= Yii::t('ui', 'PNG · 64×32 или 22×17') ?>
                                 </div>
                             </div>
 
@@ -220,7 +176,7 @@ ob_start();
                             <?php if($hasCloak): ?>
 
                                 <?= Html::a(
-                                    'Удалить',
+                                    Yii::t('ui', 'Удалить'),
                                     [
                                         '/skin/delete',
                                         'type' => 'cloak',
@@ -228,7 +184,7 @@ ob_start();
                                     [
                                         'class' => 'btn btn-sm btn-outline-danger',
                                         'data-method' => 'post',
-                                        'data-confirm' => 'Удалить текущий плащ?',
+                                        'data-confirm' => Yii::t('ui', 'Удалить текущий плащ?'),
                                         'data-drop-ignore' => '1',
                                     ]
                                 ) ?>
@@ -247,7 +203,7 @@ ob_start();
                             <img
                                 id="cloak-preview"
                                 src="<?= Html::encode($cloakUrl) ?>"
-                                alt="Плащ"
+                                alt="<?= Html::encode(Yii::t('ui', 'Плащ')) ?>"
                                 <?= $hasCloak ? '' : 'style="display:none"' ?>
                             >
 
@@ -262,17 +218,17 @@ ob_start();
                                 </div>
 
                                 <strong>
-                                    Перетащите плащ сюда
+                                    <?= Yii::t('ui', 'Перетащите плащ сюда') ?>
                                 </strong>
 
                                 <span>
-                                    или нажмите для выбора файла
+                                    <?= Yii::t('ui', 'или нажмите для выбора файла') ?>
                                 </span>
                             </div>
 
 
                             <div class="drop-overlay">
-                                Отпустите файл
+                                <?= Yii::t('ui', 'Отпустите файл') ?>
                             </div>
 
                         </div>
@@ -313,11 +269,11 @@ ob_start();
                     <div>
 
                         <div class="eyebrow">
-                            Персонализация
+                            <?= Yii::t('ui', 'Персонализация') ?>
                         </div>
 
                         <h3>
-                            Цвет ника
+                            <?= Yii::t('ui', 'Цвет ника') ?>
                         </h3>
 
                     </div>
@@ -343,15 +299,14 @@ ob_start();
                 <?php if(!$canNickColor): ?>
 
                     <p class="muted mb-3">
-                        Выбор цвета ника доступен начиная
-                        со статуса Premium.
+                        <?= Yii::t('ui', 'Выбор цвета ника доступен начиная со статуса Premium.') ?>
                     </p>
 
                     <a
                         href="<?= Url::to(['/shop/index']) ?>"
                         class="btn btn-outline-light"
                     >
-                        Посмотреть привилегии
+                        <?= Yii::t('ui', 'Посмотреть привилегии') ?>
                     </a>
 
                 <?php else: ?>
@@ -362,16 +317,14 @@ ob_start();
                     ?>
 
                     <p class="muted">
-                        Выберите цвет ника из стандартной
-                        палитры Minecraft. Цвет префикса
-                        статуса при этом не изменяется.
+                        <?= Yii::t('ui', 'Выберите цвет ника из стандартной палитры Minecraft. Цвет префикса статуса при этом не изменяется.') ?>
                     </p>
 
 
                     <div class="nick-game-preview">
 
                         <span class="muted">
-                            Как будет выглядеть ник:
+                            <?= Yii::t('ui', 'Как будет выглядеть ник:') ?>
                         </span>
 
                         <div class="nick-game-preview-value">
@@ -458,7 +411,7 @@ ob_start();
 
                                 <span>
                                     <?= Html::encode(
-                                        $color['label']
+                                        Yii::t('ui', $color['label'])
                                     ) ?>
                                 </span>
 
@@ -487,7 +440,7 @@ ob_start();
                             >
 
                             <?= Html::submitButton(
-                                'Сбросить цвет',
+                                Yii::t('ui', 'Сбросить цвет'),
                                 [
                                     'class' =>
                                         'btn btn-outline-light',
@@ -845,7 +798,7 @@ ob_start();
         )
         {
             alert(
-                'Можно загрузить только PNG.'
+                <?= Json::htmlEncode(Yii::t('ui', 'Можно загрузить только PNG.')) ?>
             );
 
             return false;
@@ -879,7 +832,7 @@ ob_start();
         );
 
         setStatus(
-            'Загрузка файла...'
+            <?= Json::htmlEncode(Yii::t('ui', 'Загрузка файла...')) ?>
         );
 
         form.submit();
@@ -1161,46 +1114,4 @@ ob_start();
 
 </script>
 
-
-<?php
-// HIVEGRID_I18N_BUFFER_END
-$__hgHtml = ob_get_clean();
-
-if(Yii::$app->language !== 'ru')
-{
-    $__hgMap = [];
-
-    foreach($__hgI18nKeys as $__hgKey)
-    {
-        $__hgTranslated = Yii::t(
-            'ui',
-            $__hgKey
-        );
-
-        if($__hgTranslated !== $__hgKey)
-        {
-            $__hgMap[$__hgKey] =
-                $__hgTranslated;
-        }
-    }
-
-    if($__hgMap)
-    {
-        $__hgHtml = strtr(
-            $__hgHtml,
-            $__hgMap
-        );
-    }
-}
-
-echo $__hgHtml;
-
-unset(
-    $__hgHtml,
-    $__hgMap,
-    $__hgKey,
-    $__hgTranslated,
-    $__hgI18nKeys
-);
-?>
 

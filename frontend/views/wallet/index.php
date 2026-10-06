@@ -4,6 +4,71 @@ use yii\helpers\Html;
 
 $this->title = Yii::t('ui', 'Баланс');
 
+$translateShopText = static function (?string $value): string {
+    $value = trim((string)$value);
+
+    if($value === '' || Yii::$app->language === 'ru')
+    {
+        return $value;
+    }
+
+    $normalized = preg_replace('/\\s+/u', ' ', $value);
+
+    if(!is_string($normalized) || $normalized === '')
+    {
+        return $value;
+    }
+
+    if(preg_match(
+        '/^(VIP|Premium|Elite|Legend)\\s+на\\s+(\\d+)\\s+дн(?:я|ей)?\\.?$/u',
+        $normalized,
+        $matches
+    ))
+    {
+        return Yii::t('ui', '{status} на {days} дней', [
+            'status' => $matches[1],
+            'days' => (int)$matches[2],
+        ]);
+    }
+
+    $translated = Yii::t('ui', $normalized);
+
+    return $translated !== $normalized
+        ? $translated
+        : $value;
+};
+
+$transactionDescription = static function ($transaction) use ($translateShopText): string {
+    $description = trim((string)$transaction->description);
+
+    if(preg_match('/^Покупка:\\s*(.+)$/u', $description, $matches))
+    {
+        return Yii::t('ui', 'Покупка: {product}', [
+            'product' => $translateShopText($matches[1]),
+        ]);
+    }
+
+    if(preg_match('/^Промокод\\s+(.+)$/u', $description, $matches))
+    {
+        return Yii::t('ui', 'Промокод {code}', [
+            'code' => $matches[1],
+        ]);
+    }
+
+    if(preg_match('/^Голосование:\\s*(.+)$/u', $description, $matches))
+    {
+        return Yii::t('ui', 'Голосование: {service}', [
+            'service' => $matches[1],
+        ]);
+    }
+
+    $translated = Yii::t('ui', $description);
+
+    return $translated !== $description
+        ? $translated
+        : $description;
+};
+
 ?>
 
 <div class="container ht-section">
@@ -84,7 +149,7 @@ $this->title = Yii::t('ui', 'Баланс');
 
                                         <td>
                                             <?= Html::encode(
-                                                $transaction->description
+                                                $transactionDescription($transaction)
                                             ) ?>
                                         </td>
 

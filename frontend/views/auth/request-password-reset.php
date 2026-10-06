@@ -1,1 +1,19 @@
-<?php use yii\widgets\ActiveForm;use yii\helpers\Html;$this->title='Восстановление пароля';?><div class="container"><div class="auth-wrap"><div class="auth-panel"><h1 class="h3">Восстановление пароля</h1><p class="muted">Ссылка действует один час.</p><?php $f=ActiveForm::begin();echo $f->field($model,'email')->input('email');echo Html::submitButton('Отправить ссылку',['class'=>'btn btn-primary']);ActiveForm::end();?></div></div></div>
+<?php
+
+use yii\helpers\Html;
+use yii\widgets\ActiveForm;
+
+$this->title = Yii::t('app', 'Восстановление пароля');
+?>
+<div class="container">
+    <div class="auth-wrap">
+        <div class="auth-panel">
+            <h1 class="h3"><?= Yii::t('app', 'Восстановление пароля') ?></h1>
+            <p class="muted"><?= Yii::t('app', 'Ссылка действует один час.') ?></p>
+            <?php $form = ActiveForm::begin(); ?>
+            <?= $form->field($model, 'email')->input('email')->label('Email') ?>
+            <?= Html::submitButton(Yii::t('app', 'Отправить ссылку'), ['class' => 'btn btn-primary']) ?>
+            <?php ActiveForm::end(); ?>
+        </div>
+    </div>
+</div>
