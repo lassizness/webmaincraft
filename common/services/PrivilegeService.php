@@ -403,9 +403,11 @@ final class PrivilegeService
                 )
                 {
                     throw new \DomainException(
-                        'Пока действует '
-                        . $oldGroup->name
-                        . ', нельзя купить более низкий статус.'
+                        Yii::t(
+                            'ui',
+                            'Пока действует {status}, нельзя купить более низкий статус.',
+                            ['status' => $oldGroup->name]
+                        )
                     );
                 }
 

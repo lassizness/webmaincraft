@@ -39,7 +39,23 @@ final class LanguageBootstrap implements BootstrapInterface
         }
 
         /*
-         * 2. Если позже внешний reverse proxy начнёт передавать страну,
+         * 2. Для авторизованного пользователя используем сохранённый язык,
+         * если cookie ещё нет (например, на новом устройстве).
+         */
+        if(!$app->user->isGuest)
+        {
+            $userLanguage = trim((string)($app->user->identity?->language ?? ''));
+
+            if(isset(self::LANGUAGES[$userLanguage]))
+            {
+                $app->language = $userLanguage;
+                $app->sourceLanguage = 'ru';
+                return;
+            }
+        }
+
+        /*
+         * 3. Если позже внешний reverse proxy начнёт передавать страну,
          * используем её.
          *
          * Поддерживаем:
@@ -67,7 +83,7 @@ final class LanguageBootstrap implements BootstrapInterface
         else
         {
             /*
-             * 3. Пока GeoIP-заголовка нет — используем предпочтение браузера.
+             * 4. Пока GeoIP-заголовка нет — используем предпочтение браузера.
              *
              * en стоит первым специально:
              * неизвестный язык => English.

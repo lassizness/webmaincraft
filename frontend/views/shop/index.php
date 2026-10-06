@@ -24,6 +24,18 @@ $translateShopText = static function (?string $value): string {
         return $value;
     }
 
+    if(preg_match(
+        '/^(VIP|Premium|Elite|Legend)\\s+на\\s+(\\d+)\\s+дн(?:я|ей)?\\.?$/u',
+        $normalized,
+        $matches
+    ))
+    {
+        return Yii::t('ui', '{status} на {days} дней', [
+            'status' => $matches[1],
+            'days' => (int)$matches[2],
+        ]);
+    }
+
     $translated = Yii::t('ui', $normalized);
 
     return $translated !== $normalized

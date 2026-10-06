@@ -91,19 +91,16 @@ final class SkinController extends Controller
 
                     Yii::$app->session->setFlash(
                         'success',
-                        (
-                            $type === 'skin'
-                                ? 'Скин'
-                                : 'Плащ'
-                        )
-                        . ' сохранён.'
+                        $type === 'skin'
+                            ? Yii::t('ui', 'Скин сохранён.')
+                            : Yii::t('ui', 'Плащ сохранён.')
                     );
                 }
                 catch(\Throwable $e)
                 {
                     Yii::$app->session->setFlash(
                         'error',
-                        $e->getMessage()
+                        Yii::t('ui', $e->getMessage())
                     );
                 }
             }
@@ -192,15 +189,15 @@ final class SkinController extends Controller
             Yii::$app->session->setFlash(
                 'success',
                 $color === null
-                    ? 'Цвет ника сброшен.'
-                    : 'Цвет ника сохранён. Изменение будет применено на игровом сервере.'
+                    ? Yii::t('ui', 'Цвет ника сброшен.')
+                    : Yii::t('ui', 'Цвет ника сохранён. Изменение будет применено на игровом сервере.')
             );
         }
         catch(\Throwable $e)
         {
             Yii::$app->session->setFlash(
                 'error',
-                $e->getMessage()
+                Yii::t('ui', $e->getMessage())
             );
         }
 
@@ -240,7 +237,7 @@ final class SkinController extends Controller
         if(!isset($paths[$type]))
         {
             throw new \yii\web\BadRequestHttpException(
-                'Неизвестный тип текстуры.'
+                Yii::t('ui', 'Неизвестный тип текстуры.')
             );
         }
 
@@ -254,7 +251,7 @@ final class SkinController extends Controller
         {
             Yii::$app->session->setFlash(
                 'error',
-                'Не удалось удалить файл.'
+                Yii::t('ui', 'Не удалось удалить файл.')
             );
 
             return $this->redirect([
@@ -265,8 +262,8 @@ final class SkinController extends Controller
         Yii::$app->session->setFlash(
             'success',
             $type === 'skin'
-                ? 'Скин удалён.'
-                : 'Плащ удалён.'
+                ? Yii::t('ui', 'Скин удалён.')
+                : Yii::t('ui', 'Плащ удалён.')
         );
 
         return $this->redirect([
@@ -291,7 +288,7 @@ final class SkinController extends Controller
         if(!$server)
         {
             throw new NotFoundHttpException(
-                'Игровой сервер не найден.'
+                Yii::t('ui', 'Игровой сервер не найден.')
             );
         }
 

@@ -40,6 +40,17 @@ final class LanguageController extends Controller
             new Cookie($config)
         );
 
+        if(!Yii::$app->user->isGuest)
+        {
+            $user = Yii::$app->user->identity;
+
+            if($user && $user->language !== $lang)
+            {
+                $user->language = $lang;
+                $user->save(false, ['language']);
+            }
+        }
+
         $returnUrl = trim((string)Yii::$app->request->get(
             'return',
             '/'

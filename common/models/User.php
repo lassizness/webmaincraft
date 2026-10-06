@@ -9,7 +9,7 @@ use Yii;
 use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
 
-/** @property int $id @property string $uuid @property string $username @property string $email @property string $password @property ?string $accessToken @property ?string $serverID @property ?int $hwidId @property string $status @property int $email_verified @property string $created_at @property string $updated_at @property ?string $last_login_at */
+/** @property int $id @property string $uuid @property string $username @property string $email @property string $password @property ?string $accessToken @property ?string $serverID @property ?int $hwidId @property string $status @property int $email_verified @property string $language @property string $created_at @property string $updated_at @property ?string $last_login_at */
 final class User extends ActiveRecord implements IdentityInterface
 {
     public const STATUS_PENDING = 'pending';
@@ -28,6 +28,7 @@ final class User extends ActiveRecord implements IdentityInterface
             [['username', 'email', 'uuid'], 'unique'],
             ['status', 'in', 'range' => [self::STATUS_PENDING, self::STATUS_ACTIVE, self::STATUS_BLOCKED]],
             ['email_verified', 'boolean'],
+            ['language', 'in', 'range' => ['ru', 'en', 'de']],
         ];
     }
 

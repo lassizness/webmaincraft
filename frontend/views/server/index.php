@@ -2,7 +2,7 @@
 
 use yii\helpers\Html;
 
-$this->title = 'Серверы';
+$this->title = Yii::t('app', 'Серверы');
 
 $modNames = [
     'appliedenergistics2' => 'Applied Energistics 2',
@@ -79,7 +79,7 @@ $technicalMods = [
 <div class="container ht-section">
 
     <div class="section-title">
-        <h2>Серверы HiveTech</h2>
+        <h2><?= Yii::t('app', 'Серверы HiveTech') ?></h2>
     </div>
 
     <div class="row g-3">
@@ -164,7 +164,7 @@ $technicalMods = [
                         <div class="col-md-4">
 
                             <div class="muted small">
-                                Адрес сервера
+                                <?= Yii::t('app', 'Адрес сервера') ?>
                             </div>
 
                             <div class="fw-semibold">
@@ -177,7 +177,7 @@ $technicalMods = [
                         <div class="col-md-4">
 
                             <div class="muted small">
-                                Версия
+                                <?= Yii::t('app', 'Версия') ?>
                             </div>
 
                             <div class="fw-semibold">
@@ -196,7 +196,7 @@ $technicalMods = [
                         <div class="col-md-4">
 
                             <div class="muted small">
-                                Игроки
+                                <?= Yii::t('app', 'Игроки') ?>
                             </div>
 
                             <div class="fw-semibold">
@@ -224,12 +224,12 @@ $technicalMods = [
 
                             <div>
                                 <div class="fw-semibold">
-                                    Модификации
+                                    <?= Yii::t('app', 'Модификации') ?>
                                 </div>
 
                                 <div class="muted small">
-                                    <?= count($contentMods) ?> игровых модов
-                                    · <?= count($mods) ?> компонентов всего
+                                    <?= Yii::t('app', '{count} игровых модов', ['count' => count($contentMods)]) ?>
+                                    · <?= Yii::t('app', '{count} компонентов всего', ['count' => count($mods)]) ?>
                                 </div>
                             </div>
 
@@ -241,7 +241,7 @@ $technicalMods = [
                                 aria-expanded="false"
                                 aria-controls="<?= Html::encode($collapseId) ?>"
                             >
-                                Показать список
+                                <?= Yii::t('app', 'Показать список') ?>
                             </button>
 
                         </div>

@@ -1,1 +1,11 @@
-<?php use yii\helpers\Html;?><h2>Сброс пароля HiveTech</h2><p>Для аккаунта <?= Html::encode($user->username) ?> запрошен сброс пароля.</p><p><?= Html::a('Установить новый пароль',$url) ?></p><p>Ссылка действует 1 час. После смены пароля старые web- и launcher-сессии будут сброшены.</p>
+<?php
+
+use yii\helpers\Html;
+
+?>
+<h2><?= Yii::t('app', 'Сброс пароля HiveTech') ?></h2>
+<p><?= Yii::t('app', 'Для аккаунта {username} запрошен сброс пароля.', [
+    'username' => Html::encode($user->username),
+]) ?></p>
+<p><?= Html::a(Yii::t('app', 'Установить новый пароль'), $url) ?></p>
+<p><?= Yii::t('app', 'Ссылка действует 1 час. После смены пароля старые web- и launcher-сессии будут сброшены.') ?></p>

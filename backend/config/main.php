@@ -9,6 +9,23 @@ return [
     'bootstrap' => ['log'],
     'controllerNamespace' => 'backend\\controllers',
     'components' => [
+        'i18n' => [
+            'translations' => [
+                'ui*' => [
+                    'class' => yii\i18n\PhpMessageSource::class,
+                    'basePath' => '@common/messages',
+                    'sourceLanguage' => 'ru',
+                ],
+                'app*' => [
+                    'class' => yii\i18n\PhpMessageSource::class,
+                    'basePath' => '@common/messages',
+                    'sourceLanguage' => 'ru',
+                    'fileMap' => [
+                        'app' => 'app.php',
+                    ],
+                ],
+            ],
+        ],
         'request' => [
             'csrfParam' => '_csrf-hivetech-admin',
             'cookieValidationKey' => ht_env('COOKIE_VALIDATION_KEY', 'CHANGE-ME') . '-admin',
