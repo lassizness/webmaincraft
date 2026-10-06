@@ -27,7 +27,7 @@ $statusLabel = Yii::t('ui', match($ticket->status)
         <section>
             <div class="ht-card">
 
-                <div class="d-flex justify-content-between">
+                <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
 
                     <h2>
                         #<?= $ticket->id ?>

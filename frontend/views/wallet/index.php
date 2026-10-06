@@ -135,6 +135,7 @@ $transactionDescription = static function ($transaction) use ($translateShopText
 
                         <?php else: ?>
 
+                            <div class="table-responsive">
                             <table class="table">
                                 <tbody>
 
@@ -172,6 +173,7 @@ $transactionDescription = static function ($transaction) use ($translateShopText
 
                                 </tbody>
                             </table>
+                            </div>
 
                         <?php endif; ?>
 
