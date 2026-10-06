@@ -1,0 +1,1 @@
+<?php use yii\widgets\ActiveForm;use yii\helpers\Html;$this->title='Категория новостей';?><div class="card p-4"><?php $f=ActiveForm::begin();echo $f->field($model,'name');echo $f->field($model,'slug');echo Html::submitButton('Сохранить',['class'=>'btn btn-primary']);ActiveForm::end();?></div>

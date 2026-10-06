@@ -1,0 +1,1 @@
+<?php use yii\helpers\Html;$this->title='Ошибка';?><div class="card p-4"><h2>Ошибка</h2><p><?= Html::encode($exception?->getMessage() ?: 'Неизвестная ошибка') ?></p></div>

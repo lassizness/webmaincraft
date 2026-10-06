@@ -1,0 +1,4 @@
+<?php
+
+declare(strict_types=1);namespace backend\controllers;use backend\components\AdminController;use common\models\PromoCode;use Yii;use yii\data\ActiveDataProvider;use yii\web\NotFoundHttpException;
+final class PromoController extends AdminController { protected string $permission='manageShop'; public function actionIndex():string{return $this->render('index',['dataProvider'=>new ActiveDataProvider(['query'=>PromoCode::find()->orderBy(['id'=>SORT_DESC])])]);}public function actionEdit(?int $id=null){$m=$id?PromoCode::findOne($id):new PromoCode(['type'=>'wallet','value'=>100,'enabled'=>1,'used_count'=>0]);if(!$m)throw new NotFoundHttpException();if($m->load(Yii::$app->request->post())){$m->code=mb_strtoupper(trim($m->code));if($m->save())return $this->redirect(['index']);}return $this->render('form',['model'=>$m]);}}

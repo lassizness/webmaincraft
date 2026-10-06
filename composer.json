@@ -1,0 +1,39 @@
+{
+  "name": "hivetech/portal",
+  "description": "HiveTech Minecraft portal, cabinet and administration on Yii2",
+  "type": "project",
+  "license": "proprietary",
+  "minimum-stability": "stable",
+  "prefer-stable": true,
+  "require": {
+    "php": ">=8.2",
+    "ext-json": "*",
+    "ext-pdo": "*",
+    "ext-mbstring": "*",
+    "ext-fileinfo": "*",
+    "yiisoft/yii2": "2.0.55",
+    "yiisoft/yii2-bootstrap5": "~2.0.50",
+    "yiisoft/yii2-symfonymailer": "~2.0.4",
+    "yiisoft/yii2-httpclient": "~2.0.0"
+  },
+  "require-dev": {
+    "yiisoft/yii2-debug": "~2.1.28",
+    "yiisoft/yii2-gii": "~2.2.7"
+  },
+  "repositories": [
+    {"type": "composer", "url": "https://asset-packagist.org"}
+  ],
+  "autoload": {
+    "psr-4": {
+      "common\\": "common/",
+      "frontend\\": "frontend/",
+      "backend\\": "backend/",
+      "console\\": "console/"
+    }
+  },
+  "config": {
+    "allow-plugins": {"yiisoft/yii2-composer": true},
+    "sort-packages": true,
+    "process-timeout": 1800
+  }
+}

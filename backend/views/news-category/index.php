@@ -1,0 +1,1 @@
+<?php use yii\grid\GridView;use yii\helpers\Html;$this->title='Категории новостей';?><p><?= Html::a('Добавить',['edit'],['class'=>'btn btn-primary']) ?></p><?= GridView::widget(['dataProvider'=>$dataProvider,'columns'=>['id','name','slug',['class'=>yii\grid\ActionColumn::class,'template'=>'{update}','buttons'=>['update'=>fn($u,$m)=>Html::a('✎',['edit','id'=>$m->id])]]]]) ?>

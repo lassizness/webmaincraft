@@ -1,0 +1,1 @@
+<?php use yii\helpers\{Html,Url};?><h2>Добро пожаловать в HiveTech, <?= Html::encode($user->username) ?>!</h2><p>Подтвердите email. До подтверждения аккаунт имеет статус <b>pending</b> и не может войти в HiveTech Launcher.</p><p><?= Html::a('Подтвердить email',$url) ?></p><p>Ссылка действует 24 часа.</p>

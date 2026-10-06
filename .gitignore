@@ -1,0 +1,53 @@
+# Dependencies
+/vendor/
+
+# Environment / secrets
+/.env
+/.env.*
+!/.env.example
+
+# Yii runtime
+/runtime/*
+!/runtime/.gitkeep
+/frontend/runtime/
+/backend/runtime/
+/console/runtime/
+
+# Published Yii assets
+/frontend/web/assets/
+/backend/web/assets/
+
+# User generated content
+/storage/uploads/support/*
+!/storage/uploads/support/.gitkeep
+/storage/textures/skins/*
+!/storage/textures/skins/.gitkeep
+/storage/textures/cloaks/*
+!/storage/textures/cloaks/.gitkeep
+
+# Logs
+*.log
+
+# Local backups / patches / archives
+*.patch
+*.bak
+*.bak-*
+*.orig
+*.rej
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+
+# Generated build metadata
+/BUILD_MANIFEST.txt
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Composer local files
+/composer.phar
+/auth.json

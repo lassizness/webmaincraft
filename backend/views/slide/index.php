@@ -1,0 +1,1 @@
+<?php use yii\grid\GridView;use yii\helpers\Html;$this->title='Слайдер';?><p><?= Html::a('Добавить слайд',['create'],['class'=>'btn btn-primary']) ?></p><?= GridView::widget(['dataProvider'=>$dataProvider,'columns'=>['id','title','image_url','enabled:boolean','sort',['class'=>yii\grid\ActionColumn::class,'template'=>'{update} {delete}']]]) ?>

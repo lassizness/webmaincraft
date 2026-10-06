@@ -1,0 +1,1 @@
+<?php use yii\helpers\Html;?><h2>Ответ поддержки HiveTech #<?= $ticket->id ?></h2><p><?= nl2br(Html::encode($message->body)) ?></p><p><a href="<?= Yii::$app->params['appUrl'] ?>/support/<?= $ticket->id ?>">Открыть тикет</a></p>

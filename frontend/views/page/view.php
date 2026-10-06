@@ -1,0 +1,1 @@
+<?php use yii\helpers\Html;$this->title=$model->meta_title ?: $model->title;?><div class="container ht-section"><article class="ht-card"><h1><?= Html::encode($model->title) ?></h1><div class="mt-4"><?= Yii::$app->formatter->asHtml($model->body) ?></div></article></div>

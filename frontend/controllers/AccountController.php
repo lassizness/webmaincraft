@@ -1,0 +1,14 @@
+<?php
+
+declare(strict_types=1);
+namespace frontend\controllers;
+use common\models\{User,WebSession,WalletTransaction,ShopPurchase,VoteService};use common\services\{SessionTracker,TokenService,AuditService};use common\models\UserToken;use frontend\components\Controller;use frontend\models\{ProfileForm,ChangePasswordForm};use Yii;use yii\filters\AccessControl;
+final class AccountController extends Controller
+{
+ public function behaviors():array{return ['access'=>['class'=>AccessControl::class,'rules'=>[['allow'=>true,'roles'=>['@']]]]];}
+ public function actionIndex():string{$u=Yii::$app->user->identity;return $this->render('index',['user'=>$u,'wallet'=>(new \common\services\WalletService())->wallet((int)$u->id),'purchases'=>ShopPurchase::find()->where(['user_id'=>$u->id])->orderBy(['id'=>SORT_DESC])->limit(5)->all(),'voteServices'=>VoteService::find()->where(['enabled'=>1])->orderBy(['sort'=>SORT_ASC,'id'=>SORT_ASC])->all()]);}
+ public function actionSettings(){/** @var User $u */$u=Yii::$app->user->identity;$m=new ProfileForm(['email'=>$u->email]);if($m->load(Yii::$app->request->post())&&$m->validate()&&mb_strtolower($m->email)!==mb_strtolower($u->email)){$u->email=mb_strtolower($m->email);$u->email_verified=0;$u->status=User::STATUS_PENDING;$u->save(false,['email','email_verified','status']);$raw=(new TokenService())->issue((int)$u->id,UserToken::TYPE_EMAIL_VERIFY,86400);$url=Yii::$app->params['appUrl'].'/verify-email?token='.rawurlencode($raw);Yii::$app->mailer->compose('verify-email',['user'=>$u,'url'=>$url])->setTo($u->email)->setSubject('Подтвердите новый email HiveTech')->send();(new SessionTracker())->revokeAll((int)$u->id);Yii::$app->user->logout();Yii::$app->session->setFlash('success','Подтвердите новый email. До подтверждения вход отключён.');return $this->redirect(['/auth/login']);}return $this->render('settings',['model'=>$m]);}
+ public function actionSecurity(){/** @var User $u */$u=Yii::$app->user->identity;$m=new ChangePasswordForm();if($m->load(Yii::$app->request->post())&&$m->validate()){if(!$u->validatePassword($m->currentPassword)){$m->addError('currentPassword','Текущий пароль неверен.');}else{$u->setPassword($m->password);$u->save(false,['password','accessToken','serverID']);(new SessionTracker())->revokeAll((int)$u->id);AuditService::log('user.password_change','user',(string)$u->id);Yii::$app->user->logout();Yii::$app->session->setFlash('success','Пароль изменён. Войдите снова.');return $this->redirect(['/auth/login']);}}return $this->render('security',['model'=>$m]);}
+ public function actionSessions():string{return $this->render('sessions',['sessions'=>WebSession::find()->where(['user_id'=>Yii::$app->user->id])->orderBy(['id'=>SORT_DESC])->limit(30)->all()]);}
+ public function actionRevokeSession(int $id){if(Yii::$app->request->isPost)(new SessionTracker())->revoke($id,(int)Yii::$app->user->id);return $this->redirect(['sessions']);}
+}

@@ -1,0 +1,584 @@
+<?php
+
+use yii\helpers\{
+    Html,
+    Json,
+    Url
+};
+
+$this->title = 'Магазин';
+
+?>
+
+<div class="container ht-section">
+
+    <div class="section-title">
+
+        <h2>Магазин</h2>
+
+        <?php if(!Yii::$app->user->isGuest): ?>
+
+            <div>
+                <a
+                    href="<?= Url::to(['/wallet/index']) ?>"
+                    class="btn btn-outline-light"
+                >
+                    Баланс
+                </a>
+
+                <a
+                    href="<?= Url::to(['/shop/promo']) ?>"
+                    class="btn btn-outline-light"
+                >
+                    Промокод
+                </a>
+            </div>
+
+        <?php endif; ?>
+
+    </div>
+
+
+    <?php foreach($categories as $category): ?>
+
+        <?php
+
+        $privilegeGroups = [];
+        $regularProducts = [];
+        $availableDurations = [];
+
+        foreach($category->products as $product)
+        {
+            if(
+                $product->product_type === 'privilege'
+                && $product->privilege_group_id
+            )
+            {
+                $groupId = (int)$product->privilege_group_id;
+
+                if(!isset($privilegeGroups[$groupId]))
+                {
+                    $privilegeGroups[$groupId] = [
+                        'group' => $product->privilegeGroup,
+                        'products' => [],
+                    ];
+                }
+
+                $days = (int)$product->duration_days;
+
+                $privilegeGroups[$groupId]['products'][$days] = $product;
+
+                $availableDurations[$days] = true;
+            }
+            else
+            {
+                $regularProducts[] = $product;
+            }
+        }
+
+        ksort($availableDurations);
+
+        ?>
+
+        <h3 class="mt-4">
+            <?= Html::encode($category->name) ?>
+        </h3>
+
+
+        <?php if($privilegeGroups): ?>
+
+            <?php
+
+            $durations = array_keys($availableDurations);
+
+            $defaultDuration = in_array(30, $durations, true)
+                ? 30
+                : (int)reset($durations);
+
+            ?>
+
+            <div
+                class="privilege-duration-toggle mt-3"
+                data-privilege-duration-toggle
+            >
+
+                <?php foreach($durations as $days): ?>
+
+                    <button
+                        type="button"
+                        class="privilege-duration-btn <?= $days === $defaultDuration ? 'active' : '' ?>"
+                        data-duration="<?= $days ?>"
+                    >
+                        <?= $days ?> дней
+                    </button>
+
+                <?php endforeach; ?>
+
+            </div>
+
+
+            <div class="shop-grid mt-3">
+
+                <?php foreach($privilegeGroups as $entry): ?>
+
+                    <?php
+
+                    $group = $entry['group'];
+                    $products = $entry['products'];
+
+                    ksort($products);
+
+                    $variants = [];
+
+                    foreach($products as $days => $product)
+                    {
+                        $variants[(string)$days] = [
+                            'id' => (int)$product->id,
+                            'price' => (float)$product->price,
+                            'url' => Url::to([
+                                '/shop/buy',
+                                'id' => $product->id,
+                            ]),
+                            'name' => $product->name,
+                        ];
+                    }
+
+                    $selectedProduct =
+                        $products[$defaultDuration]
+                        ?? reset($products);
+
+                    $selectedDays =
+                        isset($products[$defaultDuration])
+                            ? $defaultDuration
+                            : (int)array_key_first($products);
+
+                    ?>
+
+                    <div
+                        class="product-card privilege-card"
+                        data-privilege-card
+                        data-variants="<?= Html::encode(
+                            Json::encode($variants)
+                        ) ?>"
+                    >
+
+                        <div class="privilege-card-head">
+
+                            <div>
+
+                                <div class="eyebrow">
+                                    Статус
+                                </div>
+
+                                <h3
+                                    <?php if($group?->color): ?>
+                                        style="color: <?= Html::encode($group->color) ?>"
+                                    <?php endif; ?>
+                                >
+                                    <?= Html::encode(
+                                        $group?->name
+                                        ?: $selectedProduct->name
+                                    ) ?>
+                                </h3>
+
+                            </div>
+
+                            <span
+                                class="privilege-days"
+                                data-selected-days
+                            >
+                                <?= $selectedDays ?> дней
+                            </span>
+
+                        </div>
+
+
+                        <p class="muted privilege-description">
+
+                            <?= Html::encode(
+                                $group?->description
+                                ?: $selectedProduct->description
+                            ) ?>
+
+                        </p>
+
+
+                        <div class="privilege-card-bottom">
+
+                            <div>
+
+                                <div class="muted small">
+                                    Стоимость
+                                </div>
+
+                                <div
+                                    class="privilege-price"
+                                    data-price
+                                >
+                                    <?= number_format(
+                                        (float)$selectedProduct->price,
+                                        0,
+                                        ',',
+                                        ' '
+                                    ) ?> ₽
+                                </div>
+
+                            </div>
+
+
+                            <?php if(Yii::$app->user->isGuest): ?>
+
+                                <a
+                                    class="btn btn-primary"
+                                    href="<?= Url::to(['/auth/login']) ?>"
+                                >
+                                    Войти
+                                </a>
+
+                            <?php else: ?>
+
+                                <?= Html::beginForm(
+                                    [
+                                        '/shop/buy',
+                                        'id' => $selectedProduct->id,
+                                    ],
+                                    'post',
+                                    [
+                                        'data-buy-form' => '1',
+                                    ]
+                                ) ?>
+
+                                <?= Html::submitButton(
+                                    'Купить',
+                                    [
+                                        'class' => 'btn btn-primary',
+                                        'data-buy-button' => '1',
+                                    ]
+                                ) ?>
+
+                                <?= Html::endForm() ?>
+
+                            <?php endif; ?>
+
+                        </div>
+
+                    </div>
+
+                <?php endforeach; ?>
+
+            </div>
+
+        <?php endif; ?>
+
+
+        <?php if($regularProducts): ?>
+
+            <div class="shop-grid mt-3">
+
+                <?php foreach($regularProducts as $product): ?>
+
+                    <div class="product-card">
+
+                        <h3>
+                            <?= Html::encode($product->name) ?>
+                        </h3>
+
+                        <p class="muted">
+                            <?= Html::encode($product->description) ?>
+                        </p>
+
+                        <div class="d-flex justify-content-between align-items-center">
+
+                            <strong>
+                                <?= number_format(
+                                    (float)$product->price,
+                                    0,
+                                    ',',
+                                    ' '
+                                ) ?> ₽
+                            </strong>
+
+                            <?php if(Yii::$app->user->isGuest): ?>
+
+                                <a
+                                    class="btn btn-primary"
+                                    href="<?= Url::to(['/auth/login']) ?>"
+                                >
+                                    Войти
+                                </a>
+
+                            <?php else: ?>
+
+                                <?= Html::beginForm(
+                                    [
+                                        '/shop/buy',
+                                        'id' => $product->id,
+                                    ],
+                                    'post'
+                                ) ?>
+
+                                <?= Html::submitButton(
+                                    'Купить',
+                                    [
+                                        'class' => 'btn btn-primary',
+                                    ]
+                                ) ?>
+
+                                <?= Html::endForm() ?>
+
+                            <?php endif; ?>
+
+                        </div>
+
+                    </div>
+
+                <?php endforeach; ?>
+
+            </div>
+
+        <?php endif; ?>
+
+    <?php endforeach; ?>
+
+
+    <?php if(!$categories): ?>
+
+        <div class="ht-card">
+            <p class="muted mb-0">
+                Каталог пока пуст.
+            </p>
+        </div>
+
+    <?php endif; ?>
+
+</div>
+
+
+<style>
+
+.privilege-duration-toggle {
+    display: inline-flex;
+    gap: 4px;
+    padding: 5px;
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 12px;
+    background: rgba(255,255,255,.035);
+}
+
+.privilege-duration-btn {
+    border: 0;
+    border-radius: 8px;
+    padding: 9px 16px;
+    background: transparent;
+    color: rgba(255,255,255,.65);
+    font-weight: 600;
+    transition: .15s ease;
+}
+
+.privilege-duration-btn:hover {
+    color: #fff;
+    background: rgba(255,255,255,.06);
+}
+
+.privilege-duration-btn.active {
+    color: #fff;
+    background: rgba(255,255,255,.13);
+}
+
+.privilege-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 250px;
+}
+
+.privilege-card-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    align-items: flex-start;
+}
+
+.privilege-card-head h3 {
+    margin-bottom: 0;
+}
+
+.privilege-days {
+    white-space: nowrap;
+    padding: 5px 9px;
+    border-radius: 8px;
+    background: rgba(255,255,255,.07);
+    color: rgba(255,255,255,.7);
+    font-size: 13px;
+}
+
+.privilege-description {
+    margin-top: 18px;
+    flex: 1;
+}
+
+.privilege-card-bottom {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.privilege-price {
+    font-size: 24px;
+    line-height: 1.1;
+    font-weight: 700;
+    margin-top: 3px;
+}
+
+@media (max-width: 700px) {
+
+    .privilege-duration-toggle {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        width: 100%;
+    }
+
+    .privilege-duration-btn {
+        width: 100%;
+    }
+}
+
+</style>
+
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    const toggle = document.querySelector(
+        '[data-privilege-duration-toggle]'
+    );
+
+    if (!toggle) {
+        return;
+    }
+
+    const buttons = toggle.querySelectorAll(
+        '[data-duration]'
+    );
+
+    const cards = document.querySelectorAll(
+        '[data-privilege-card]'
+    );
+
+    function formatPrice(value) {
+
+        return new Intl.NumberFormat(
+            'ru-RU',
+            {
+                maximumFractionDigits: 2
+            }
+        ).format(value) + ' ₽';
+
+    }
+
+
+    function selectDuration(days) {
+
+        buttons.forEach(function (button) {
+
+            button.classList.toggle(
+                'active',
+                Number(button.dataset.duration) === days
+            );
+
+        });
+
+
+        cards.forEach(function (card) {
+
+            const variants = JSON.parse(
+                card.dataset.variants
+            );
+
+            const variant = variants[String(days)];
+
+            const price = card.querySelector(
+                '[data-price]'
+            );
+
+            const selectedDays = card.querySelector(
+                '[data-selected-days]'
+            );
+
+            const form = card.querySelector(
+                '[data-buy-form]'
+            );
+
+            const buyButton = card.querySelector(
+                '[data-buy-button]'
+            );
+
+
+            if (!variant) {
+
+                card.classList.add(
+                    'privilege-unavailable'
+                );
+
+                if (buyButton) {
+                    buyButton.disabled = true;
+                    buyButton.textContent = 'Недоступно';
+                }
+
+                return;
+            }
+
+
+            card.classList.remove(
+                'privilege-unavailable'
+            );
+
+
+            if (price) {
+                price.textContent = formatPrice(
+                    variant.price
+                );
+            }
+
+
+            if (selectedDays) {
+                selectedDays.textContent =
+                    days + ' дней';
+            }
+
+
+            if (form) {
+                form.action = variant.url;
+            }
+
+
+            if (buyButton) {
+                buyButton.disabled = false;
+                buyButton.textContent = 'Купить';
+            }
+
+        });
+
+    }
+
+
+    buttons.forEach(function (button) {
+
+        button.addEventListener(
+            'click',
+            function () {
+
+                selectDuration(
+                    Number(button.dataset.duration)
+                );
+
+            }
+        );
+
+    });
+
+});
+
+</script>

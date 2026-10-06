@@ -1,0 +1,770 @@
+<?php
+
+use yii\helpers\Html;
+use yii\helpers\Url;
+
+/**
+ * @var common\models\User $user
+ */
+
+$this->title = 'Скин и плащ';
+
+$skinPath = Yii::getAlias(
+    '@storage/textures/skins/' . $user->uuid . '.png'
+);
+
+$cloakPath = Yii::getAlias(
+    '@storage/textures/cloaks/' . $user->uuid . '.png'
+);
+
+$hasSkin = is_file($skinPath);
+$hasCloak = is_file($cloakPath);
+
+$skinUrl = $hasSkin
+    ? Url::to([
+        '/texture/skin',
+        'username' => $user->username,
+        'v' => filemtime($skinPath),
+    ])
+    : '';
+
+$cloakUrl = $hasCloak
+    ? Url::to([
+        '/texture/cloak',
+        'username' => $user->username,
+        'v' => filemtime($cloakPath),
+    ])
+    : '';
+
+?>
+
+<div class="container ht-section skin-page">
+
+    <div class="account-grid">
+
+        <?= $this->render('../account/_nav') ?>
+
+        <section class="skin-content">
+
+            <div class="ht-card">
+
+                <div class="mb-4">
+                    <h2 class="mb-1">
+                        Скин и плащ
+                    </h2>
+
+                    <div class="muted">
+                        Перетащите PNG прямо на нужную карточку
+                        или нажмите на область предпросмотра.
+                    </div>
+                </div>
+
+
+                <?= Html::beginForm(
+                    '',
+                    'post',
+                    [
+                        'id' => 'texture-form',
+                        'enctype' => 'multipart/form-data',
+                    ]
+                ) ?>
+
+
+                <div class="texture-grid">
+
+                    <!-- SKIN -->
+                    <div class="texture-card">
+
+                        <div class="texture-card-header">
+
+                            <div>
+                                <strong>Скин</strong>
+
+                                <div class="texture-format">
+                                    PNG · 64×64 или 64×32
+                                </div>
+                            </div>
+
+
+                            <?php if($hasSkin): ?>
+
+                                <?= Html::a(
+                                    'Удалить',
+                                    [
+                                        '/skin/delete',
+                                        'type' => 'skin',
+                                    ],
+                                    [
+                                        'class' => 'btn btn-sm btn-outline-danger',
+                                        'data-method' => 'post',
+                                        'data-confirm' => 'Удалить текущий скин?',
+                                        'data-drop-ignore' => '1',
+                                    ]
+                                ) ?>
+
+                            <?php endif; ?>
+
+                        </div>
+
+
+                        <div
+                            id="skin-drop"
+                            class="texture-drop-zone"
+                            data-input="skin-file"
+                        >
+
+                            <canvas
+                                id="skin-character"
+                                width="150"
+                                height="300"
+                            ></canvas>
+
+
+                            <div
+                                id="skin-empty"
+                                class="texture-empty"
+                                <?= $hasSkin ? 'style="display:none"' : '' ?>
+                            >
+                                <div class="drop-icon">
+                                    ↓
+                                </div>
+
+                                <strong>
+                                    Перетащите скин сюда
+                                </strong>
+
+                                <span>
+                                    или нажмите для выбора файла
+                                </span>
+                            </div>
+
+
+                            <div class="drop-overlay">
+                                Отпустите файл
+                            </div>
+
+                        </div>
+
+
+                        <input
+                            id="skin-file"
+                            type="file"
+                            name="skin"
+                            accept="image/png"
+                            hidden
+                        >
+
+                    </div>
+
+
+                    <!-- CLOAK -->
+                    <div class="texture-card">
+
+                        <div class="texture-card-header">
+
+                            <div>
+                                <strong>Плащ</strong>
+
+                                <div class="texture-format">
+                                    PNG · 64×32 или 22×17
+                                </div>
+                            </div>
+
+
+                            <?php if($hasCloak): ?>
+
+                                <?= Html::a(
+                                    'Удалить',
+                                    [
+                                        '/skin/delete',
+                                        'type' => 'cloak',
+                                    ],
+                                    [
+                                        'class' => 'btn btn-sm btn-outline-danger',
+                                        'data-method' => 'post',
+                                        'data-confirm' => 'Удалить текущий плащ?',
+                                        'data-drop-ignore' => '1',
+                                    ]
+                                ) ?>
+
+                            <?php endif; ?>
+
+                        </div>
+
+
+                        <div
+                            id="cloak-drop"
+                            class="texture-drop-zone"
+                            data-input="cloak-file"
+                        >
+
+                            <img
+                                id="cloak-preview"
+                                src="<?= Html::encode($cloakUrl) ?>"
+                                alt="Плащ"
+                                <?= $hasCloak ? '' : 'style="display:none"' ?>
+                            >
+
+
+                            <div
+                                id="cloak-empty"
+                                class="texture-empty"
+                                <?= $hasCloak ? 'style="display:none"' : '' ?>
+                            >
+                                <div class="drop-icon">
+                                    ↓
+                                </div>
+
+                                <strong>
+                                    Перетащите плащ сюда
+                                </strong>
+
+                                <span>
+                                    или нажмите для выбора файла
+                                </span>
+                            </div>
+
+
+                            <div class="drop-overlay">
+                                Отпустите файл
+                            </div>
+
+                        </div>
+
+
+                        <input
+                            id="cloak-file"
+                            type="file"
+                            name="cloak"
+                            accept="image/png"
+                            hidden
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="upload-status"
+                    class="upload-status"
+                >
+                </div>
+
+
+                <?= Html::endForm() ?>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</div>
+
+
+<style>
+
+.skin-page {
+    padding-bottom: 50px;
+}
+
+.skin-content {
+    min-width: 0;
+}
+
+.texture-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.texture-card {
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.09);
+    border-radius: 12px;
+    background: rgba(255,255,255,.025);
+}
+
+.texture-card-header {
+    display: flex;
+    min-height: 68px;
+    padding: 12px 16px;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.texture-format {
+    margin-top: 3px;
+    font-size: 12px;
+    opacity: .45;
+}
+
+.texture-drop-zone {
+    position: relative;
+    display: flex;
+    height: 360px;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    cursor: pointer;
+    background: rgba(0,0,0,.12);
+    transition:
+        background .15s ease,
+        box-shadow .15s ease;
+}
+
+.texture-drop-zone:hover {
+    background: rgba(255,255,255,.035);
+}
+
+.texture-drop-zone.dragging {
+    background: rgba(31,201,151,.08);
+    box-shadow:
+        inset 0 0 0 2px rgba(31,201,151,.8);
+}
+
+.texture-drop-zone.uploading {
+    pointer-events: none;
+    opacity: .65;
+}
+
+#skin-character {
+    width: 150px;
+    height: 300px;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+#cloak-preview {
+    width: 240px;
+    max-width: 75%;
+    max-height: 300px;
+    object-fit: contain;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+.texture-empty {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,.55);
+    text-align: center;
+    pointer-events: none;
+}
+
+.texture-empty strong {
+    color: rgba(255,255,255,.75);
+}
+
+.texture-empty span {
+    font-size: 13px;
+}
+
+.drop-icon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 4px;
+    border: 1px dashed rgba(255,255,255,.3);
+    border-radius: 12px;
+    font-size: 28px;
+    line-height: 44px;
+}
+
+.drop-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(7,18,25,.88);
+    color: #fff;
+    font-size: 18px;
+    font-weight: 600;
+    pointer-events: none;
+}
+
+.texture-drop-zone.dragging .drop-overlay {
+    display: flex;
+}
+
+.upload-status {
+    min-height: 24px;
+    margin-top: 14px;
+    color: rgba(255,255,255,.6);
+    font-size: 13px;
+}
+
+@media (max-width: 900px) {
+
+    .texture-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .texture-drop-zone {
+        height: 320px;
+    }
+
+}
+
+</style>
+
+
+<script>
+
+(function()
+{
+    const form =
+        document.getElementById(
+            'texture-form'
+        );
+
+    const status =
+        document.getElementById(
+            'upload-status'
+        );
+
+
+    function setStatus(text)
+    {
+        status.textContent = text;
+    }
+
+
+    function validateFile(file)
+    {
+        if(!file)
+        {
+            return false;
+        }
+
+        if(
+            file.type !== 'image/png'
+            && !file.name
+                .toLowerCase()
+                .endsWith('.png')
+        )
+        {
+            alert(
+                'Можно загрузить только PNG.'
+            );
+
+            return false;
+        }
+
+        return true;
+    }
+
+
+    function submitFile(
+        input,
+        file,
+        zone
+    )
+    {
+        if(!validateFile(file))
+        {
+            return;
+        }
+
+        const transfer =
+            new DataTransfer();
+
+        transfer.items.add(file);
+
+        input.files =
+            transfer.files;
+
+        zone.classList.add(
+            'uploading'
+        );
+
+        setStatus(
+            'Загрузка файла...'
+        );
+
+        form.submit();
+    }
+
+
+    function initDropZone(zone)
+    {
+        const input =
+            document.getElementById(
+                zone.dataset.input
+            );
+
+
+        zone.addEventListener(
+            'click',
+            function(event)
+            {
+                if(
+                    event.target.closest(
+                        '[data-drop-ignore]'
+                    )
+                )
+                {
+                    return;
+                }
+
+                input.click();
+            }
+        );
+
+
+        input.addEventListener(
+            'change',
+            function()
+            {
+                const file =
+                    input.files[0];
+
+                if(file)
+                {
+                    submitFile(
+                        input,
+                        file,
+                        zone
+                    );
+                }
+            }
+        );
+
+
+        zone.addEventListener(
+            'dragenter',
+            function(event)
+            {
+                event.preventDefault();
+
+                zone.classList.add(
+                    'dragging'
+                );
+            }
+        );
+
+
+        zone.addEventListener(
+            'dragover',
+            function(event)
+            {
+                event.preventDefault();
+
+                event.dataTransfer
+                    .dropEffect =
+                        'copy';
+
+                zone.classList.add(
+                    'dragging'
+                );
+            }
+        );
+
+
+        zone.addEventListener(
+            'dragleave',
+            function(event)
+            {
+                if(
+                    !zone.contains(
+                        event.relatedTarget
+                    )
+                )
+                {
+                    zone.classList.remove(
+                        'dragging'
+                    );
+                }
+            }
+        );
+
+
+        zone.addEventListener(
+            'drop',
+            function(event)
+            {
+                event.preventDefault();
+
+                zone.classList.remove(
+                    'dragging'
+                );
+
+                const file =
+                    event
+                        .dataTransfer
+                        .files[0];
+
+                if(file)
+                {
+                    submitFile(
+                        input,
+                        file,
+                        zone
+                    );
+                }
+            }
+        );
+    }
+
+
+    initDropZone(
+        document.getElementById(
+            'skin-drop'
+        )
+    );
+
+    initDropZone(
+        document.getElementById(
+            'cloak-drop'
+        )
+    );
+
+
+    /*
+     * Простое фронтальное preview скина.
+     */
+
+    const canvas =
+        document.getElementById(
+            'skin-character'
+        );
+
+    const ctx =
+        canvas.getContext('2d');
+
+    ctx.imageSmoothingEnabled =
+        false;
+
+
+    function part(
+        image,
+        sx,
+        sy,
+        sw,
+        sh,
+        dx,
+        dy,
+        dw,
+        dh
+    )
+    {
+        ctx.drawImage(
+            image,
+            sx,
+            sy,
+            sw,
+            sh,
+            dx,
+            dy,
+            dw,
+            dh
+        );
+    }
+
+
+    function renderSkin(image)
+    {
+        ctx.clearRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        const modern =
+            image.naturalHeight >= 64;
+
+
+        // Голова
+        part(
+            image,
+            8,8,8,8,
+            37,0,76,76
+        );
+
+
+        // Шапка / второй слой головы
+        part(
+            image,
+            40,8,8,8,
+            37,0,76,76
+        );
+
+
+        // Тело
+        part(
+            image,
+            20,20,8,12,
+            37,76,76,112
+        );
+
+
+        // Правая рука
+        part(
+            image,
+            44,20,4,12,
+            0,76,37,112
+        );
+
+
+        // Левая рука
+        part(
+            image,
+            modern ? 36 : 44,
+            modern ? 52 : 20,
+            4,12,
+            113,76,37,112
+        );
+
+
+        // Правая нога
+        part(
+            image,
+            4,20,4,12,
+            37,188,38,112
+        );
+
+
+        // Левая нога
+        part(
+            image,
+            modern ? 20 : 4,
+            modern ? 52 : 20,
+            4,12,
+            75,188,38,112
+        );
+    }
+
+
+    <?php if($hasSkin): ?>
+
+    const currentSkin =
+        new Image();
+
+    currentSkin.onload =
+        function()
+        {
+            renderSkin(
+                currentSkin
+            );
+        };
+
+    currentSkin.src =
+        <?= json_encode(
+            $skinUrl,
+            JSON_UNESCAPED_SLASHES
+        ) ?>;
+
+    <?php endif; ?>
+
+})();
+
+</script>

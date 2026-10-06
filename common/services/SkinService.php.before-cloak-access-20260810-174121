@@ -1,0 +1,13 @@
+<?php
+
+declare(strict_types=1);
+namespace common\services;
+use common\models\User;use yii\web\UploadedFile;use Yii;
+final class SkinService
+{
+    public function save(User $user,UploadedFile $file,string $type): void
+    {
+        if($file->size>2*1024*1024)throw new \DomainException('Файл больше 2 МБ');$info=@getimagesize($file->tempName);if(!$info||$info[2]!==IMAGETYPE_PNG)throw new \DomainException('Нужен PNG');[$w,$h]=$info;$valid=$type==='skin'?(($w===64&&in_array($h,[32,64],true))):(($w===64&&$h===32)||($w===22&&$h===17));if(!$valid)throw new \DomainException($type==='skin'?'Размер скина: 64x64 или 64x32':'Размер плаща: 64x32 или 22x17');$dir=Yii::getAlias('@storage/textures/'.($type==='skin'?'skins':'cloaks'));if(!is_dir($dir))mkdir($dir,0770,true);if(!move_uploaded_file($file->tempName,$dir.'/'.$user->uuid.'.png')){if(!$file->saveAs($dir.'/'.$user->uuid.'.png'))throw new \RuntimeException('Не удалось сохранить файл');}
+    }
+    public function pathByUsername(string $username,string $type): ?string { $u=User::findActiveByUsername($username);if(!$u)return null;$p=Yii::getAlias('@storage/textures/'.($type==='skin'?'skins':'cloaks').'/'.$u->uuid.'.png');return is_file($p)?$p:null; }
+}

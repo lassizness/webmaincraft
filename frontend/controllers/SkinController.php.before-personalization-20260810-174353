@@ -1,0 +1,57 @@
+<?php
+
+declare(strict_types=1);namespace frontend\controllers;use common\services\SkinService;use frontend\components\Controller;use Yii;use yii\filters\AccessControl;use yii\web\UploadedFile;
+final class SkinController extends Controller
+{
+ public function behaviors():array{return ['access'=>['class'=>AccessControl::class,'rules'=>[['allow'=>true,'roles'=>['@']]]]];}
+ public function actionDelete(string $type)
+{
+    $user = Yii::$app->user->identity;
+
+    if(!$user)
+    {
+        return $this->redirect(['/auth/login']);
+    }
+
+    $paths = [
+        'skin' => Yii::getAlias(
+            '@storage/textures/skins/' . $user->uuid . '.png'
+        ),
+        'cloak' => Yii::getAlias(
+            '@storage/textures/cloaks/' . $user->uuid . '.png'
+        ),
+    ];
+
+    if(!isset($paths[$type]))
+    {
+        throw new \yii\web\BadRequestHttpException(
+            'Неизвестный тип текстуры.'
+        );
+    }
+
+    $path = $paths[$type];
+
+    if(is_file($path))
+    {
+        if(!unlink($path))
+        {
+            Yii::$app->session->setFlash(
+                'error',
+                'Не удалось удалить файл.'
+            );
+
+            return $this->redirect(['index']);
+        }
+    }
+
+    Yii::$app->session->setFlash(
+        'success',
+        $type === 'skin'
+            ? 'Скин удалён.'
+            : 'Плащ удалён.'
+    );
+
+    return $this->redirect(['index']);
+}
+ public function actionIndex(){if(Yii::$app->request->isPost){$svc=new SkinService();foreach(['skin','cloak'] as $type){$f=UploadedFile::getInstanceByName($type);if($f){try{$svc->save(Yii::$app->user->identity,$f,$type);Yii::$app->session->setFlash('success',($type==='skin'?'Скин':'Плащ').' сохранён.');}catch(\Throwable $e){Yii::$app->session->setFlash('error',$e->getMessage());}}}return $this->refresh();}return $this->render('index',['user'=>Yii::$app->user->identity]);}
+}

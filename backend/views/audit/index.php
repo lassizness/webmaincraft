@@ -1,0 +1,1 @@
+<?php use yii\grid\GridView;$this->title='Аудит';?><?= GridView::widget(['dataProvider'=>$dataProvider,'columns'=>['id','user_id','action','entity_type','entity_id','ip_address','created_at',['attribute'=>'data_json','format'=>'ntext']]]) ?>

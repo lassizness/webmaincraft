@@ -1,0 +1,1 @@
+<?php use yii\grid\GridView;use yii\helpers\Url;$this->title='Поддержка';?><?= GridView::widget(['dataProvider'=>$dataProvider,'columns'=>['id',['attribute'=>'user_id','value'=>fn($m)=>$m->user?->username],'subject','status','updated_at',['class'=>yii\grid\ActionColumn::class,'template'=>'{view}','urlCreator'=>fn($a,$m)=>Url::to([$a,'id'=>$m->id])]]]) ?>
