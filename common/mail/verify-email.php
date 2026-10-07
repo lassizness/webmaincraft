@@ -7,5 +7,5 @@ use yii\helpers\Html;
     'username' => Html::encode($user->username),
 ]) ?></h2>
 <p><?= Yii::t('app', 'Подтвердите email, чтобы мы знали, что адрес действительно принадлежит вам. Аккаунт уже активен, подтверждение не блокирует вход.') ?></p>
-<p><?= Html::a(Yii::t('app', 'Подтвердить email'), $url) ?></p>
+<p><?= Html::a(Yii::t('app', 'Подтвердить email'), $url, ['class' => 'mail-button']) ?></p>
 <p><?= Yii::t('app', 'Ссылка действует 24 часа.') ?></p>

@@ -29,17 +29,9 @@ final class MailController extends Controller
         try
         {
             $sent = Yii::$app->mailer
-                ->compose()
+                ->compose('smtp-test')
                 ->setTo($to)
                 ->setSubject('HiveGrid SMTP test')
-                ->setTextBody(
-                    "HiveGrid SMTP test message.\n"
-                    . "If you received this email, SMTP delivery is working.\n"
-                )
-                ->setHtmlBody(
-                    '<h2>HiveGrid SMTP test</h2>'
-                    . '<p>If you received this email, SMTP delivery is working.</p>'
-                )
                 ->send();
 
             if(!$sent)
