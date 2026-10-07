@@ -10,13 +10,13 @@
 - регистрация `username + email + password`;
 - UUID v4;
 - bcrypt cost 10 с `$2b$` для предсказуемой совместимости с Gravit;
-- жизненный цикл `pending → active → blocked`;
-- подтверждение email;
+- жизненный цикл `active / blocked` для доступа к аккаунту;
+- подтверждение email хранится отдельно в `email_verified` и не блокирует вход;
 - login по username или email;
 - throttling неудачных входов: 5 / 15 минут на identifier+IP;
 - восстановление и смена пароля;
 - смена пароля обнуляет `accessToken` / `serverID` и отзывает web-сессии;
-- смена email переводит аккаунт обратно в `pending` до подтверждения;
+- смена email сбрасывает `email_verified`, но аккаунт остаётся активным;
 - список web-сессий и отзыв отдельных сессий;
 - аудит критических действий;
 - опциональный Cloudflare Turnstile.
@@ -311,7 +311,28 @@ MAIL_FROM=no-reply@example.com
 MAIL_FROM_NAME=HiveTech
 ```
 
-Если `SMTP_HOST` пуст, Yii использует file transport — удобно для первого локального теста, письма будут попадать в runtime mail storage вместо реальной отправки.
+Для обычного Gmail-аккаунта:
+
+```dotenv
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your.account@gmail.com
+SMTP_PASSWORD=GOOGLE_APP_PASSWORD
+SMTP_ENCRYPTION=tls
+MAIL_FROM=your.account@gmail.com
+MAIL_FROM_NAME=HiveGrid
+```
+
+Для Gmail в `SMTP_PASSWORD` используется отдельный App Password, а `MAIL_FROM` лучше оставлять тем же Gmail-адресом, который указан в `SMTP_USER`.
+
+Проверка реальной SMTP-доставки:
+
+```bash
+HIVETECH_ENV_FILE=/etc/hivetech/portal.env \
+php yii mail/test your-test-address@example.com
+```
+
+Если `SMTP_HOST` пуст, Yii использует file transport — удобно для локальной разработки, но команда `mail/test` в таком режиме специально завершится с ошибкой конфигурации вместо создания локального файла.
 
 ## 12. RCON
 
@@ -376,7 +397,8 @@ curl -I https://admin.YOUR_DOMAIN/site/login
 Проверка общей identity:
 1. Зарегистрировать нового пользователя на сайте.
 2. Подтвердить email.
-3. Убедиться в `users.status=active`, `email_verified=1`, bcrypt length=60.
-4. Войти этими же username/password в HiveTech Launcher.
-5. Block пользователя в админке — сайт и новый launcher login должны перестать работать.
+3. Убедиться в `users.status=active`, `email_verified=0`, bcrypt length=60 и возможности сразу войти на сайт/в лаунчер.
+4. Подтвердить email и убедиться, что `email_verified=1`, а `status` остаётся `active`.
+5. Войти этими же username/password в HiveTech Launcher.
+6. Block пользователя в админке — сайт и новый launcher login должны перестать работать.
 

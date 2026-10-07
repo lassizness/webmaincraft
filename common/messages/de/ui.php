@@ -251,4 +251,10 @@ return [
     'Расширенный статус.' => 'Erweiterter Status.',
     'Высокий уровень привилегий.' => 'Hohe Privilegienstufe.',
     'Максимальный пользовательский статус.' => 'Höchster Spielerstatus.',
+
+    'После смены email аккаунт останется активным. Мы отправим письмо для подтверждения нового адреса.' => 'Nach der Änderung der E-Mail-Adresse bleibt das Konto aktiv. Wir senden eine Nachricht zur Bestätigung der neuen Adresse.',
+    'Email изменён. Аккаунт остаётся активным; подтвердите новый адрес, когда получите письмо.' => 'E-Mail-Adresse geändert. Dein Konto bleibt aktiv; bestätige die neue Adresse, sobald die Nachricht eintrifft.',
+
+    'Email не подтверждён. Это не мешает входу, но рекомендуем подтвердить адрес для восстановления доступа и уведомлений.' => 'Die E-Mail-Adresse ist nicht bestätigt. Das blockiert die Anmeldung nicht, aber wir empfehlen die Bestätigung für Kontowiederherstellung und Benachrichtigungen.',
+    'Отправить письмо повторно' => 'E-Mail erneut senden',
 ];
