@@ -1,2 +1,4 @@
 * * * * * www-data cd /opt/hivetech/portal && HIVETECH_ENV_FILE=/etc/hivetech/portal.env php yii delivery/process --limit=20 >> /var/log/hivetech-delivery.log 2>&1
+*/10 * * * * www-data cd /opt/hivetech/portal && HIVETECH_ENV_FILE=/etc/hivetech/portal.env php yii privilege/expire --limit=100 >> /var/log/hivetech-maintenance.log 2>&1
+12 * * * * www-data cd /opt/hivetech/portal && HIVETECH_ENV_FILE=/etc/hivetech/portal.env php yii privilege/notify --limit=200 >> /var/log/hivetech-maintenance.log 2>&1
 17 * * * * www-data cd /opt/hivetech/portal && HIVETECH_ENV_FILE=/etc/hivetech/portal.env php yii maintenance/cleanup >> /var/log/hivetech-maintenance.log 2>&1
