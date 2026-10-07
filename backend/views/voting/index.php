@@ -8,11 +8,20 @@ $this->title = 'Голосования';
 $appUrl = rtrim((string)(Yii::$app->params['appUrl'] ?? ''), '/');
 ?>
 
-<div class="mb-3">
-    <?= Html::a('Добавить сервис', ['edit'], ['class' => 'btn btn-primary']) ?>
+<div class="admin-section-head">
+    <div class="admin-panel-subtitle">
+        Рейтинги, callback-защита, награды и история голосов.
+    </div>
+    <div class="admin-actions">
+        <?= Html::a(
+            'Добавить сервис',
+            ['edit'],
+            ['class' => 'btn btn-primary']
+        ) ?>
+    </div>
 </div>
 
-<div class="card p-3 mb-4">
+<section class="admin-panel mb-3">
     <h3 class="mb-3">Сервисы голосования</h3>
     <?= GridView::widget([
         'dataProvider' => $serviceProvider,
@@ -71,9 +80,9 @@ $appUrl = rtrim((string)(Yii::$app->params['appUrl'] ?? ''), '/');
             ],
         ],
     ]) ?>
-</div>
+</section>
 
-<div class="card p-3">
+<section class="admin-panel">
     <h3 class="mb-3">Последние голоса</h3>
     <?= GridView::widget([
         'dataProvider' => $voteProvider,
@@ -108,4 +117,4 @@ $appUrl = rtrim((string)(Yii::$app->params['appUrl'] ?? ''), '/');
             'created_at',
         ],
     ]) ?>
-</div>
+</section>

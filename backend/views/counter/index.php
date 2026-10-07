@@ -6,12 +6,17 @@ use yii\helpers\Html;
 $this->title = 'Счётчики посещений';
 ?>
 
-<div class="mb-3">
-    <?= Html::a(
-        'Добавить счётчик',
-        ['create'],
-        ['class' => 'btn btn-primary']
-    ) ?>
+<div class="admin-section-head">
+    <div class="admin-panel-subtitle">
+        Внешние счётчики и аналитические скрипты публичного сайта.
+    </div>
+    <div class="admin-actions">
+        <?= Html::a(
+            'Добавить счётчик',
+            ['create'],
+            ['class' => 'btn btn-primary']
+        ) ?>
+    </div>
 </div>
 
 <div class="card p-3">

@@ -258,13 +258,24 @@ $this->title =
             'Сортировка'
         ) ?>
 
-    <?= Html::submitButton(
-        'Сохранить',
-        [
-            'class' =>
-                'btn btn-primary',
-        ]
-    ) ?>
+    <div class="admin-actions">
+        <?= Html::submitButton(
+            'Сохранить',
+            [
+                'class' =>
+                    'btn btn-primary',
+            ]
+        ) ?>
+
+        <?= Html::a(
+            'Отмена',
+            ['index'],
+            [
+                'class' =>
+                    'btn btn-outline-secondary',
+            ]
+        ) ?>
+    </div>
 
     <?php ActiveForm::end(); ?>
 
