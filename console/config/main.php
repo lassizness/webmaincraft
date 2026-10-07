@@ -10,4 +10,18 @@ return [
             'migrationPath' => '@console/migrations',
         ],
     ],
+    'components' => [
+        'i18n' => [
+            'translations' => [
+                'app*' => [
+                    'class' => yii\i18n\PhpMessageSource::class,
+                    'basePath' => '@common/messages',
+                    'sourceLanguage' => 'ru',
+                    'fileMap' => [
+                        'app' => 'app.php',
+                    ],
+                ],
+            ],
+        ],
+    ],
 ];
