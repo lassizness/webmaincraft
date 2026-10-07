@@ -76,6 +76,7 @@ $secretConfigured = trim((string)($settings['recaptcha.secret_key'] ?? '')) !== 
         что действие выполнил человек. Используйте ключи именно reCAPTCHA v3.
         Начните с режима наблюдения, посмотрите реальные score в
         <code>frontend/runtime/logs/recaptcha.log</code>, затем включите блокировку по выбранным порогам.
+        При сетевой недоступности Google можно оставить fail-open, чтобы внешний сбой не отключал авторизацию.
     </div>
 
     <div class="mb-3">
@@ -115,6 +116,21 @@ $secretConfigured = trim((string)($settings['recaptcha.secret_key'] ?? '')) !== 
         ) ?>
         <div class="form-text">
             Рекомендуется оставить включённым после первого запуска, чтобы подобрать пороги на реальном трафике.
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <?= Html::checkbox(
+            'settings[recaptcha.fail_open_on_service_error]',
+            (string)$settings['recaptcha.fail_open_on_service_error'] === '1',
+            [
+                'value' => '1',
+                'label' => 'Пропускать пользователя, если Google reCAPTCHA временно недоступна',
+            ]
+        ) ?>
+        <div class="form-text">
+            Рекомендуется держать включённым, чтобы сбой DNS или Google не отключал вход и регистрацию.
+            Невалидный токен, неверный action и проваленная проверка при этом по-прежнему блокируются.
         </div>
     </div>
 

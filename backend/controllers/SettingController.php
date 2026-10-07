@@ -20,6 +20,7 @@ final class SettingController extends AdminController
         'recaptcha.login.enabled',
         'recaptcha.register.enabled',
         'recaptcha.monitoring_only',
+        'recaptcha.fail_open_on_service_error',
     ];
 
     private const TEXT_KEYS = [
@@ -43,6 +44,7 @@ final class SettingController extends AdminController
         'recaptcha.login.enabled',
         'recaptcha.register.enabled',
         'recaptcha.monitoring_only',
+        'recaptcha.fail_open_on_service_error',
         'recaptcha.login.threshold',
         'recaptcha.register.threshold',
         'recaptcha.site_key',
@@ -148,7 +150,8 @@ final class SettingController extends AdminController
                 'registration.enabled',
                 'recaptcha.login.enabled',
                 'recaptcha.register.enabled',
-                'recaptcha.monitoring_only' => '1',
+                'recaptcha.monitoring_only',
+                'recaptcha.fail_open_on_service_error' => '1',
                 'recaptcha.login.threshold',
                 'recaptcha.register.threshold' => '0.5',
                 default => '',
