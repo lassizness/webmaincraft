@@ -55,6 +55,14 @@ final class RecaptchaService
         ) === '1';
     }
 
+    public function isFailOpenOnServiceError(): bool
+    {
+        return (string)Setting::value(
+            'recaptcha.fail_open_on_service_error',
+            '1'
+        ) === '1';
+    }
+
     public function getSiteKey(): string
     {
         return trim((string)Setting::value(
@@ -90,29 +98,49 @@ final class RecaptchaService
     {
         $response = trim((string)$response);
 
-        if(
-            !$this->isConfigured()
-            || $response === ''
-            || !in_array(
-                $scope,
-                [
-                    self::SCOPE_LOGIN,
-                    self::SCOPE_REGISTER,
-                ],
-                true
-            )
-        )
+        if(!$this->isConfigured())
         {
+            Yii::error([
+                'event' => 'recaptcha.not_configured',
+                'scope' => $scope,
+            ], 'recaptcha');
+
+            return false;
+        }
+
+        if($response === '')
+        {
+            Yii::warning([
+                'event' => 'recaptcha.token_missing',
+                'scope' => $scope,
+            ], 'recaptcha');
+
+            return false;
+        }
+
+        if(!in_array(
+            $scope,
+            [
+                self::SCOPE_LOGIN,
+                self::SCOPE_REGISTER,
+            ],
+            true
+        ))
+        {
+            Yii::error([
+                'event' => 'recaptcha.invalid_scope',
+                'scope' => $scope,
+            ], 'recaptcha');
+
             return false;
         }
 
         if(!function_exists('curl_init'))
         {
-            Yii::error(
-                'PHP cURL extension is not available',
-                'recaptcha'
+            return $this->handleServiceError(
+                $scope,
+                'curl_unavailable'
             );
-            return false;
         }
 
         $payload = [
@@ -131,11 +159,10 @@ final class RecaptchaService
 
         if($curl === false)
         {
-            Yii::error(
-                'Unable to initialize cURL',
-                'recaptcha'
+            return $this->handleServiceError(
+                $scope,
+                'curl_init_failed'
             );
-            return false;
         }
 
         curl_setopt_array($curl, [
@@ -147,8 +174,8 @@ final class RecaptchaService
                 PHP_QUERY_RFC3986
             ),
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_CONNECTTIMEOUT => 3,
-            CURLOPT_TIMEOUT => 6,
+            CURLOPT_CONNECTTIMEOUT => 2,
+            CURLOPT_TIMEOUT => 4,
             CURLOPT_HTTPHEADER => [
                 'Content-Type: application/x-www-form-urlencoded',
                 'Accept: application/json',
@@ -160,12 +187,19 @@ final class RecaptchaService
 
         if($body === false)
         {
-            Yii::warning(
-                'reCAPTCHA request failed: '.curl_error($curl),
-                'recaptcha'
-            );
+            $error = curl_error($curl);
+            $errorNumber = curl_errno($curl);
+
             curl_close($curl);
-            return false;
+
+            return $this->handleServiceError(
+                $scope,
+                'request_failed',
+                [
+                    'curlError' => $error,
+                    'curlErrno' => $errorNumber,
+                ]
+            );
         }
 
         $httpCode = (int)curl_getinfo(
@@ -177,23 +211,21 @@ final class RecaptchaService
 
         if($httpCode < 200 || $httpCode >= 300)
         {
-            Yii::warning(
-                'reCAPTCHA verification returned HTTP '
-                .$httpCode,
-                'recaptcha'
+            return $this->handleServiceError(
+                $scope,
+                'http_error',
+                ['httpCode' => $httpCode]
             );
-            return false;
         }
 
         $data = json_decode($body, true);
 
         if(!is_array($data))
         {
-            Yii::warning(
-                'Invalid reCAPTCHA response',
-                'recaptcha'
+            return $this->handleServiceError(
+                $scope,
+                'invalid_response'
             );
-            return false;
         }
 
         $success = ($data['success'] ?? false) === true;
@@ -210,6 +242,7 @@ final class RecaptchaService
                 'scope' => $scope,
                 'errorCodes' => $data['error-codes'] ?? [],
             ], 'recaptcha');
+
             return false;
         }
 
@@ -222,6 +255,7 @@ final class RecaptchaService
                 'score' => $score,
                 'hostname' => $data['hostname'] ?? null,
             ], 'recaptcha');
+
             return false;
         }
 
@@ -232,6 +266,7 @@ final class RecaptchaService
                 'scope' => $scope,
                 'hostname' => $data['hostname'] ?? null,
             ], 'recaptcha');
+
             return false;
         }
 
@@ -253,6 +288,27 @@ final class RecaptchaService
         }
 
         return true;
+    }
+
+    private function handleServiceError(
+        string $scope,
+        string $reason,
+        array $context = []
+    ): bool
+    {
+        $failOpen = $this->isMonitoringOnly()
+            || $this->isFailOpenOnServiceError();
+
+        Yii::warning(array_merge([
+            'event' => 'recaptcha.service_unavailable',
+            'scope' => $scope,
+            'reason' => $reason,
+            'monitoringOnly' => $this->isMonitoringOnly(),
+            'failOpenOnServiceError' => $this->isFailOpenOnServiceError(),
+            'allowed' => $failOpen,
+        ], $context), 'recaptcha');
+
+        return $failOpen;
     }
 
     private function getSecretKey(): string
