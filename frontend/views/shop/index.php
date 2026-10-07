@@ -492,7 +492,7 @@ $jsLocale = match(Yii::$app->language)
     border-radius: 8px;
     padding: 9px 16px;
     background: transparent;
-    color: rgba(255,255,255,.65);
+    color: rgba(238,245,251,.82);
     font-weight: 600;
     transition: .15s ease;
 }
@@ -529,7 +529,7 @@ $jsLocale = match(Yii::$app->language)
     padding: 5px 9px;
     border-radius: 8px;
     background: rgba(255,255,255,.07);
-    color: rgba(255,255,255,.7);
+    color: rgba(238,245,251,.84);
     font-size: 13px;
 }
 
@@ -557,11 +557,29 @@ $jsLocale = match(Yii::$app->language)
 
     .privilege-duration-toggle {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         width: 100%;
     }
 
     .privilege-duration-btn {
+        width: 100%;
+        padding-inline: 10px;
+    }
+
+    .privilege-card-head,
+    .privilege-card-bottom {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .privilege-days {
+        align-self: flex-start;
+        white-space: normal;
+    }
+
+    .privilege-card-bottom .btn,
+    .privilege-card-bottom form,
+    .privilege-card-bottom form .btn {
         width: 100%;
     }
 }
@@ -586,7 +604,7 @@ $jsLocale = match(Yii::$app->language)
 }
 
 .privilege-kit-text {
-    color: rgba(220,235,245,.78);
+    color: rgba(226,238,247,.88);
     font-size: 13px;
     line-height: 1.55;
 }

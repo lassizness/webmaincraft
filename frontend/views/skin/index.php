@@ -505,8 +505,8 @@ $cloakUrl = $hasCloak
 
 .texture-format {
     margin-top: 3px;
+    color: rgba(226,238,247,.72);
     font-size: 12px;
-    opacity: .45;
 }
 
 .texture-drop-zone {
@@ -561,13 +561,13 @@ $cloakUrl = $hasCloak
     gap: 7px;
     align-items: center;
     justify-content: center;
-    color: rgba(255,255,255,.55);
+    color: rgba(235,243,249,.72);
     text-align: center;
     pointer-events: none;
 }
 
 .texture-empty strong {
-    color: rgba(255,255,255,.75);
+    color: rgba(245,249,252,.9);
 }
 
 .texture-empty span {
@@ -605,7 +605,7 @@ $cloakUrl = $hasCloak
 .upload-status {
     min-height: 24px;
     margin-top: 14px;
-    color: rgba(255,255,255,.6);
+    color: rgba(226,238,247,.74);
     font-size: 13px;
 }
 
@@ -619,6 +619,34 @@ $cloakUrl = $hasCloak
         height: 320px;
     }
 
+}
+
+@media (max-width: 560px) {
+
+    .texture-card-header,
+    .character-option-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .texture-card-header .btn,
+    .character-rank-badge {
+        align-self: flex-start;
+    }
+
+    .texture-drop-zone {
+        height: 280px;
+    }
+
+    #skin-character {
+        width: 130px;
+        height: 260px;
+    }
+
+    .nick-game-preview-value {
+        flex-wrap: wrap;
+        overflow-wrap: anywhere;
+    }
 }
 
 

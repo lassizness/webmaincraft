@@ -18,6 +18,7 @@ $this->title = Yii::t('ui', 'Сессии');
                     <?= Yii::t('ui', 'Активность входов') ?>
                 </h2>
 
+                <div class="table-responsive">
                 <table class="table">
                     <thead>
                     <tr>
@@ -85,6 +86,7 @@ $this->title = Yii::t('ui', 'Сессии');
 
                     </tbody>
                 </table>
+                </div>
 
             </div>
         </section>

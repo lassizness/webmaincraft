@@ -41,6 +41,7 @@ $statusLabel = static function(string $status): string
 
             <div class="ht-card">
 
+                <div class="table-responsive">
                 <table class="table">
 
                     <thead>
@@ -81,6 +82,7 @@ $statusLabel = static function(string $status): string
 
                     </tbody>
                 </table>
+                </div>
 
                 <?php if(!$tickets): ?>
 
