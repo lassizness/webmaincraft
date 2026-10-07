@@ -147,4 +147,6 @@ return [
 
     'Вы изменили email для аккаунта {username}. Подтвердите новый адрес по ссылке ниже. Вход в аккаунт при этом остаётся доступен.' => 'Du hast die E-Mail-Adresse für das Konto {username} geändert. Bestätige die neue Adresse über den Link unten. Die Anmeldung bleibt währenddessen weiterhin möglich.',
     'Подтвердить новый email' => 'Neue E-Mail bestätigen',
+
+    'Не удалось пройти проверку защиты от ботов. Повторите попытку.' => 'Die Bot-Schutzprüfung ist fehlgeschlagen. Bitte versuche es erneut.',
 ];

@@ -100,11 +100,20 @@ return [
         ],
         'log' => [
             'traceLevel' => ht_bool('YII_DEBUG', false) ? 3 : 0,
-            'targets' => [[
-                'class' => yii\log\FileTarget::class,
-                'levels' => ['error', 'warning'],
-                'logVars' => [],
-            ]],
+            'targets' => [
+                [
+                    'class' => yii\log\FileTarget::class,
+                    'levels' => ['error', 'warning'],
+                    'logVars' => [],
+                ],
+                [
+                    'class' => yii\log\FileTarget::class,
+                    'levels' => ['info', 'warning', 'error'],
+                    'categories' => ['recaptcha'],
+                    'logFile' => '@runtime/logs/recaptcha.log',
+                    'logVars' => [],
+                ],
+            ],
         ],
     ],
     'params' => require dirname(__DIR__, 2) . '/common/config/params.php',

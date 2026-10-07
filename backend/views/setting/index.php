@@ -60,7 +60,7 @@ $secretConfigured = trim((string)($settings['recaptcha.secret_key'] ?? '')) !== 
     <div class="d-flex align-items-center justify-content-between mb-3">
         <div>
             <h4 class="mb-1">Google reCAPTCHA</h4>
-            <div class="text-muted small">reCAPTCHA v2 Checkbox</div>
+            <div class="text-muted small">reCAPTCHA v3 · невидимая проверка по score</div>
         </div>
 
         <?php if($secretConfigured): ?>
@@ -71,8 +71,11 @@ $secretConfigured = trim((string)($settings['recaptcha.secret_key'] ?? '')) !== 
     </div>
 
     <div class="alert alert-info">
-        CAPTCHA проверяется только после включения и заполнения Site key + Secret key.
-        Для локального стенда используйте тестовые ключи Google, перед production замените их реальными.
+        reCAPTCHA v3 работает без чекбокса и не прерывает пользователя.
+        Google возвращает score от 0.0 до 1.0: чем выше значение, тем больше вероятность,
+        что действие выполнил человек. Используйте ключи именно reCAPTCHA v3.
+        Начните с режима наблюдения, посмотрите реальные score в
+        <code>frontend/runtime/logs/recaptcha.log</code>, затем включите блокировку по выбранным порогам.
     </div>
 
     <div class="mb-3">
@@ -98,6 +101,50 @@ $secretConfigured = trim((string)($settings['recaptcha.secret_key'] ?? '')) !== 
                 (string)$settings['recaptcha.register.enabled'] === '1',
                 ['value' => '1', 'label' => 'Проверять при регистрации']
             ) ?>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <?= Html::checkbox(
+            'settings[recaptcha.monitoring_only]',
+            (string)$settings['recaptcha.monitoring_only'] === '1',
+            [
+                'value' => '1',
+                'label' => 'Режим наблюдения: считать score и писать его в лог, но не блокировать пользователя',
+            ]
+        ) ?>
+        <div class="form-text">
+            Рекомендуется оставить включённым после первого запуска, чтобы подобрать пороги на реальном трафике.
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-lg-6">
+            <label class="form-label">Минимальный score для авторизации</label>
+            <input
+                type="number"
+                min="0"
+                max="1"
+                step="0.1"
+                class="form-control"
+                name="settings[recaptcha.login.threshold]"
+                value="<?= Html::encode((string)$settings['recaptcha.login.threshold']) ?>"
+            >
+            <div class="form-text">Стартовое значение: 0.5.</div>
+        </div>
+
+        <div class="col-lg-6">
+            <label class="form-label">Минимальный score для регистрации</label>
+            <input
+                type="number"
+                min="0"
+                max="1"
+                step="0.1"
+                class="form-control"
+                name="settings[recaptcha.register.threshold]"
+                value="<?= Html::encode((string)$settings['recaptcha.register.threshold']) ?>"
+            >
+            <div class="form-text">Стартовое значение: 0.5.</div>
         </div>
     </div>
 
