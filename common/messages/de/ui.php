@@ -257,4 +257,23 @@ return [
 
     'Email не подтверждён. Это не мешает входу, но рекомендуем подтвердить адрес для восстановления доступа и уведомлений.' => 'Die E-Mail-Adresse ist nicht bestätigt. Das blockiert die Anmeldung nicht, aber wir empfehlen die Bestätigung für Kontowiederherstellung und Benachrichtigungen.',
     'Отправить письмо повторно' => 'E-Mail erneut senden',
+
+    // P0 privilege lifecycle
+    'Статус заканчивается через {days} дн.' => 'Dein Status läuft in {days} Tagen ab.',
+    'Статус уже закончился. Его можно активировать снова.' => 'Dein Status ist abgelaufen. Du kannst ihn erneut aktivieren.',
+    'Продлить' => 'Verlängern',
+    'Продление добавит новый срок к текущей дате окончания.' => 'Die Verlängerung wird an das aktuelle Ablaufdatum angehängt.',
+    'Продлить на {days} дней · {price} кварков' => 'Für {days} Tage verlängern · {price} Quarks',
+    'Подтвердить продление статуса?' => 'Statusverlängerung bestätigen?',
+    'Статус продлён. Оставшийся срок сохранён.' => 'Status verlängert. Die verbleibende Laufzeit wurde erhalten.',
+    'Игровой статус HiveTech скоро закончится' => 'Dein HiveTech-Spielstatus läuft bald ab',
+    'Игровой статус HiveTech закончился' => 'Dein HiveTech-Spielstatus ist abgelaufen',
+    'Статус скоро закончится' => 'Dein Status läuft bald ab',
+    'Статус закончился' => 'Dein Status ist abgelaufen',
+    'Привет, {username}. Статус {status} на сервере {server} закончится примерно через {days} дн.' => 'Hallo {username}. Dein Status {status} auf {server} läuft in ungefähr {days} Tagen ab.',
+    'Продлить статус можно прямо в личном кабинете, оставшийся срок не сгорит.' => 'Du kannst den Status direkt im Konto verlängern. Die Restlaufzeit geht nicht verloren.',
+    'Привет, {username}. Срок статуса {status} на сервере {server} закончился.' => 'Hallo {username}. Dein Status {status} auf {server} ist abgelaufen.',
+    'Если статус ещё нужен, его можно снова активировать из личного кабинета.' => 'Wenn du den Status weiterhin brauchst, kannst du ihn im Konto erneut aktivieren.',
+    'Открыть игровой статус' => 'Spielstatus öffnen',
+
 ];
