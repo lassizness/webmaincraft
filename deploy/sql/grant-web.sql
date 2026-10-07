@@ -1,7 +1,7 @@
 -- Run on mc-data AFTER yii migrate. Adjust host if mc-edge changes.
 -- Existing users grant is repeated intentionally so deployment is reproducible.
 GRANT SELECT, INSERT,
-      UPDATE (`serverID`,`email`,`password`,`status`,`email_verified`,`accessToken`,`last_login_at`)
+      UPDATE (`serverID`,`email`,`password`,`status`,`email_verified`,`accessToken`,`last_login_at`,`hwidId`)
 ON `hivetech_core`.`users`
 TO 'hivetech_web'@'10.140.0.141';
 
@@ -34,6 +34,13 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`settings` TO 'hivetech_
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`audit_log` TO 'hivetech_web'@'10.140.0.141';
 GRANT SELECT ON `hivetech_core`.`migration` TO 'hivetech_web'@'10.140.0.141';
 FLUSH PRIVILEGES;
+GRANT SELECT, UPDATE (`banned`) ON `hivetech_core`.`hwids` TO 'hivetech_web'@'10.140.0.141';
+GRANT SELECT ON `hivetech_core`.`hwidLog` TO 'hivetech_web'@'10.140.0.141';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`privilege_groups` TO 'hivetech_web'@'10.140.0.141';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`user_privileges` TO 'hivetech_web'@'10.140.0.141';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`privilege_history` TO 'hivetech_web'@'10.140.0.141';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`user_cosmetics` TO 'hivetech_web'@'10.140.0.141';
+GRANT SELECT, INSERT ON `hivetech_core`.`privilege_notification_log` TO 'hivetech_web'@'10.140.0.141';
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`user_permissions` TO 'hivetech_web'@'10.140.0.141';
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`vote_services` TO 'hivetech_web'@'10.140.0.141';
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`votes` TO 'hivetech_web'@'10.140.0.141';
