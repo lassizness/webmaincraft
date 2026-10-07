@@ -4,202 +4,352 @@ use yii\helpers\Html;
 
 $this->title = 'Настройки';
 
-$secretConfigured = trim((string)($settings['recaptcha.secret_key'] ?? '')) !== '';
+$secretConfigured = trim(
+    (string)($settings['recaptcha.secret_key'] ?? '')
+) !== '';
+
+$siteKeyConfigured = trim(
+    (string)($settings['recaptcha.site_key'] ?? '')
+) !== '';
+
+$recaptchaReady = $secretConfigured && $siteKeyConfigured;
 ?>
-<div class="card p-4">
-    <?= Html::beginForm() ?>
 
-    <h4 class="mb-3">Основные настройки</h4>
+<?= Html::beginForm() ?>
 
-    <div class="mb-3">
-        <label class="form-label">Название сайта</label>
-        <input
-            class="form-control"
-            name="settings[site.title]"
-            value="<?= Html::encode((string)$settings['site.title']) ?>"
-        >
+<div class="row g-3">
+    <div class="col-xl-5">
+        <section class="admin-panel h-100">
+            <div class="admin-section-head">
+                <div>
+                    <h2 class="admin-panel-title">
+                        Проект
+                    </h2>
+                    <div class="admin-panel-subtitle">
+                        Название и короткое описание публичного сайта.
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="site-title">
+                    Название сайта
+                </label>
+                <input
+                    id="site-title"
+                    class="form-control"
+                    name="settings[site.title]"
+                    value="<?= Html::encode(
+                        (string)$settings['site.title']
+                    ) ?>"
+                >
+            </div>
+
+            <div>
+                <label class="form-label" for="site-tagline">
+                    Подзаголовок
+                </label>
+                <input
+                    id="site-tagline"
+                    class="form-control"
+                    name="settings[site.tagline]"
+                    value="<?= Html::encode(
+                        (string)$settings['site.tagline']
+                    ) ?>"
+                >
+            </div>
+        </section>
     </div>
 
-    <div class="mb-4">
-        <label class="form-label">Подзаголовок</label>
-        <input
-            class="form-control"
-            name="settings[site.tagline]"
-            value="<?= Html::encode((string)$settings['site.tagline']) ?>"
-        >
+    <div class="col-xl-7">
+        <section class="admin-panel h-100">
+            <div class="admin-section-head">
+                <div>
+                    <h2 class="admin-panel-title">
+                        Доступность функций
+                    </h2>
+                    <div class="admin-panel-subtitle">
+                        Операционные переключатели проекта.
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-setting-grid">
+                <div class="admin-toggle-card">
+                    <?= Html::checkbox(
+                        'settings[maintenance.enabled]',
+                        (string)$settings['maintenance.enabled'] === '1',
+                        [
+                            'value' => '1',
+                            'class' => 'form-check-input me-2',
+                            'label' => 'Режим обслуживания',
+                        ]
+                    ) ?>
+                    <div class="admin-toggle-description">
+                        Используй только для технических работ.
+                    </div>
+                </div>
+
+                <div class="admin-toggle-card">
+                    <?= Html::checkbox(
+                        'settings[registration.enabled]',
+                        (string)$settings['registration.enabled'] === '1',
+                        [
+                            'value' => '1',
+                            'class' => 'form-check-input me-2',
+                            'label' => 'Регистрация включена',
+                        ]
+                    ) ?>
+                    <div class="admin-toggle-description">
+                        Разрешает создание новых аккаунтов.
+                    </div>
+                </div>
+
+                <div class="admin-toggle-card">
+                    <?= Html::checkbox(
+                        'settings[shop.enabled]',
+                        (string)$settings['shop.enabled'] === '1',
+                        [
+                            'value' => '1',
+                            'class' => 'form-check-input me-2',
+                            'label' => 'Магазин включён',
+                        ]
+                    ) ?>
+                    <div class="admin-toggle-description">
+                        Управляет доступностью магазина для игроков.
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
+</div>
 
-    <div class="row">
-        <div class="col-lg-4 mb-3">
-            <?= Html::checkbox(
-                'settings[maintenance.enabled]',
-                (string)$settings['maintenance.enabled'] === '1',
-                ['value' => '1', 'label' => 'Режим обслуживания']
-            ) ?>
-        </div>
-
-        <div class="col-lg-4 mb-3">
-            <?= Html::checkbox(
-                'settings[registration.enabled]',
-                (string)$settings['registration.enabled'] === '1',
-                ['value' => '1', 'label' => 'Регистрация включена']
-            ) ?>
-        </div>
-
-        <div class="col-lg-4 mb-3">
-            <?= Html::checkbox(
-                'settings[shop.enabled]',
-                (string)$settings['shop.enabled'] === '1',
-                ['value' => '1', 'label' => 'Магазин включён']
-            ) ?>
-        </div>
-    </div>
-
-    <hr class="my-4">
-
-    <div class="d-flex align-items-center justify-content-between mb-3">
+<section class="admin-panel mt-3">
+    <div class="admin-section-head">
         <div>
-            <h4 class="mb-1">Google reCAPTCHA</h4>
-            <div class="text-muted small">reCAPTCHA v3 · невидимая проверка по score</div>
+            <h2 class="admin-panel-title">
+                Google reCAPTCHA v3
+            </h2>
+            <div class="admin-panel-subtitle">
+                Невидимая score-проверка входа и регистрации.
+            </div>
         </div>
 
-        <?php if($secretConfigured): ?>
-            <span class="badge bg-success">Secret key сохранён</span>
-        <?php else: ?>
-            <span class="badge bg-secondary">Secret key не задан</span>
-        <?php endif; ?>
+        <div class="admin-actions">
+            <?php if($recaptchaReady): ?>
+                <span class="badge bg-success">
+                    Ключи настроены
+                </span>
+            <?php elseif($siteKeyConfigured || $secretConfigured): ?>
+                <span class="badge bg-warning">
+                    Настройка не завершена
+                </span>
+            <?php else: ?>
+                <span class="badge bg-secondary">
+                    Ключи не заданы
+                </span>
+            <?php endif; ?>
+        </div>
     </div>
 
     <div class="alert alert-info">
-        reCAPTCHA v3 работает без чекбокса и не прерывает пользователя.
-        Google возвращает score от 0.0 до 1.0: чем выше значение, тем больше вероятность,
-        что действие выполнил человек. Используйте ключи именно reCAPTCHA v3.
-        Начните с режима наблюдения, посмотрите реальные score в
-        <code>frontend/runtime/logs/recaptcha.log</code>, затем включите блокировку по выбранным порогам.
-        При сетевой недоступности Google можно оставить fail-open, чтобы внешний сбой не отключал авторизацию.
+        reCAPTCHA v3 не показывает пользователю чекбокс.
+        Сначала оставь режим наблюдения включённым и собери реальные score
+        в <code>frontend/runtime/logs/recaptcha.log</code>.
+        Fail-open защищает авторизацию от внешнего сбоя DNS или Google.
     </div>
 
-    <div class="mb-3">
-        <?= Html::checkbox(
-            'settings[recaptcha.enabled]',
-            (string)$settings['recaptcha.enabled'] === '1',
-            ['value' => '1', 'label' => 'Включить Google reCAPTCHA']
-        ) ?>
-    </div>
+    <div class="admin-setting-grid mb-4">
+        <div class="admin-toggle-card">
+            <?= Html::checkbox(
+                'settings[recaptcha.enabled]',
+                (string)$settings['recaptcha.enabled'] === '1',
+                [
+                    'value' => '1',
+                    'class' => 'form-check-input me-2',
+                    'label' => 'Включить reCAPTCHA',
+                ]
+            ) ?>
+            <div class="admin-toggle-description">
+                Глобальный переключатель всей защиты.
+            </div>
+        </div>
 
-    <div class="row mb-3">
-        <div class="col-lg-6">
+        <div class="admin-toggle-card">
+            <?= Html::checkbox(
+                'settings[recaptcha.monitoring_only]',
+                (string)$settings['recaptcha.monitoring_only'] === '1',
+                [
+                    'value' => '1',
+                    'class' => 'form-check-input me-2',
+                    'label' => 'Режим наблюдения',
+                ]
+            ) ?>
+            <div class="admin-toggle-description">
+                Логировать score, но не блокировать из-за низкой оценки.
+            </div>
+        </div>
+
+        <div class="admin-toggle-card">
             <?= Html::checkbox(
                 'settings[recaptcha.login.enabled]',
                 (string)$settings['recaptcha.login.enabled'] === '1',
-                ['value' => '1', 'label' => 'Проверять при авторизации']
+                [
+                    'value' => '1',
+                    'class' => 'form-check-input me-2',
+                    'label' => 'Защищать авторизацию',
+                ]
             ) ?>
+            <div class="admin-toggle-description">
+                Проверять вход по логину и паролю.
+            </div>
         </div>
 
-        <div class="col-lg-6">
+        <div class="admin-toggle-card">
             <?= Html::checkbox(
                 'settings[recaptcha.register.enabled]',
                 (string)$settings['recaptcha.register.enabled'] === '1',
-                ['value' => '1', 'label' => 'Проверять при регистрации']
+                [
+                    'value' => '1',
+                    'class' => 'form-check-input me-2',
+                    'label' => 'Защищать регистрацию',
+                ]
             ) ?>
+            <div class="admin-toggle-description">
+                Проверять создание новых аккаунтов.
+            </div>
+        </div>
+
+        <div class="admin-toggle-card">
+            <?= Html::checkbox(
+                'settings[recaptcha.fail_open_on_service_error]',
+                (string)$settings['recaptcha.fail_open_on_service_error'] === '1',
+                [
+                    'value' => '1',
+                    'class' => 'form-check-input me-2',
+                    'label' => 'Fail-open при сбое сервиса',
+                ]
+            ) ?>
+            <div class="admin-toggle-description">
+                Не блокировать игрока, если Google или DNS временно недоступны.
+            </div>
         </div>
     </div>
 
-    <div class="mb-3">
-        <?= Html::checkbox(
-            'settings[recaptcha.monitoring_only]',
-            (string)$settings['recaptcha.monitoring_only'] === '1',
-            [
-                'value' => '1',
-                'label' => 'Режим наблюдения: считать score и писать его в лог, но не блокировать пользователя',
-            ]
-        ) ?>
-        <div class="form-text">
-            Рекомендуется оставить включённым после первого запуска, чтобы подобрать пороги на реальном трафике.
-        </div>
-    </div>
-
-    <div class="mb-3">
-        <?= Html::checkbox(
-            'settings[recaptcha.fail_open_on_service_error]',
-            (string)$settings['recaptcha.fail_open_on_service_error'] === '1',
-            [
-                'value' => '1',
-                'label' => 'Пропускать пользователя, если Google reCAPTCHA временно недоступна',
-            ]
-        ) ?>
-        <div class="form-text">
-            Рекомендуется держать включённым, чтобы сбой DNS или Google не отключал вход и регистрацию.
-            Невалидный токен, неверный action и проваленная проверка при этом по-прежнему блокируются.
-        </div>
-    </div>
-
-    <div class="row mb-3">
+    <div class="row g-3 mb-4">
         <div class="col-lg-6">
-            <label class="form-label">Минимальный score для авторизации</label>
+            <label class="form-label" for="recaptcha-login-threshold">
+                Минимальный score для авторизации
+            </label>
             <input
+                id="recaptcha-login-threshold"
                 type="number"
                 min="0"
                 max="1"
                 step="0.1"
                 class="form-control"
                 name="settings[recaptcha.login.threshold]"
-                value="<?= Html::encode((string)$settings['recaptcha.login.threshold']) ?>"
+                value="<?= Html::encode(
+                    (string)$settings['recaptcha.login.threshold']
+                ) ?>"
             >
-            <div class="form-text">Стартовое значение: 0.5.</div>
+            <div class="form-text">
+                Базовое значение: 0.5. Меняй только после анализа логов.
+            </div>
         </div>
 
         <div class="col-lg-6">
-            <label class="form-label">Минимальный score для регистрации</label>
+            <label class="form-label" for="recaptcha-register-threshold">
+                Минимальный score для регистрации
+            </label>
             <input
+                id="recaptcha-register-threshold"
                 type="number"
                 min="0"
                 max="1"
                 step="0.1"
                 class="form-control"
                 name="settings[recaptcha.register.threshold]"
-                value="<?= Html::encode((string)$settings['recaptcha.register.threshold']) ?>"
+                value="<?= Html::encode(
+                    (string)$settings['recaptcha.register.threshold']
+                ) ?>"
             >
-            <div class="form-text">Стартовое значение: 0.5.</div>
+            <div class="form-text">
+                Регистрацию можно сделать немного строже после накопления статистики.
+            </div>
         </div>
     </div>
 
-    <div class="mb-3">
-        <label class="form-label">Site key</label>
-        <input
-            class="form-control"
-            name="settings[recaptcha.site_key]"
-            value="<?= Html::encode((string)$settings['recaptcha.site_key']) ?>"
-            autocomplete="off"
-        >
-    </div>
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <label class="form-label" for="recaptcha-site-key">
+                Site key
+            </label>
+            <input
+                id="recaptcha-site-key"
+                class="form-control font-monospace"
+                name="settings[recaptcha.site_key]"
+                value="<?= Html::encode(
+                    (string)$settings['recaptcha.site_key']
+                ) ?>"
+                autocomplete="off"
+            >
+            <div class="form-text">
+                Публичный ключ reCAPTCHA v3 для hivegrid.online.
+            </div>
+        </div>
 
-    <div class="mb-2">
-        <label class="form-label">Secret key</label>
-        <input
-            type="password"
-            class="form-control"
-            name="settings[recaptcha.secret_key]"
-            value=""
-            autocomplete="new-password"
-            placeholder="<?= $secretConfigured
-                ? 'Secret key уже сохранён. Оставьте пустым, чтобы не менять.'
-                : 'Введите Secret key'
-            ?>"
-        >
-        <div class="form-text">Значение намеренно не выводится обратно в HTML.</div>
+        <div class="col-lg-6">
+            <label class="form-label" for="recaptcha-secret-key">
+                Secret key
+            </label>
+            <input
+                id="recaptcha-secret-key"
+                type="password"
+                class="form-control font-monospace"
+                name="settings[recaptcha.secret_key]"
+                value=""
+                autocomplete="new-password"
+                placeholder="<?= $secretConfigured
+                    ? 'Сохранён. Оставь пустым, чтобы не менять.'
+                    : 'Введите Secret key'
+                ?>"
+            >
+            <div class="form-text">
+                Секрет намеренно никогда не выводится обратно в HTML.
+            </div>
+        </div>
     </div>
 
     <?php if($secretConfigured): ?>
-        <div class="mb-4">
+        <div class="admin-danger-zone admin-panel mt-3">
+            <h3 class="admin-panel-title mb-1">
+                Удаление Secret key
+            </h3>
+            <div class="admin-panel-subtitle mb-3">
+                После удаления включённая reCAPTCHA перестанет быть настроенной.
+            </div>
+
             <?= Html::checkbox(
                 'recaptcha_secret_clear',
                 false,
-                ['value' => '1', 'label' => 'Удалить сохранённый Secret key']
+                [
+                    'value' => '1',
+                    'label' => 'Удалить сохранённый Secret key при сохранении',
+                ]
             ) ?>
         </div>
     <?php endif; ?>
+</section>
 
-    <?= Html::submitButton('Сохранить', ['class' => 'btn btn-primary']) ?>
-    <?= Html::endForm() ?>
+<div class="admin-save-bar">
+    <div class="admin-save-copy">
+        Изменения применяются после сохранения.
+    </div>
+    <?= Html::submitButton(
+        'Сохранить настройки',
+        ['class' => 'btn btn-primary']
+    ) ?>
 </div>
+
+<?= Html::endForm() ?>
