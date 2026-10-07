@@ -142,4 +142,13 @@ return [
     'Ссылка действует 1 час. После смены пароля старые web- и launcher-сессии будут сброшены.' => 'The link is valid for 1 hour. After changing the password, old web and launcher sessions will be reset.',
     'Ответ поддержки HiveTech #{id}' => 'HiveTech Support Reply #{id}',
     'Открыть тикет' => 'Open ticket',
+
+    'Аккаунт создан. Можно входить сразу; подтвердите email, чтобы привязать адрес к аккаунту.' => 'Account created. You can sign in right away; confirm your email to link the address to your account.',
+    'Если email ещё не подтверждён, новое письмо сформировано.' => 'If the email is not verified yet, a new verification email has been sent.',
+    'Email подтверждён.' => 'Email confirmed.',
+    'Если email ещё не подтверждён, мы создадим новую ссылку и отправим её повторно.' => 'If the email is not verified yet, we will create a new link and send it again.',
+    'Подтвердите email, чтобы мы знали, что адрес действительно принадлежит вам. Аккаунт уже активен, подтверждение не блокирует вход.' => 'Confirm your email so we know the address really belongs to you. Your account is already active and verification does not block sign-in.',
+
+    'Вы изменили email для аккаунта {username}. Подтвердите новый адрес по ссылке ниже. Вход в аккаунт при этом остаётся доступен.' => 'You changed the email address for account {username}. Confirm the new address using the link below. You can continue signing in to your account in the meantime.',
+    'Подтвердить новый email' => 'Confirm new email',
 ];

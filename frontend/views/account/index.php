@@ -52,6 +52,21 @@ $translateShopText = static function (?string $value): string {
 
         <section>
 
+            <?php if(!(bool)$user->email_verified): ?>
+                <div class="alert alert-warning">
+                    <?= Yii::t(
+                        'ui',
+                        'Email не подтверждён. Это не мешает входу, но рекомендуем подтвердить адрес для восстановления доступа и уведомлений.'
+                    ) ?>
+                    <a
+                        class="alert-link ms-1"
+                        href="<?= Url::to(['/auth/resend-verification']) ?>"
+                    >
+                        <?= Yii::t('ui', 'Отправить письмо повторно') ?>
+                    </a>
+                </div>
+            <?php endif; ?>
+
             <div class="section-title">
                 <h2>
                     <?= Yii::t('ui', 'Привет, {username}', [

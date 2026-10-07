@@ -139,7 +139,7 @@ final class AuthController extends Controller
                     AuditService::log('user.register', 'user', (string)$user->id);
                     Yii::$app->session->setFlash(
                         'success',
-                        Yii::t('app', 'Аккаунт создан. Подтвердите email, после этого он станет доступен и в лаунчере.')
+                        Yii::t('app', 'Аккаунт создан. Можно входить сразу; подтвердите email, чтобы привязать адрес к аккаунту.')
                     );
                     return $this->redirect(['login']);
                 }
@@ -163,7 +163,7 @@ final class AuthController extends Controller
         if($model->load(Yii::$app->request->post()) && $model->validate())
         {
             $user = User::findOne(['email' => mb_strtolower($model->email)]);
-            if($user && $user->status === User::STATUS_PENDING)
+            if($user && !$user->email_verified && $user->status !== User::STATUS_BLOCKED)
             {
                 $raw = (new TokenService())->issue((int)$user->id, UserToken::TYPE_EMAIL_VERIFY, 86400);
                 $url = Yii::$app->params['appUrl'].'/verify-email?token='.rawurlencode($raw);
@@ -186,7 +186,7 @@ final class AuthController extends Controller
                     Yii::error($e, 'mail');
                 }
             }
-            Yii::$app->session->setFlash('success', Yii::t('app', 'Если аккаунт ожидает подтверждения, новое письмо сформировано.'));
+            Yii::$app->session->setFlash('success', Yii::t('app', 'Если email ещё не подтверждён, новое письмо сформировано.'));
             return $this->refresh();
         }
         return $this->render('resend-verification', ['model' => $model]);
@@ -200,7 +200,7 @@ final class AuthController extends Controller
             Yii::$app->session->setFlash('error', Yii::t('app', 'Ссылка недействительна или истекла.'));
             return $this->redirect(['login']);
         }
-        Yii::$app->session->setFlash('success', Yii::t('app', 'Email подтверждён. Теперь можно входить на сайт и в HiveTech Launcher.'));
+        Yii::$app->session->setFlash('success', Yii::t('app', 'Email подтверждён.'));
         return $this->redirect(['login']);
     }
 
