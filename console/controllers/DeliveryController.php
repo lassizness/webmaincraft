@@ -5,10 +5,7 @@ declare(strict_types=1);
 namespace console\controllers;
 
 use common\models\DeliveryQueue;
-use common\services\{
-    DeliveryService,
-    PrivilegeService
-};
+use common\services\DeliveryService;
 use yii\console\Controller;
 
 final class DeliveryController extends Controller
@@ -17,23 +14,6 @@ final class DeliveryController extends Controller
         int $limit = 20
     ): int
     {
-        $expired =
-            (
-                new PrivilegeService()
-            )->expireDue(
-                max(
-                    20,
-                    $limit
-                )
-            );
-
-        if($expired > 0)
-        {
-            $this->stdout(
-                "Expired privileges: {$expired}\n"
-            );
-        }
-
         $items =
             DeliveryQueue::find()
                 ->where(
