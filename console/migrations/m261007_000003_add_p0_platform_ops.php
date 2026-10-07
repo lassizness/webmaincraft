@@ -16,13 +16,14 @@ final class m261007_000003_add_p0_platform_ops extends Migration
                 'id' => $this->bigPrimaryKey()->unsigned(),
                 'user_privilege_id' => $this->bigInteger()->unsigned()->notNull(),
                 'notice_type' => $this->string(16)->notNull(),
+                'active_to' => $this->dateTime()->notNull(),
                 'sent_at' => $this->dateTime()->notNull(),
             ], $this->options);
 
             $this->createIndex(
                 'uq_privilege_notice_once',
                 '{{%privilege_notification_log}}',
-                ['user_privilege_id', 'notice_type'],
+                ['user_privilege_id', 'notice_type', 'active_to'],
                 true
             );
 
