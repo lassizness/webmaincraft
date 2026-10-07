@@ -13,6 +13,11 @@ $siteKeyConfigured = trim(
 ) !== '';
 
 $recaptchaReady = $secretConfigured && $siteKeyConfigured;
+
+$payPalychTokenConfigured = trim((string)ht_env('PAYPALYCH_API_TOKEN', '')) !== '';
+$payPalychSignatureConfigured = trim((string)ht_env('PAYPALYCH_SIGNATURE_TOKEN', '')) !== '';
+$payPalychShopConfigured = trim((string)($settings['payments.paypalych.shop_id'] ?? '')) !== '';
+$payPalychReady = $payPalychTokenConfigured && $payPalychShopConfigured;
 ?>
 
 <?= Html::beginForm() ?>
@@ -340,6 +345,86 @@ $recaptchaReady = $secretConfigured && $siteKeyConfigured;
             ) ?>
         </div>
     <?php endif; ?>
+</section>
+
+
+<section class="admin-panel mt-3">
+    <div class="admin-section-head">
+        <div>
+            <h2 class="admin-panel-title">PayPalych / Pally</h2>
+            <div class="admin-panel-subtitle">
+                Каркас интернет-эквайринга. Боевой поток пополнения пока не включён.
+            </div>
+        </div>
+        <div class="admin-actions">
+            <?php if($payPalychReady): ?>
+                <span class="badge bg-success">API готов к подключению</span>
+            <?php elseif($payPalychTokenConfigured || $payPalychShopConfigured): ?>
+                <span class="badge bg-warning">Настройка не завершена</span>
+            <?php else: ?>
+                <span class="badge bg-secondary">Не настроен</span>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <div class="alert alert-info">
+        API token и token подписи не сохраняются в базе и не выводятся в HTML.
+        Они задаются в <code>/etc/hivetech/portal.env</code> как
+        <code>PAYPALYCH_API_TOKEN</code> и <code>PAYPALYCH_SIGNATURE_TOKEN</code>.
+        Result URL/webhook будет подключён отдельным шагом при включении реальных платежей.
+    </div>
+
+    <div class="admin-setting-grid mb-4">
+        <div class="admin-toggle-card">
+            <?= Html::checkbox(
+                'settings[payments.paypalych.enabled]',
+                (string)$settings['payments.paypalych.enabled'] === '1',
+                [
+                    'value' => '1',
+                    'class' => 'form-check-input me-2',
+                    'label' => 'Включить провайдер',
+                ]
+            ) ?>
+            <div class="admin-toggle-description">
+                Разрешает backend использовать PayPalych adapter. Само пополнение пока остаётся выключенным.
+            </div>
+        </div>
+
+        <div class="admin-toggle-card">
+            <div class="form-check-label fw-bold">Секреты окружения</div>
+            <div class="admin-toggle-description ms-0 mt-2">
+                API token: <strong><?= $payPalychTokenConfigured ? 'настроен' : 'не задан' ?></strong><br>
+                Signature token: <strong><?= $payPalychSignatureConfigured ? 'отдельный' : 'используется API token' ?></strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <label class="form-label" for="paypalych-shop-id">Shop ID</label>
+            <input
+                id="paypalych-shop-id"
+                class="form-control font-monospace"
+                name="settings[payments.paypalych.shop_id]"
+                value="<?= Html::encode((string)$settings['payments.paypalych.shop_id']) ?>"
+                autocomplete="off"
+            >
+        </div>
+
+        <div class="col-lg-6">
+            <label class="form-label" for="paypalych-base-url">API base URL</label>
+            <input
+                id="paypalych-base-url"
+                class="form-control font-monospace"
+                name="settings[payments.paypalych.base_url]"
+                value="<?= Html::encode((string)$settings['payments.paypalych.base_url']) ?>"
+                autocomplete="off"
+            >
+            <div class="form-text">
+                По умолчанию: https://pally.info/api/v1
+            </div>
+        </div>
+    </div>
 </section>
 
 <div class="admin-save-bar">
