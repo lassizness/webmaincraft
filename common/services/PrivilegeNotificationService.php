@@ -77,6 +77,7 @@ final class PrivilegeNotificationService
         if(PrivilegeNotification::find()->where([
             'user_privilege_id' => $privilege->id,
             'notice_type' => $type,
+            'active_to' => (string)$privilege->active_to,
         ])->exists())
         {
             return false;
@@ -122,6 +123,7 @@ final class PrivilegeNotificationService
             $log = new PrivilegeNotification([
                 'user_privilege_id' => $privilege->id,
                 'notice_type' => $type,
+                'active_to' => (string)$privilege->active_to,
                 'sent_at' => date('Y-m-d H:i:s'),
             ]);
 
