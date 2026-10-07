@@ -21,7 +21,10 @@ final class RecaptchaService
 
     public function isEnabledFor(string $scope): bool
     {
-        if(!$this->isEnabled()) return false;
+        if(!$this->isEnabled())
+        {
+            return false;
+        }
 
         $key = match($scope)
         {
@@ -30,30 +33,85 @@ final class RecaptchaService
             default => null,
         };
 
-        if($key === null) return false;
+        if($key === null)
+        {
+            return false;
+        }
 
         return (string)Setting::value($key, '1') === '1';
     }
 
     public function isConfigured(): bool
     {
-        return $this->getSiteKey() !== '' && $this->getSecretKey() !== '';
+        return $this->getSiteKey() !== ''
+            && $this->getSecretKey() !== '';
+    }
+
+    public function isMonitoringOnly(): bool
+    {
+        return (string)Setting::value(
+            'recaptcha.monitoring_only',
+            '1'
+        ) === '1';
     }
 
     public function getSiteKey(): string
     {
-        return trim((string)Setting::value('recaptcha.site_key', ''));
+        return trim((string)Setting::value(
+            'recaptcha.site_key',
+            ''
+        ));
     }
 
-    public function verify(?string $response, ?string $remoteIp = null): bool
+    public function getThreshold(string $scope): float
+    {
+        $key = match($scope)
+        {
+            self::SCOPE_LOGIN => 'recaptcha.login.threshold',
+            self::SCOPE_REGISTER => 'recaptcha.register.threshold',
+            default => null,
+        };
+
+        if($key === null)
+        {
+            return 0.5;
+        }
+
+        $value = (float)Setting::value($key, '0.5');
+
+        return max(0.0, min(1.0, $value));
+    }
+
+    public function verify(
+        ?string $response,
+        string $scope,
+        ?string $remoteIp = null
+    ): bool
     {
         $response = trim((string)$response);
 
-        if(!$this->isConfigured() || $response === '') return false;
+        if(
+            !$this->isConfigured()
+            || $response === ''
+            || !in_array(
+                $scope,
+                [
+                    self::SCOPE_LOGIN,
+                    self::SCOPE_REGISTER,
+                ],
+                true
+            )
+        )
+        {
+            return false;
+        }
 
         if(!function_exists('curl_init'))
         {
-            Yii::error('PHP cURL extension is not available', 'recaptcha');
+            Yii::error(
+                'PHP cURL extension is not available',
+                'recaptcha'
+            );
             return false;
         }
 
@@ -63,18 +121,31 @@ final class RecaptchaService
         ];
 
         $remoteIp = trim((string)$remoteIp);
-        if($remoteIp !== '') $payload['remoteip'] = $remoteIp;
+
+        if($remoteIp !== '')
+        {
+            $payload['remoteip'] = $remoteIp;
+        }
 
         $curl = curl_init(self::VERIFY_URL);
+
         if($curl === false)
         {
-            Yii::error('Unable to initialize cURL', 'recaptcha');
+            Yii::error(
+                'Unable to initialize cURL',
+                'recaptcha'
+            );
             return false;
         }
 
         curl_setopt_array($curl, [
             CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => http_build_query($payload, '', '&', PHP_QUERY_RFC3986),
+            CURLOPT_POSTFIELDS => http_build_query(
+                $payload,
+                '',
+                '&',
+                PHP_QUERY_RFC3986
+            ),
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CONNECTTIMEOUT => 3,
             CURLOPT_TIMEOUT => 6,
@@ -89,33 +160,95 @@ final class RecaptchaService
 
         if($body === false)
         {
-            Yii::warning('reCAPTCHA request failed: '.curl_error($curl), 'recaptcha');
+            Yii::warning(
+                'reCAPTCHA request failed: '.curl_error($curl),
+                'recaptcha'
+            );
             curl_close($curl);
             return false;
         }
 
-        $httpCode = (int)curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
+        $httpCode = (int)curl_getinfo(
+            $curl,
+            CURLINFO_RESPONSE_CODE
+        );
+
         curl_close($curl);
 
         if($httpCode < 200 || $httpCode >= 300)
         {
-            Yii::warning('reCAPTCHA verification returned HTTP '.$httpCode, 'recaptcha');
+            Yii::warning(
+                'reCAPTCHA verification returned HTTP '
+                .$httpCode,
+                'recaptcha'
+            );
             return false;
         }
 
         $data = json_decode($body, true);
+
         if(!is_array($data))
         {
-            Yii::warning('Invalid reCAPTCHA response', 'recaptcha');
+            Yii::warning(
+                'Invalid reCAPTCHA response',
+                'recaptcha'
+            );
             return false;
         }
 
-        if(($data['success'] ?? false) !== true)
+        $success = ($data['success'] ?? false) === true;
+        $action = (string)($data['action'] ?? '');
+        $score = isset($data['score'])
+            ? (float)$data['score']
+            : null;
+        $threshold = $this->getThreshold($scope);
+
+        if(!$success)
         {
             Yii::info([
                 'event' => 'recaptcha.verify.failed',
+                'scope' => $scope,
                 'errorCodes' => $data['error-codes'] ?? [],
             ], 'recaptcha');
+            return false;
+        }
+
+        if($action !== $scope)
+        {
+            Yii::warning([
+                'event' => 'recaptcha.action_mismatch',
+                'expectedAction' => $scope,
+                'actualAction' => $action,
+                'score' => $score,
+                'hostname' => $data['hostname'] ?? null,
+            ], 'recaptcha');
+            return false;
+        }
+
+        if($score === null)
+        {
+            Yii::warning([
+                'event' => 'recaptcha.score_missing',
+                'scope' => $scope,
+                'hostname' => $data['hostname'] ?? null,
+            ], 'recaptcha');
+            return false;
+        }
+
+        $passed = $score >= $threshold;
+
+        Yii::info([
+            'event' => 'recaptcha.score',
+            'scope' => $scope,
+            'score' => $score,
+            'threshold' => $threshold,
+            'passed' => $passed,
+            'monitoringOnly' => $this->isMonitoringOnly(),
+            'hostname' => $data['hostname'] ?? null,
+        ], 'recaptcha');
+
+        if(!$passed && !$this->isMonitoringOnly())
+        {
             return false;
         }
 
@@ -124,6 +257,9 @@ final class RecaptchaService
 
     private function getSecretKey(): string
     {
-        return trim((string)Setting::value('recaptcha.secret_key', ''));
+        return trim((string)Setting::value(
+            'recaptcha.secret_key',
+            ''
+        ));
     }
 }

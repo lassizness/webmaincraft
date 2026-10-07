@@ -46,10 +46,11 @@ final class AuthController extends Controller
                 }
                 elseif(!$recaptcha->verify(
                     Yii::$app->request->post('g-recaptcha-response'),
+                    RecaptchaService::SCOPE_LOGIN,
                     Yii::$app->request->userIP
                 ))
                 {
-                    $model->addError('password', Yii::t('app', 'Подтвердите, что вы не робот.'));
+                    $model->addError('password', Yii::t('app', 'Не удалось пройти проверку защиты от ботов. Повторите попытку.'));
                     $captchaPassed = false;
                 }
             }
@@ -118,10 +119,11 @@ final class AuthController extends Controller
                 }
                 elseif(!$recaptcha->verify(
                     Yii::$app->request->post('g-recaptcha-response'),
+                    RecaptchaService::SCOPE_REGISTER,
                     Yii::$app->request->userIP
                 ))
                 {
-                    $model->addError('username', Yii::t('app', 'Подтвердите, что вы не робот.'));
+                    $model->addError('username', Yii::t('app', 'Не удалось пройти проверку защиты от ботов. Повторите попытку.'));
                     $captchaPassed = false;
                 }
             }
