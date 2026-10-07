@@ -257,4 +257,23 @@ return [
 
     'Email не подтверждён. Это не мешает входу, но рекомендуем подтвердить адрес для восстановления доступа и уведомлений.' => 'Email is not verified. This does not block sign-in, but we recommend confirming the address for account recovery and notifications.',
     'Отправить письмо повторно' => 'Resend email',
+
+    // P0 privilege lifecycle
+    'Статус заканчивается через {days} дн.' => 'Your status expires in {days} days.',
+    'Статус уже закончился. Его можно активировать снова.' => 'Your status has expired. You can activate it again.',
+    'Продлить' => 'Renew',
+    'Продление добавит новый срок к текущей дате окончания.' => 'Renewal adds the new period to the current expiration date.',
+    'Продлить на {days} дней · {price} кварков' => 'Renew for {days} days · {price} quarks',
+    'Подтвердить продление статуса?' => 'Confirm status renewal?',
+    'Статус продлён. Оставшийся срок сохранён.' => 'Status renewed. Your remaining time was preserved.',
+    'Игровой статус HiveTech скоро закончится' => 'Your HiveTech game status expires soon',
+    'Игровой статус HiveTech закончился' => 'Your HiveTech game status has expired',
+    'Статус скоро закончится' => 'Your status expires soon',
+    'Статус закончился' => 'Your status has expired',
+    'Привет, {username}. Статус {status} на сервере {server} закончится примерно через {days} дн.' => 'Hello, {username}. Your {status} status on {server} expires in about {days} days.',
+    'Продлить статус можно прямо в личном кабинете, оставшийся срок не сгорит.' => 'You can renew directly from your account. Remaining time will not be lost.',
+    'Привет, {username}. Срок статуса {status} на сервере {server} закончился.' => 'Hello, {username}. Your {status} status on {server} has expired.',
+    'Если статус ещё нужен, его можно снова активировать из личного кабинета.' => 'If you still need the status, you can activate it again from your account.',
+    'Открыть игровой статус' => 'Open game status',
+
 ];
