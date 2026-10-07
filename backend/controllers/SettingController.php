@@ -21,12 +21,15 @@ final class SettingController extends AdminController
         'recaptcha.register.enabled',
         'recaptcha.monitoring_only',
         'recaptcha.fail_open_on_service_error',
+        'payments.paypalych.enabled',
     ];
 
     private const TEXT_KEYS = [
         'site.title',
         'site.tagline',
         'recaptcha.site_key',
+        'payments.paypalych.shop_id',
+        'payments.paypalych.base_url',
     ];
 
     private const SCORE_KEYS = [
@@ -49,23 +52,22 @@ final class SettingController extends AdminController
         'recaptcha.register.threshold',
         'recaptcha.site_key',
         'recaptcha.secret_key',
+        'payments.paypalych.enabled',
+        'payments.paypalych.shop_id',
+        'payments.paypalych.base_url',
     ];
 
     public function actionIndex()
     {
         if(Yii::$app->request->isPost)
         {
-            $settings = (array)Yii::$app->request->post(
-                'settings',
-                []
-            );
+            $settings = (array)Yii::$app->request->post('settings', []);
 
             foreach(self::BOOLEAN_KEYS as $key)
             {
                 $this->saveSetting(
                     $key,
-                    isset($settings[$key])
-                    && (string)$settings[$key] === '1'
+                    isset($settings[$key]) && (string)$settings[$key] === '1'
                         ? '1'
                         : '0'
                 );
@@ -87,26 +89,12 @@ final class SettingController extends AdminController
                     trim((string)($settings[$key] ?? '0.5'))
                 );
 
-                $score = is_numeric($raw)
-                    ? (float)$raw
-                    : 0.5;
-
+                $score = is_numeric($raw) ? (float)$raw : 0.5;
                 $score = max(0.0, min(1.0, $score));
 
                 $this->saveSetting(
                     $key,
-                    rtrim(
-                        rtrim(
-                            number_format(
-                                $score,
-                                2,
-                                '.',
-                                ''
-                            ),
-                            '0'
-                        ),
-                        '.'
-                    )
+                    rtrim(rtrim(number_format($score, 2, '.', ''), '0'), '.')
                 );
             }
 
@@ -114,29 +102,16 @@ final class SettingController extends AdminController
                 (string)($settings['recaptcha.secret_key'] ?? '')
             );
 
-            if(
-                Yii::$app->request->post(
-                    'recaptcha_secret_clear'
-                ) === '1'
-            )
+            if(Yii::$app->request->post('recaptcha_secret_clear') === '1')
             {
-                $this->saveSetting(
-                    'recaptcha.secret_key',
-                    ''
-                );
+                $this->saveSetting('recaptcha.secret_key', '');
             }
             elseif($newSecret !== '')
             {
-                $this->saveSetting(
-                    'recaptcha.secret_key',
-                    $newSecret
-                );
+                $this->saveSetting('recaptcha.secret_key', $newSecret);
             }
 
-            Yii::$app->session->setFlash(
-                'success',
-                'Настройки сохранены.'
-            );
+            Yii::$app->session->setFlash('success', 'Настройки сохранены.');
 
             return $this->refresh();
         }
@@ -154,25 +129,17 @@ final class SettingController extends AdminController
                 'recaptcha.fail_open_on_service_error' => '1',
                 'recaptcha.login.threshold',
                 'recaptcha.register.threshold' => '0.5',
+                'payments.paypalych.base_url' => 'https://pally.info/api/v1',
                 default => '',
             };
 
-            $settings[$key] = Setting::value(
-                $key,
-                $default
-            );
+            $settings[$key] = Setting::value($key, $default);
         }
 
-        return $this->render(
-            'index',
-            ['settings' => $settings]
-        );
+        return $this->render('index', ['settings' => $settings]);
     }
 
-    private function saveSetting(
-        string $key,
-        string $value
-    ): void
+    private function saveSetting(string $key, string $value): void
     {
         $model = Setting::findOne(['key' => $key]);
 
