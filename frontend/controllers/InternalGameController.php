@@ -11,7 +11,6 @@ use common\services\{
 };
 use Yii;
 use yii\filters\VerbFilter;
-use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\UnauthorizedHttpException;
 use yii\web\Response;
@@ -119,8 +118,8 @@ final class InternalGameController extends Controller
             || $limit < 1
         )
         {
-            throw new BadRequestHttpException(
-                'Invalid revision or limit.'
+            return $this->badRequest(
+                'invalid_revision_or_limit'
             );
         }
 
@@ -150,8 +149,8 @@ final class InternalGameController extends Controller
             )
         )
         {
-            throw new BadRequestHttpException(
-                'Invalid UUID.'
+            return $this->badRequest(
+                'invalid_uuid'
             );
         }
 
@@ -174,8 +173,8 @@ final class InternalGameController extends Controller
 
         if(!is_array($payload))
         {
-            throw new BadRequestHttpException(
-                'Invalid JSON body.'
+            return $this->badRequest(
+                'invalid_json'
             );
         }
 
@@ -192,6 +191,19 @@ final class InternalGameController extends Controller
                 (new ModerationBridgeApiService())
                     ->currentRevision(),
         ]);
+    }
+
+    private function badRequest(
+        string $error
+    ): array
+    {
+        Yii::$app->response->statusCode = 400;
+
+        return [
+            'api_version' =>
+                ModerationBridgeApiService::API_VERSION,
+            'error' => $error,
+        ];
     }
 
     private function envelope(
