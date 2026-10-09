@@ -7,7 +7,8 @@ namespace frontend\controllers;
 use common\models\ServerModerationBridge;
 use common\services\{
     ModerationBridgeApiService,
-    ServerModerationBridgeService
+    ServerModerationBridgeService,
+    TelemetryApiService
 };
 use Yii;
 use yii\filters\VerbFilter;
@@ -31,6 +32,8 @@ final class InternalGameController extends Controller
                     'moderation-changes' => ['GET'],
                     'moderation-player' => ['GET'],
                     'bridge-heartbeat' => ['POST'],
+                    'telemetry-events' => ['POST'],
+                    'telemetry-heartbeat' => ['POST'],
                 ],
             ],
         ];
@@ -241,6 +244,87 @@ final class InternalGameController extends Controller
                 (new ModerationBridgeApiService())
                     ->currentRevision(),
         ]);
+    }
+
+    public function actionTelemetryEvents(): array
+    {
+        $rawBody = Yii::$app->request->rawBody;
+
+        if(strlen($rawBody) > 2097152)
+        {
+            Yii::$app->response->statusCode = 413;
+
+            return [
+                'api_version' =>
+                    TelemetryApiService::API_VERSION,
+                'error' => 'payload_too_large',
+            ];
+        }
+
+        $payload = json_decode(
+            $rawBody,
+            true
+        );
+
+        if(!is_array($payload))
+        {
+            return $this->badRequest(
+                'invalid_json'
+            );
+        }
+
+        try
+        {
+            $result =
+                (new TelemetryApiService())
+                    ->ingest(
+                        (int)$this->bridge->server_id,
+                        $payload,
+                        Yii::$app->request->userIP
+                    );
+        }
+        catch(\InvalidArgumentException $e)
+        {
+            return $this->badRequest(
+                $e->getMessage()
+            );
+        }
+
+        return $this->envelope($result);
+    }
+
+    public function actionTelemetryHeartbeat(): array
+    {
+        $payload = json_decode(
+            Yii::$app->request->rawBody,
+            true
+        );
+
+        if(!is_array($payload))
+        {
+            return $this->badRequest(
+                'invalid_json'
+            );
+        }
+
+        try
+        {
+            $result =
+                (new TelemetryApiService())
+                    ->heartbeat(
+                        (int)$this->bridge->server_id,
+                        $payload,
+                        Yii::$app->request->userIP
+                    );
+        }
+        catch(\InvalidArgumentException $e)
+        {
+            return $this->badRequest(
+                $e->getMessage()
+            );
+        }
+
+        return $this->envelope($result);
     }
 
     private function badRequest(
