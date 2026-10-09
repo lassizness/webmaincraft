@@ -61,7 +61,10 @@ final class RatingsController extends Controller
                 : [],
             'summary' => $service->summary((int)$user->id),
             'rank' => (bool)$settings->public_ranking
-                ? $service->rankForUser((int)$user->id)
+                ? $service->rankForUser(
+                    (int)$user->id,
+                    true
+                )
                 : null,
         ]);
     }
