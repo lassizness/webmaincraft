@@ -100,10 +100,57 @@ final class m261009_000005_add_telemetry_api_runtime extends Migration
             'CASCADE',
             'CASCADE'
         );
+
+        $this->createTable('{{%achievement_reward_deliveries}}', [
+            'id' => $this->bigPrimaryKey()->unsigned(),
+            'unlock_id' => $this->bigInteger()->unsigned()->notNull(),
+            'reward_id' => $this->bigInteger()->unsigned()->notNull(),
+            'status' => $this->string(16)->notNull()->defaultValue('pending'),
+            'attempts' => $this->integer()->unsigned()->notNull()->defaultValue(0),
+            'available_at' => $this->dateTime()->null(),
+            'last_error' => $this->text()->null(),
+            'created_at' => $this->dateTime()->notNull(),
+            'delivered_at' => $this->dateTime()->null(),
+            'updated_at' => $this->dateTime()->notNull(),
+        ], $this->options);
+
+        $this->createIndex(
+            'uq_achievement_reward_delivery',
+            '{{%achievement_reward_deliveries}}',
+            ['unlock_id', 'reward_id'],
+            true
+        );
+
+        $this->createIndex(
+            'idx_achievement_reward_delivery_queue',
+            '{{%achievement_reward_deliveries}}',
+            ['status', 'available_at', 'attempts', 'id']
+        );
+
+        $this->addForeignKey(
+            'fk_achievement_reward_delivery_unlock',
+            '{{%achievement_reward_deliveries}}',
+            'unlock_id',
+            '{{%achievement_unlocks}}',
+            'id',
+            'CASCADE',
+            'CASCADE'
+        );
+
+        $this->addForeignKey(
+            'fk_achievement_reward_delivery_reward',
+            '{{%achievement_reward_deliveries}}',
+            'reward_id',
+            '{{%achievement_rewards}}',
+            'id',
+            'CASCADE',
+            'CASCADE'
+        );
     }
 
     public function safeDown(): void
     {
+        $this->dropTable('{{%achievement_reward_deliveries}}');
         $this->dropTable('{{%server_telemetry_status}}');
         $this->dropTable('{{%player_discoveries}}');
 
