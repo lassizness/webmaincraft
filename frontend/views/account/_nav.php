@@ -44,4 +44,10 @@ use yii\helpers\Url;
     <a href="<?= Url::to(['/support/index']) ?>">
         <?= Yii::t('ui', 'Поддержка') ?>
     </a>
+
+    <?php if(Yii::$app->user->can('admin')): ?>
+        <a href="/admin/">
+            <?= Yii::t('ui', 'Админ-панель') ?>
+        </a>
+    <?php endif; ?>
 </aside>
