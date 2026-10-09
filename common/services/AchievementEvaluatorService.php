@@ -114,6 +114,55 @@ final class AchievementEvaluatorService
 
             if($inserted > 0)
             {
+                $unlockId = (int)Yii::$app->db
+                    ->getLastInsertID();
+
+                if($achievement->rewards)
+                {
+                    $nowString = date('Y-m-d H:i:s');
+
+                    foreach($achievement->rewards as $reward)
+                    {
+                        Yii::$app->db
+                            ->createCommand(
+                                '
+                                INSERT IGNORE INTO {{%achievement_reward_deliveries}}
+                                (
+                                    unlock_id,
+                                    reward_id,
+                                    status,
+                                    attempts,
+                                    available_at,
+                                    last_error,
+                                    created_at,
+                                    delivered_at,
+                                    updated_at
+                                )
+                                VALUES
+                                (
+                                    :unlock_id,
+                                    :reward_id,
+                                    :status,
+                                    0,
+                                    NULL,
+                                    NULL,
+                                    :created_at,
+                                    NULL,
+                                    :updated_at
+                                )
+                                ',
+                                [
+                                    ':unlock_id' => $unlockId,
+                                    ':reward_id' => (int)$reward->id,
+                                    ':status' => 'pending',
+                                    ':created_at' => $nowString,
+                                    ':updated_at' => $nowString,
+                                ]
+                            )
+                            ->execute();
+                    }
+                }
+
                 $unlocked[] = [
                     'id' => (int)$achievement->id,
                     'code' => (string)$achievement->code,
