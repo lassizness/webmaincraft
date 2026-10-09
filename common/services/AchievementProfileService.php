@@ -112,7 +112,10 @@ final class AchievementProfileService
         ];
     }
 
-    public function rankForUser(int $userId): ?int
+    public function rankForUser(
+        int $userId,
+        bool $respectPrivacy = false
+    ): ?int
     {
         $score = (int)(new Query())
             ->from('{{%achievement_unlocks}}')
@@ -125,12 +128,32 @@ final class AchievementProfileService
         }
 
         $scores = (new Query())
-            ->from('{{%achievement_unlocks}}')
+            ->from(['au' => '{{%achievement_unlocks}}'])
+            ->innerJoin(
+                ['u' => '{{%users}}'],
+                'u.id = au.user_id'
+            )
+            ->leftJoin(
+                ['pps' => '{{%player_profile_settings}}'],
+                'pps.user_id = u.id'
+            )
+            ->where(['u.status' => User::STATUS_ACTIVE]);
+
+        if($respectPrivacy)
+        {
+            $scores->andWhere([
+                'or',
+                ['pps.public_ranking' => 1],
+                ['pps.public_ranking' => null],
+            ]);
+        }
+
+        $scores
             ->select([
-                'user_id',
-                'score' => 'SUM(score_awarded)',
+                'user_id' => 'u.id',
+                'score' => 'SUM(au.score_awarded)',
             ])
-            ->groupBy('user_id');
+            ->groupBy('u.id');
 
         $higher = (new Query())
             ->from(['ranking' => $scores])
