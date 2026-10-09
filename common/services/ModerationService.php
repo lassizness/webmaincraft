@@ -422,6 +422,30 @@ final class ModerationService
         ModerationAction $action
     ): array
     {
+        DeliveryQueue::updateAll(
+            [
+                'status' => 'done',
+                'processed_at' => date('Y-m-d H:i:s'),
+                'last_error' =>
+                    'Superseded by moderation state change',
+            ],
+            [
+                'and',
+                [
+                    'moderation_action_id' =>
+                        $action->id,
+                    'moderation_operation' =>
+                        'apply',
+                ],
+                [
+                    'status' => [
+                        'pending',
+                        'failed',
+                    ],
+                ],
+            ]
+        );
+
         $user = User::findOne($action->user_id);
 
         if(!$user)
@@ -508,6 +532,12 @@ final class ModerationService
                     $user,
                     $action
                 ),
+                'moderation_action_id' =>
+                    $action->id,
+                'moderation_operation' =>
+                    $reverse
+                        ? 'reverse'
+                        : 'apply',
                 'status' => 'pending',
                 'attempts' => 0,
                 'created_at' => date('Y-m-d H:i:s'),
