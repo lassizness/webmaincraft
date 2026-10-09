@@ -84,17 +84,6 @@ final class TelemetryApiService
                     $userCache
                 );
 
-                if(
-                    !$user
-                    && (
-                        $event['username'] !== null
-                        || $event['player_uuid'] !== null
-                    )
-                )
-                {
-                    $unresolved++;
-                }
-
                 $inserted = $db
                     ->createCommand(
                         '
@@ -171,6 +160,17 @@ final class TelemetryApiService
                 }
 
                 $accepted++;
+
+                if(
+                    !$user
+                    && (
+                        $event['username'] !== null
+                        || $event['player_uuid'] !== null
+                    )
+                )
+                {
+                    $unresolved++;
+                }
 
                 if(
                     $latestEventAt === null
