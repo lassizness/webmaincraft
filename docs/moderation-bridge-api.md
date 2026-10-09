@@ -74,6 +74,7 @@ Operations:
 
 - `apply`: a ban/mute was created.
 - `reverse`: a ban/mute was revoked or expired.
+- `noop`: historical create event is already inactive and must not be replayed.
 - `refresh`: reserved for future moderation event types.
 
 Example:
@@ -108,6 +109,8 @@ Example:
   ]
 }
 ```
+
+The client must ignore `noop` events and should apply `apply` only while the returned action is still active and not expired.
 
 The client should persist the returned `revision`. When `has_more=true`,
 request the next page immediately using the returned revision.
