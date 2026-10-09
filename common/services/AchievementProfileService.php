@@ -140,9 +140,12 @@ final class AchievementProfileService
         return (int)$higher + 1;
     }
 
-    public function leaderboard(int $limit = 100): array
+    public function leaderboard(
+        int $limit = 100,
+        bool $respectPrivacy = true
+    ): array
     {
-        $scores = (new Query())
+        $query = (new Query())
             ->from(['au' => '{{%achievement_unlocks}}'])
             ->innerJoin(
                 ['u' => '{{%users}}'],
@@ -152,12 +155,18 @@ final class AchievementProfileService
                 ['pps' => '{{%player_profile_settings}}'],
                 'pps.user_id = u.id'
             )
-            ->where(['u.status' => User::STATUS_ACTIVE])
-            ->andWhere([
+            ->where(['u.status' => User::STATUS_ACTIVE]);
+
+        if($respectPrivacy)
+        {
+            $query->andWhere([
                 'or',
                 ['pps.public_ranking' => 1],
                 ['pps.public_ranking' => null],
-            ])
+            ]);
+        }
+
+        $scores = $query
             ->select([
                 'user_id' => 'u.id',
                 'username' => 'u.username',
