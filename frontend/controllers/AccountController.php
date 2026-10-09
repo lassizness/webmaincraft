@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace frontend\controllers;
 
 use common\models\{
+    Setting,
     ShopPurchase,
     User,
     UserToken,
@@ -12,6 +13,7 @@ use common\models\{
     WebSession
 };
 use common\services\{
+    AchievementProfileService,
     AuditService,
     SessionTracker,
     TokenService,
@@ -62,6 +64,55 @@ final class AccountController extends Controller
                     'id' => SORT_ASC,
                 ])
                 ->all(),
+        ]);
+    }
+
+    public function actionAchievements()
+    {
+        /** @var User $user */
+        $user = Yii::$app->user->identity;
+        $service = new AchievementProfileService();
+        $profileSettings = $service->profileSettings((int)$user->id);
+
+        if(Yii::$app->request->isPost)
+        {
+            $profileSettings->public_achievements =
+                Yii::$app->request->post('public_achievements') === '1'
+                    ? 1
+                    : 0;
+            $profileSettings->public_playtime =
+                Yii::$app->request->post('public_playtime') === '1'
+                    ? 1
+                    : 0;
+            $profileSettings->public_ranking =
+                Yii::$app->request->post('public_ranking') === '1'
+                    ? 1
+                    : 0;
+            $profileSettings->updated_at = date('Y-m-d H:i:s');
+            $profileSettings->save(false);
+
+            Yii::$app->session->setFlash(
+                'success',
+                Yii::t('ui', 'Настройки публичного профиля сохранены.')
+            );
+
+            return $this->redirect(['achievements']);
+        }
+
+        return $this->render('achievements', [
+            'user' => $user,
+            'catalog' => $service->catalog(),
+            'unlocks' => $service->unlocksForUser((int)$user->id),
+            'progress' => $service->progressForUser((int)$user->id),
+            'stats' => $service->statsForUser((int)$user->id),
+            'summary' => $service->summary((int)$user->id),
+            'rank' => $service->rankForUser((int)$user->id),
+            'profileSettings' => $profileSettings,
+            'publicRatingsEnabled' =>
+                (string)Setting::value(
+                    'ratings.public_enabled',
+                    '0'
+                ) === '1',
         ]);
     }
 
