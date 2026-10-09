@@ -13,6 +13,14 @@ final class Server extends ActiveRecord
         return '{{%servers}}';
     }
 
+    public function getModerationBridge()
+    {
+        return $this->hasOne(
+            ServerModerationBridge::class,
+            ['server_id' => 'id']
+        );
+    }
+
     public function rules(): array
     {
         return [

@@ -35,6 +35,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`audit_log` TO 'hivetech
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`rbac_role_meta` TO 'hivetech_web'@'10.140.0.141';
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`moderation_actions` TO 'hivetech_web'@'10.140.0.141';
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`moderation_action_history` TO 'hivetech_web'@'10.140.0.141';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`server_moderation_bridge` TO 'hivetech_web'@'10.140.0.141';
 GRANT SELECT ON `hivetech_core`.`migration` TO 'hivetech_web'@'10.140.0.141';
 GRANT SELECT, UPDATE (`banned`) ON `hivetech_core`.`hwids` TO 'hivetech_web'@'10.140.0.141';
 GRANT SELECT ON `hivetech_core`.`hwidLog` TO 'hivetech_web'@'10.140.0.141';

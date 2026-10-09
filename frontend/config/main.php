@@ -88,6 +88,16 @@ return [
                 'vote/<service:[a-z0-9_-]+>/callback' => 'vote/callback',
                 'vote/<service:[a-z0-9_-]+>/<username:[A-Za-z0-9_]{3,16}>' => 'vote/go',
                 'servers' => 'server/index',
+
+                'GET internal/game/moderation/snapshot' =>
+                    'internal-game/moderation-snapshot',
+                'GET internal/game/moderation/changes' =>
+                    'internal-game/moderation-changes',
+                'GET internal/game/moderation/player/<uuid:[0-9A-Fa-f\\-]{36}>' =>
+                    'internal-game/moderation-player',
+                'POST internal/game/bridge/heartbeat' =>
+                    'internal-game/bridge-heartbeat',
+
                 'forum/sso' => 'forum/sso',
                 'page/<slug:[a-z0-9-]+>' => 'page/view',
             ],

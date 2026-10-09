@@ -33,6 +33,39 @@ $this->title = 'Серверы';
         'port',
         'rcon_env_key',
         [
+            'label' => 'Bridge',
+            'format' => 'raw',
+            'value' => static function($model): string {
+                $bridge = $model->moderationBridge;
+
+                if(!$bridge)
+                {
+                    return Html::a(
+                        'Не настроен',
+                        ['bridge', 'id' => $model->id],
+                        ['class' => 'badge bg-secondary text-decoration-none']
+                    );
+                }
+
+                $online = (int)$bridge->enabled === 1
+                    && $bridge->isOnline();
+
+                $label = !(int)$bridge->enabled
+                    ? 'Отключён'
+                    : ($online ? 'Online' : 'Offline');
+
+                $class = !(int)$bridge->enabled
+                    ? 'bg-secondary'
+                    : ($online ? 'bg-success' : 'bg-danger');
+
+                return Html::a(
+                    $label,
+                    ['bridge', 'id' => $model->id],
+                    ['class' => 'badge '.$class.' text-decoration-none']
+                );
+            },
+        ],
+        [
             'attribute' => 'enabled',
             'format' => 'raw',
             'value' => static fn($model): string => Html::tag(
@@ -47,13 +80,19 @@ $this->title = 'Серверы';
         'sort',
         [
             'class' => yii\grid\ActionColumn::class,
-            'template' => '{update}',
+            'template' => '{update} {bridge}',
             'buttons' => [
                 'update' => static fn($url, $model): string =>
                     Html::a(
                         'Изменить',
                         ['edit', 'id' => $model->id],
-                        ['class' => 'btn btn-sm btn-outline-primary']
+                        ['class' => 'btn btn-sm btn-outline-primary me-1']
+                    ),
+                'bridge' => static fn($url, $model): string =>
+                    Html::a(
+                        'Bridge',
+                        ['bridge', 'id' => $model->id],
+                        ['class' => 'btn btn-sm btn-outline-secondary']
                     ),
             ],
         ],
