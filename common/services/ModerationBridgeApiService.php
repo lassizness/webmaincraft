@@ -311,7 +311,9 @@ final class ModerationBridgeApiService
             (string)$row['event_type'];
 
         $operation = match($eventType) {
-            'created' => 'apply',
+            'created' => $this->isEffective($row)
+                ? 'apply'
+                : 'noop',
             'revoked', 'expired' => 'reverse',
             default => 'refresh',
         };
@@ -321,6 +323,43 @@ final class ModerationBridgeApiService
             'operation' => $operation,
             'event_type' => $eventType,
         ] + $this->serializeAction($row);
+    }
+
+    private function isEffective(
+        array $row
+    ): bool
+    {
+        if(
+            (string)($row['status'] ?? '')
+                !== ModerationAction::STATUS_ACTIVE
+        )
+        {
+            return false;
+        }
+
+        $startsAt = strtotime(
+            (string)($row['starts_at'] ?? '')
+        );
+
+        if(
+            $startsAt !== false
+            && $startsAt > time()
+        )
+        {
+            return false;
+        }
+
+        if(empty($row['expires_at']))
+        {
+            return true;
+        }
+
+        $expiresAt = strtotime(
+            (string)$row['expires_at']
+        );
+
+        return $expiresAt === false
+            || $expiresAt > time();
     }
 
     private function isoDate(
