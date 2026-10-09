@@ -69,6 +69,16 @@ final class AccountController extends Controller
 
     public function actionAchievements()
     {
+        if(
+            (string)Setting::value(
+                'achievements.enabled',
+                '1'
+            ) !== '1'
+        )
+        {
+            throw new \yii\web\NotFoundHttpException();
+        }
+
         /** @var User $user */
         $user = Yii::$app->user->identity;
         $service = new AchievementProfileService();
