@@ -61,4 +61,5 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`achievement_rewards` TO
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`achievement_progress` TO 'hivetech_web'@'10.140.0.141';
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`achievement_unlocks` TO 'hivetech_web'@'10.140.0.141';
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`player_profile_settings` TO 'hivetech_web'@'10.140.0.141';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`achievement_reward_deliveries` TO 'hivetech_web'@'10.140.0.141';
 FLUSH PRIVILEGES;
