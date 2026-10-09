@@ -208,8 +208,12 @@ foreach($rewards as $reward)
         <div>
             <h2 class="admin-panel-title">Награды</h2>
             <div class="admin-panel-subtitle">
-                Исполнение наград подключим вместе с achievement evaluator.
-                Сейчас редактор уже сохраняет контракт награды.
+                Награды выполняются отдельным worker после unlock, поэтому ошибка
+                RCON или привилегии не откатывает принятое игровое событие.
+                Payload задаётся JSON: wallet {"amount":500},
+                rcon {"server_id":1,"command":"give {username} ..."},
+                permission {"name":"permission.name"},
+                privilege {"server_id":1,"group_id":1,"days":30}.
             </div>
         </div>
     </div>
