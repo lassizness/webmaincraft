@@ -41,6 +41,27 @@ $moderationStatusLabels = [
     ModerationAction::STATUS_EXPIRED => 'Истекло',
     ModerationAction::STATUS_REVOKED => 'Снято',
 ];
+
+$operatorStatusLabels = [
+    'pending' => 'В очереди',
+    'processing' => 'Выполняется',
+    'done' => 'Выполнено',
+    'failed' => 'Ошибка',
+];
+
+$operatorStatusClasses = [
+    'pending' => 'bg-secondary',
+    'processing' => 'bg-info',
+    'done' => 'bg-success',
+    'failed' => 'bg-danger',
+];
+
+$serverOptions = [];
+foreach($minecraftServers as $server)
+{
+    $serverOptions[(int)$server->id] =
+        $server->name . ' (' . $server->code . ')';
+}
 ?>
 
 <div class="admin-section-head">
@@ -275,6 +296,168 @@ $moderationStatusLabels = [
         </section>
     </div>
 </div>
+
+<?php if(Yii::$app->user->can('manageMinecraftOperators')): ?>
+    <section class="admin-panel mt-3">
+        <div class="admin-section-head">
+            <div>
+                <h2 class="admin-panel-title">
+                    Minecraft OP
+                </h2>
+                <div class="admin-panel-subtitle">
+                    Выдача и снятие операторских прав через RCON.
+                    Роль администратора сайта и Minecraft OP не связаны автоматически.
+                </div>
+            </div>
+        </div>
+
+        <?php if(!$minecraftServers): ?>
+            <div class="alert alert-warning mb-0">
+                Нет включённых Minecraft-серверов.
+            </div>
+        <?php else: ?>
+            <?= Html::beginForm(
+                [
+                    '/user/minecraft-operator',
+                    'id' => $model->id,
+                ],
+                'post',
+                [
+                    'class' =>
+                        'd-flex gap-2 flex-wrap align-items-end mb-3',
+                ]
+            ) ?>
+                <div style="min-width:260px">
+                    <label class="form-label">
+                        Сервер
+                    </label>
+                    <?= Html::dropDownList(
+                        'server_id',
+                        array_key_first($serverOptions),
+                        $serverOptions,
+                        [
+                            'class' => 'form-select',
+                            'required' => true,
+                        ]
+                    ) ?>
+                </div>
+
+                <?= Html::submitButton(
+                    'Выдать OP',
+                    [
+                        'class' => 'btn btn-outline-primary',
+                        'name' => 'operation',
+                        'value' => 'grant',
+                        'data-confirm' =>
+                            'Выдать игроку '
+                            . $model->username
+                            . ' полные операторские права Minecraft?',
+                    ]
+                ) ?>
+
+                <?= Html::submitButton(
+                    'Снять OP',
+                    [
+                        'class' => 'btn btn-outline-danger',
+                        'name' => 'operation',
+                        'value' => 'revoke',
+                        'data-confirm' =>
+                            'Снять OP у игрока '
+                            . $model->username
+                            . '?',
+                    ]
+                ) ?>
+            <?= Html::endForm() ?>
+
+            <div class="admin-muted small mb-3">
+                Команда выполняется через Delivery Queue.
+                Текущее содержимое ops.json напрямую из веб-панели не читается,
+                поэтому ниже показана история отправленных OP/deOP-команд.
+            </div>
+
+            <?php if(!$operatorDeliveries): ?>
+                <div class="admin-muted">
+                    OP-операций для этого игрока ещё не было.
+                </div>
+            <?php else: ?>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Сервер</th>
+                            <th>Операция</th>
+                            <th>Статус</th>
+                            <th>Попытки</th>
+                            <th>Создано</th>
+                            <th>Ошибка</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach($operatorDeliveries as $delivery): ?>
+                            <tr>
+                                <td>
+                                    #<?= (int)$delivery->id ?>
+                                </td>
+                                <td>
+                                    <?= Html::encode(
+                                        $delivery->server?->name ?: '—'
+                                    ) ?>
+                                </td>
+                                <td>
+                                    <code>
+                                        <?= (string)$delivery->payload
+                                            === 'op {username}'
+                                                ? 'OP'
+                                                : 'deOP'
+                                        ?>
+                                    </code>
+                                </td>
+                                <td>
+                                    <span class="badge <?= $operatorStatusClasses[$delivery->status] ?? 'bg-secondary' ?>">
+                                        <?= Html::encode(
+                                            $operatorStatusLabels[$delivery->status]
+                                            ?? $delivery->status
+                                        ) ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <?= (int)$delivery->attempts ?>
+                                </td>
+                                <td>
+                                    <?= Html::encode(
+                                        (string)$delivery->created_at
+                                    ) ?>
+                                </td>
+                                <td>
+                                    <?= $delivery->last_error
+                                        ? Html::tag(
+                                            'code',
+                                            Html::encode(
+                                                mb_substr(
+                                                    (string)$delivery->last_error,
+                                                    0,
+                                                    160
+                                                )
+                                            ),
+                                            [
+                                                'class' => 'small',
+                                                'title' =>
+                                                    (string)$delivery->last_error,
+                                            ]
+                                        )
+                                        : '—'
+                                    ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+        <?php endif; ?>
+    </section>
+<?php endif; ?>
 
 <?php if(Yii::$app->user->can('viewModeration')): ?>
     <section class="admin-panel mt-3">
