@@ -267,6 +267,14 @@ final class m261009_000001_add_rbac_moderation extends Migration
             );
         }
 
+        $this->delete('{{%auth_item_child}}', [
+            'parent' => 'moderator',
+            'child' => [
+                'manageContent',
+                'manageSupport',
+            ],
+        ]);
+
         $roleChildren = [
             'moderator' => [
                 'viewUsers',
@@ -300,6 +308,8 @@ final class m261009_000001_add_rbac_moderation extends Migration
                 'manageContent',
             ],
             'admin' => [
+                'manageContent',
+                'manageSupport',
                 'viewModeration',
                 'createGlobalMute',
                 'createGlobalBan',
@@ -377,6 +387,12 @@ final class m261009_000001_add_rbac_moderation extends Migration
         {
             $this->dropTable('{{%rbac_role_meta}}');
         }
+
+        $this->execute(
+            'INSERT IGNORE INTO {{%auth_item_child}} (parent,child) '
+            . 'VALUES (\'moderator\',\'manageContent\'),'
+            . '(\'moderator\',\'manageSupport\')'
+        );
 
         $this->delete('{{%auth_item}}', [
             'name' => [
