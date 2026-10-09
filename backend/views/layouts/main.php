@@ -27,6 +27,10 @@ $icon = static function(string $name): string {
         'hwid' => '<rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9 1v4M15 1v4M9 19v4M15 19v4M1 9h4M1 15h4M19 9h4M19 15h4"/><rect x="9" y="9" width="6" height="6"/>',
         'servers' => '<rect x="3" y="4" width="18" height="6" rx="2"/><rect x="3" y="14" width="18" height="6" rx="2"/><path d="M7 7h.01M7 17h.01"/>',
         'counter' => '<path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/>',
+        'telemetry' => '<path d="M3 12h4l2-6 4 12 2-6h6"/><path d="M3 20h18"/>',
+        'achievement' => '<circle cx="12" cy="8" r="5"/><path d="m9 13-2 8 5-3 5 3-2-8"/>',
+        'season' => '<circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16"/>',
+        'rating' => '<path d="M5 20V10h4v10M10 20V4h4v16M15 20v-7h4v7"/>',
         'settings' => '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21h-4v-.1A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3v-4h.1A1.7 1.7 0 0 0 4.6 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3h4v.1A1.7 1.7 0 0 0 15.4 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.1.37.3.71.6 1 .3.28.68.42 1.1.4h.1v4h-.1a1.7 1.7 0 0 0-1.7.6Z"/>',
         'audit' => '<path d="M4 3h16v18H4z"/><path d="M8 8h8M8 12h8M8 16h5"/>',
         'external' => '<path d="M14 3h7v7M10 14 21 3"/><path d="M21 14v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h6"/>',
@@ -66,6 +70,15 @@ $navGroups = [
             ['promo/index', 'Промокоды', 'manageShop', 'promo', ['promo']],
             ['payment/index', 'Платежи', 'managePayments', 'payments', ['payment']],
             ['voting/index', 'Голосования', 'manageShop', 'vote', ['voting']],
+        ],
+    ],
+    [
+        'label' => 'Игровая система',
+        'items' => [
+            ['telemetry/index', 'Игровая аналитика', 'viewTelemetry', 'telemetry', ['telemetry']],
+            ['achievement/index', 'Достижения', 'manageAchievements', 'achievement', ['achievement']],
+            ['season/index', 'Сезоны', 'manageSeasons', 'season', ['season']],
+            ['rating/index', 'Рейтинги', 'manageRatings', 'rating', ['rating']],
         ],
     ],
     [
