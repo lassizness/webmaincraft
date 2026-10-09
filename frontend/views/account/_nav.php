@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Setting;
 use yii\helpers\Url;
 
 ?>
@@ -40,6 +41,12 @@ use yii\helpers\Url;
     <a href="<?= Url::to(['/vote/index']) ?>">
         <?= Yii::t('ui', 'Голосование') ?>
     </a>
+
+    <?php if((string)Setting::value('achievements.enabled', '1') === '1'): ?>
+        <a href="<?= Url::to(['/account/achievements']) ?>">
+            <?= Yii::t('ui', 'Достижения') ?>
+        </a>
+    <?php endif; ?>
 
     <a href="<?= Url::to(['/support/index']) ?>">
         <?= Yii::t('ui', 'Поддержка') ?>
