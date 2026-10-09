@@ -43,6 +43,15 @@ final class InternalGameController extends Controller
         Yii::$app->response->format =
             Response::FORMAT_JSON;
 
+        Yii::$app->response->headers->set(
+            'Cache-Control',
+            'no-store, private'
+        );
+        Yii::$app->response->headers->set(
+            'X-Content-Type-Options',
+            'nosniff'
+        );
+
         if(!parent::beforeAction($action))
         {
             return false;
@@ -175,6 +184,47 @@ final class InternalGameController extends Controller
         {
             return $this->badRequest(
                 'invalid_json'
+            );
+        }
+
+        foreach([
+            'bridge_version',
+            'minecraft_version',
+            'revision',
+            'cached_actions',
+            'online_players',
+        ] as $required)
+        {
+            if(!array_key_exists($required, $payload))
+            {
+                return $this->badRequest(
+                    'missing_' . $required
+                );
+            }
+        }
+
+        if(
+            trim((string)$payload['bridge_version']) === ''
+            || trim((string)$payload['minecraft_version']) === ''
+            || filter_var(
+                $payload['revision'],
+                FILTER_VALIDATE_INT
+            ) === false
+            || (int)$payload['revision'] < 0
+            || filter_var(
+                $payload['cached_actions'],
+                FILTER_VALIDATE_INT
+            ) === false
+            || (int)$payload['cached_actions'] < 0
+            || filter_var(
+                $payload['online_players'],
+                FILTER_VALIDATE_INT
+            ) === false
+            || (int)$payload['online_players'] < 0
+        )
+        {
+            return $this->badRequest(
+                'invalid_heartbeat'
             );
         }
 
