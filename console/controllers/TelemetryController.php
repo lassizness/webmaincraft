@@ -31,19 +31,44 @@ final class TelemetryController extends Controller
 
     public function actionCleanup(
         int $retentionDays = 90,
-        int $limit = 10000
+        int $batchSize = 10000,
+        int $maxBatches = 20
     ): int
     {
-        $count =
-            (new TelemetryMaintenanceService())
-                ->cleanupRawEvents(
+        $batchSize = max(
+            100,
+            min(50000, $batchSize)
+        );
+
+        $maxBatches = max(
+            1,
+            min(100, $maxBatches)
+        );
+
+        $service =
+            new TelemetryMaintenanceService();
+
+        $total = 0;
+
+        for($i = 0; $i < $maxBatches; $i++)
+        {
+            $count =
+                $service->cleanupRawEvents(
                     $retentionDays,
-                    $limit
+                    $batchSize
                 );
+
+            $total += $count;
+
+            if($count < $batchSize)
+            {
+                break;
+            }
+        }
 
         $this->stdout(
             'Deleted raw telemetry events: '
-            . $count
+            . $total
             . PHP_EOL
         );
 
