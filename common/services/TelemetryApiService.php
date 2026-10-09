@@ -988,29 +988,52 @@ final class TelemetryApiService
         int $serverId
     ): ServerTelemetryStatus
     {
+        $now = date('Y-m-d H:i:s');
+
+        Yii::$app->db
+            ->createCommand(
+                '
+                INSERT IGNORE INTO {{%server_telemetry_status}}
+                (
+                    server_id,
+                    online_players,
+                    queue_size,
+                    buffered_events,
+                    events_received_total,
+                    last_batch_size,
+                    created_at,
+                    updated_at
+                )
+                VALUES
+                (
+                    :server_id,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    :created_at,
+                    :updated_at
+                )
+                ',
+                [
+                    ':server_id' => $serverId,
+                    ':created_at' => $now,
+                    ':updated_at' => $now,
+                ]
+            )
+            ->execute();
+
         $status = ServerTelemetryStatus::findOne([
             'server_id' => $serverId,
         ]);
 
-        if($status)
+        if(!$status)
         {
-            return $status;
+            throw new \RuntimeException(
+                'Failed to create telemetry status.'
+            );
         }
-
-        $now = date('Y-m-d H:i:s');
-
-        $status = new ServerTelemetryStatus([
-            'server_id' => $serverId,
-            'online_players' => 0,
-            'queue_size' => 0,
-            'buffered_events' => 0,
-            'events_received_total' => 0,
-            'last_batch_size' => 0,
-            'created_at' => $now,
-            'updated_at' => $now,
-        ]);
-
-        $status->save(false);
 
         return $status;
     }
