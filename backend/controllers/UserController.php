@@ -5,23 +5,41 @@ declare(strict_types=1);
 namespace backend\controllers;
 
 use backend\components\AdminController;
-use common\models\{User, UserPermission};
-use common\services\{AuditService, SessionTracker};
+use common\models\{
+    ModerationAction,
+    User,
+    UserPermission
+};
+use common\services\{
+    AuditService,
+    RbacService,
+    SessionTracker
+};
 use Yii;
 use yii\data\ActiveDataProvider;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 
 final class UserController extends AdminController
 {
-    protected string $permission = 'manageUsers';
+    protected string $permission = 'viewUsers';
 
     public function actionIndex(): string
     {
-        $query = User::find()->orderBy(['id' => SORT_DESC]);
+        $query = User::find()
+            ->orderBy(['id' => SORT_DESC]);
 
-        $search = trim((string)Yii::$app->request->get('q'));
-        $status = trim((string)Yii::$app->request->get('status'));
-        $verified = trim((string)Yii::$app->request->get('verified'));
+        $search = trim(
+            (string)Yii::$app->request->get('q')
+        );
+
+        $status = trim(
+            (string)Yii::$app->request->get('status')
+        );
+
+        $verified = trim(
+            (string)Yii::$app->request->get('verified')
+        );
 
         if($search !== '')
         {
@@ -43,43 +61,104 @@ final class UserController extends AdminController
             true
         ))
         {
-            $query->andWhere(['status' => $status]);
+            $query->andWhere([
+                'status' => $status,
+            ]);
         }
 
-        if(in_array($verified, ['0', '1'], true))
+        if(in_array(
+            $verified,
+            ['0', '1'],
+            true
+        ))
         {
             $query->andWhere([
-                'email_verified' => (int)$verified,
+                'email_verified' =>
+                    (int)$verified,
             ]);
         }
 
         return $this->render('index', [
-            'dataProvider' => new ActiveDataProvider([
-                'query' => $query,
-                'pagination' => ['pageSize' => 30],
-            ]),
+            'dataProvider' =>
+                new ActiveDataProvider([
+                    'query' => $query,
+                    'pagination' => [
+                        'pageSize' => 30,
+                    ],
+                ]),
             'q' => $search,
             'status' => $status,
             'verified' => $verified,
         ]);
     }
 
-    public function actionView(int $id): string
+    public function actionView(
+        int $id
+    ): string
     {
         $model = $this->find($id);
+        $rbac = new RbacService();
 
         return $this->render('view', [
             'model' => $model,
-            'roles' => Yii::$app->authManager->getRolesByUser($id),
-            'launcherPermissions' => UserPermission::find()
-                ->where(['uuid' => $model->uuid])
-                ->orderBy('name')
-                ->all(),
+            'currentRole' =>
+                $rbac->primaryRoleName($id),
+            'assignableRoles' =>
+                Yii::$app->user->can('manageUserRoles')
+                    ? $rbac->assignableRoles(
+                        (int)Yii::$app->user->id
+                    )
+                    : [],
+            'launcherPermissions' =>
+                UserPermission::find()
+                    ->where([
+                        'uuid' => $model->uuid,
+                    ])
+                    ->orderBy('name')
+                    ->all(),
+            'moderationActions' =>
+                ModerationAction::find()
+                    ->with([
+                        'server',
+                        'creator',
+                    ])
+                    ->where([
+                        'user_id' => $model->id,
+                    ])
+                    ->orderBy([
+                        'id' => SORT_DESC,
+                    ])
+                    ->limit(10)
+                    ->all(),
+            'activeModerationCount' =>
+                ModerationAction::find()
+                    ->where([
+                        'user_id' => $model->id,
+                        'status' =>
+                            ModerationAction::STATUS_ACTIVE,
+                    ])
+                    ->count(),
         ]);
     }
 
-    public function actionStatus(int $id, string $status)
+    public function actionStatus(
+        int $id,
+        string $status
+    )
     {
+        $this->requirePermission(
+            'manageUserStatus'
+        );
+
+        $actorId =
+            (int)Yii::$app->user->id;
+
+        (new RbacService())
+            ->assertCanManageUser(
+                $actorId,
+                $id
+            );
+
         if(!Yii::$app->request->isPost)
         {
             throw new \yii\web\MethodNotAllowedHttpException();
@@ -102,11 +181,16 @@ final class UserController extends AdminController
 
         $model->status = $status;
 
-        if($status === User::STATUS_BLOCKED)
+        if(
+            $status ===
+                User::STATUS_BLOCKED
+        )
         {
             $model->accessToken = null;
             $model->serverID = null;
-            (new SessionTracker())->revokeAll($id);
+
+            (new SessionTracker())
+                ->revokeAll($id);
         }
 
         $model->save(false, [
@@ -119,30 +203,54 @@ final class UserController extends AdminController
             'admin.user.status',
             'user',
             (string)$id,
-            ['status' => $status]
+            [
+                'status' => $status,
+            ]
         );
 
-        return $this->redirect(['view', 'id' => $id]);
+        return $this->redirect([
+            'view',
+            'id' => $id,
+        ]);
     }
 
-    public function actionAddLauncherPermission(int $id)
+    public function actionAddLauncherPermission(
+        int $id
+    )
     {
+        $this->requirePermission(
+            'manageLauncherPermissions'
+        );
+
+        (new RbacService())
+            ->assertCanManageUser(
+                (int)Yii::$app->user->id,
+                $id
+            );
+
         if(!Yii::$app->request->isPost)
         {
             throw new \yii\web\MethodNotAllowedHttpException();
         }
 
         $user = $this->find($id);
+
         $name = trim(
-            (string)Yii::$app->request->post('permission')
+            (string)Yii::$app->request->post(
+                'permission'
+            )
         );
 
-        if($name !== '' && strlen($name) <= 100)
+        if(
+            $name !== ''
+            && strlen($name) <= 100
+        )
         {
-            $permission = new UserPermission([
-                'uuid' => $user->uuid,
-                'name' => $name,
-            ]);
+            $permission =
+                new UserPermission([
+                    'uuid' => $user->uuid,
+                    'name' => $name,
+                ]);
 
             $permission->save();
 
@@ -150,11 +258,16 @@ final class UserController extends AdminController
                 'admin.launcher.permission.add',
                 'user',
                 (string)$id,
-                ['permission' => $name]
+                [
+                    'permission' => $name,
+                ]
             );
         }
 
-        return $this->redirect(['view', 'id' => $id]);
+        return $this->redirect([
+            'view',
+            'id' => $id,
+        ]);
     }
 
     public function actionDeleteLauncherPermission(
@@ -162,6 +275,16 @@ final class UserController extends AdminController
         string $name
     )
     {
+        $this->requirePermission(
+            'manageLauncherPermissions'
+        );
+
+        (new RbacService())
+            ->assertCanManageUser(
+                (int)Yii::$app->user->id,
+                $id
+            );
+
         if(!Yii::$app->request->isPost)
         {
             throw new \yii\web\MethodNotAllowedHttpException();
@@ -178,51 +301,76 @@ final class UserController extends AdminController
             'admin.launcher.permission.delete',
             'user',
             (string)$id,
-            ['permission' => $name]
+            [
+                'permission' => $name,
+            ]
         );
 
-        return $this->redirect(['view', 'id' => $id]);
+        return $this->redirect([
+            'view',
+            'id' => $id,
+        ]);
     }
 
-    public function actionRole(int $id, string $role)
+    public function actionRole(
+        int $id,
+        string $role
+    )
     {
+        $this->requirePermission(
+            'manageUserRoles'
+        );
+
         if(!Yii::$app->request->isPost)
         {
             throw new \yii\web\MethodNotAllowedHttpException();
         }
 
-        $authManager = Yii::$app->authManager;
+        $service =
+            new RbacService();
 
-        if(
-            !in_array(
-                $role,
-                ['admin', 'moderator', 'user'],
-                true
-            )
-            || !($newRole = $authManager->getRole($role))
-        )
-        {
-            throw new \yii\web\BadRequestHttpException();
-        }
+        $oldRole =
+            $service->primaryRoleName($id);
 
-        foreach($authManager->getRolesByUser($id) as $oldRole)
-        {
-            $authManager->revoke($oldRole, $id);
-        }
-
-        $authManager->assign($newRole, $id);
+        $service->assignRole(
+            (int)Yii::$app->user->id,
+            $id,
+            $role
+        );
 
         AuditService::log(
             'admin.user.role',
             'user',
             (string)$id,
-            ['role' => $role]
+            [
+                'from' => $oldRole,
+                'to' => $role,
+            ]
         );
 
-        return $this->redirect(['view', 'id' => $id]);
+        return $this->redirect([
+            'view',
+            'id' => $id,
+        ]);
     }
 
-    private function find(int $id): User
+    private function requirePermission(
+        string $permission
+    ): void
+    {
+        if(
+            !Yii::$app->user->can(
+                $permission
+            )
+        )
+        {
+            throw new ForbiddenHttpException();
+        }
+    }
+
+    private function find(
+        int $id
+    ): User
     {
         $model = User::findOne($id);
 
