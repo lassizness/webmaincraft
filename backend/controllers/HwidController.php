@@ -6,7 +6,7 @@ namespace backend\controllers;
 
 use backend\components\AdminController;
 use common\models\{Hwid, User};
-use common\services\AuditService;
+use common\services\{AuditService, RbacService};
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\web\NotFoundHttpException;
@@ -67,6 +67,16 @@ final class HwidController extends AdminController
         }
 
         $model = $this->find($id);
+
+        $rbac = new RbacService();
+        foreach($model->users as $linkedUser)
+        {
+            $rbac->assertCanManageUser(
+                (int)Yii::$app->user->id,
+                (int)$linkedUser->id
+            );
+        }
+
         $model->banned = $value === 1 ? 1 : 0;
         $model->save(false, ['banned']);
 
@@ -100,6 +110,11 @@ final class HwidController extends AdminController
         {
             throw new NotFoundHttpException();
         }
+
+        (new RbacService())->assertCanManageUser(
+            (int)Yii::$app->user->id,
+            (int)$user->id
+        );
 
         $oldHwidId = $user->hwidId;
         $user->hwidId = null;

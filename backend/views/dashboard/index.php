@@ -10,7 +10,7 @@ $metrics = [
         'value' => $users,
         'note' => 'Все зарегистрированные аккаунты',
         'url' => ['/user/index'],
-        'permission' => 'manageUsers',
+        'permission' => 'viewUsers',
         'class' => '',
     ],
     [
@@ -18,7 +18,7 @@ $metrics = [
         'value' => $unverifiedUsers,
         'note' => 'Не блокирует вход',
         'url' => ['/user/index', 'verified' => '0'],
-        'permission' => 'manageUsers',
+        'permission' => 'viewUsers',
         'class' => $unverifiedUsers > 0 ? 'is-warning' : '',
     ],
     [
@@ -52,10 +52,14 @@ $metrics = [
     <?php foreach($metrics as $metric): ?>
         <?php
         $canOpen = Yii::$app->user->can($metric['permission']);
-        $tag = $canOpen ? 'a' : 'div';
-        $href = $canOpen
-            ? ' href="' . Html::encode(Url::to($metric['url'])) . '"'
-            : '';
+
+        if(!$canOpen)
+        {
+            continue;
+        }
+
+        $tag = 'a';
+        $href = ' href="' . Html::encode(Url::to($metric['url'])) . '"';
         ?>
         <<?= $tag ?>
             class="admin-kpi <?= Html::encode($metric['class']) ?>"
@@ -89,7 +93,7 @@ $metrics = [
             </div>
 
             <div class="admin-quick-grid">
-                <?php if(Yii::$app->user->can('manageUsers')): ?>
+                <?php if(Yii::$app->user->can('viewUsers')): ?>
                     <a class="admin-quick-link" href="<?= Url::to(['/user/index']) ?>">
                         <span class="admin-quick-icon">⌕</span>
                         <span>Найти пользователя</span>

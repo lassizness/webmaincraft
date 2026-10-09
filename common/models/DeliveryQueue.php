@@ -27,4 +27,12 @@ final class DeliveryQueue extends ActiveRecord
     {
         return $this->hasOne(ShopPurchase::class, ['id' => 'purchase_id']);
     }
+
+    public function getModerationAction()
+    {
+        return $this->hasOne(
+            ModerationAction::class,
+            ['id' => 'moderation_action_id']
+        );
+    }
 }

@@ -12,6 +12,8 @@ $icon = static function(string $name): string {
     $paths = [
         'dashboard' => '<path d="M4 4h6v6H4V4Zm10 0h6v6h-6V4ZM4 14h6v6H4v-6Zm10 0h6v6h-6v-6Z"/>',
         'users' => '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+        'moderation' => '<path d="M12 3 4 6v6c0 5 3.4 8 8 9 4.6-1 8-4 8-9V6l-8-3Z"/><path d="M9 12h6M12 9v6"/>',
+        'rbac' => '<circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2"/><path d="M17 8h4M19 6v4M17 15h4"/>',
         'support' => '<path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8Z"/><path d="M8 9h8M8 13h5"/>',
         'news' => '<path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/>',
         'pages' => '<path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h6M9 17h6"/>',
@@ -43,7 +45,8 @@ $navGroups = [
         'label' => 'Рабочее место',
         'items' => [
             ['dashboard/index', 'Обзор', 'adminPanel', 'dashboard', ['dashboard']],
-            ['user/index', 'Пользователи', 'manageUsers', 'users', ['user']],
+            ['user/index', 'Пользователи', 'viewUsers', 'users', ['user']],
+            ['moderation/index', 'Игровая модерация', 'viewModeration', 'moderation', ['moderation']],
             ['support/index', 'Поддержка', 'manageSupport', 'support', ['support']],
         ],
     ],
@@ -73,6 +76,7 @@ $navGroups = [
             ['hwid/index', 'HWID', 'manageHwid', 'hwid', ['hwid']],
             ['counter/index', 'Счётчики', 'manageSettings', 'counter', ['counter']],
             ['setting/index', 'Настройки', 'manageSettings', 'settings', ['setting']],
+            ['rbac/index', 'Роли и права', 'manageRbac', 'rbac', ['rbac']],
             ['audit/index', 'Аудит', 'viewAudit', 'audit', ['audit']],
         ],
     ],

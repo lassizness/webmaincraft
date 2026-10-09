@@ -1,11 +1,13 @@
 <?php
 
-use common\models\User;
+use common\models\{
+    ModerationAction,
+    RbacRoleMeta,
+    User
+};
 use yii\helpers\Html;
 
 $this->title = 'Пользователь ' . $model->username;
-
-$currentRole = array_key_first($roles) ?: 'user';
 
 $statusLabels = [
     User::STATUS_ACTIVE => 'Активен',
@@ -19,10 +21,25 @@ $statusClasses = [
     User::STATUS_BLOCKED => 'bg-danger',
 ];
 
-$roleLabels = [
-    'user' => 'Игрок',
-    'moderator' => 'Модератор',
-    'admin' => 'Администратор',
+$currentRoleMeta = RbacRoleMeta::findOne([
+    'role_name' => $currentRole,
+]);
+
+$currentRoleLabel = $currentRole === 'user'
+    ? 'Игрок'
+    : ($currentRoleMeta?->label ?: $currentRole);
+
+$moderationTypeLabels = [
+    ModerationAction::TYPE_WARN => 'Warn',
+    ModerationAction::TYPE_MUTE => 'Mute',
+    ModerationAction::TYPE_BAN => 'Ban',
+];
+
+$moderationStatusLabels = [
+    ModerationAction::STATUS_ACTIVE => 'Активно',
+    ModerationAction::STATUS_RECORDED => 'Записано',
+    ModerationAction::STATUS_EXPIRED => 'Истекло',
+    ModerationAction::STATUS_REVOKED => 'Снято',
 ];
 ?>
 
@@ -48,8 +65,31 @@ $roleLabels = [
                     : 'Email не подтверждён'
                 ?>
             </span>
+            <?php if($activeModerationCount > 0): ?>
+                <span class="badge bg-danger">
+                    Активных наказаний: <?= (int)$activeModerationCount ?>
+                </span>
+            <?php endif; ?>
         </div>
     </div>
+
+    <?php if(
+        $canManageTarget
+        && Yii::$app->user->can('viewModeration')
+        && (
+            Yii::$app->user->can('createWarn')
+            || Yii::$app->user->can('createMute')
+            || Yii::$app->user->can('createBan')
+        )
+    ): ?>
+        <div class="admin-actions">
+            <?= Html::a(
+                'Наказать игрока',
+                ['/moderation/create', 'userId' => $model->id],
+                ['class' => 'btn btn-outline-danger']
+            ) ?>
+        </div>
+    <?php endif; ?>
 </div>
 
 <div class="row g-3">
@@ -132,46 +172,57 @@ $roleLabels = [
                 Статус аккаунта
             </h2>
             <div class="admin-panel-subtitle mb-3">
-                Блокировка сразу сбрасывает web- и launcher-сессии.
+                Это системный статус аккаунта, а не игровой бан.
             </div>
 
-            <div class="admin-status-row">
-                <?php foreach([
-                    User::STATUS_ACTIVE => 'Активировать',
-                    User::STATUS_PENDING => 'Pending',
-                    User::STATUS_BLOCKED => 'Заблокировать',
-                ] as $status => $label): ?>
-                    <?= Html::beginForm(
-                        [
-                            '/user/status',
-                            'id' => $model->id,
-                            'status' => $status,
-                        ],
-                        'post',
-                        ['class' => 'd-inline']
-                    ) ?>
-                        <?= Html::submitButton(
-                            $model->status === $status
-                                ? ($statusLabels[$status] ?? $label)
-                                : $label,
+            <?php if(
+                $canManageTarget
+                && Yii::$app->user->can('manageUserStatus')
+            ): ?>
+                <div class="admin-status-row">
+                    <?php foreach([
+                        User::STATUS_ACTIVE => 'Активировать',
+                        User::STATUS_PENDING => 'Pending',
+                        User::STATUS_BLOCKED => 'Заблокировать',
+                    ] as $status => $label): ?>
+                        <?= Html::beginForm(
                             [
-                                'class' => 'btn btn-sm '
-                                    .($model->status === $status
-                                        ? 'admin-status-button is-current'
-                                        : ($status === User::STATUS_BLOCKED
-                                            ? 'btn-outline-danger'
-                                            : 'btn-outline-light'
-                                        )
-                                    ),
-                                'disabled' => $model->status === $status,
-                                'data-confirm' => $status === User::STATUS_BLOCKED
-                                    ? 'Заблокировать пользователя и сбросить его активные сессии?'
-                                    : null,
-                            ]
+                                '/user/status',
+                                'id' => $model->id,
+                                'status' => $status,
+                            ],
+                            'post',
+                            ['class' => 'd-inline']
                         ) ?>
-                    <?= Html::endForm() ?>
-                <?php endforeach; ?>
-            </div>
+                            <?= Html::submitButton(
+                                $model->status === $status
+                                    ? ($statusLabels[$status] ?? $label)
+                                    : $label,
+                                [
+                                    'class' => 'btn btn-sm '
+                                        .($model->status === $status
+                                            ? 'admin-status-button is-current'
+                                            : ($status === User::STATUS_BLOCKED
+                                                ? 'btn-outline-danger'
+                                                : 'btn-outline-light'
+                                            )
+                                        ),
+                                    'disabled' => $model->status === $status,
+                                    'data-confirm' => $status === User::STATUS_BLOCKED
+                                        ? 'Полностью заблокировать аккаунт и сбросить web/launcher-сессии?'
+                                        : null,
+                                ]
+                            ) ?>
+                        <?= Html::endForm() ?>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <span class="badge <?= $statusClasses[$model->status] ?? 'bg-secondary' ?>">
+                    <?= Html::encode(
+                        $statusLabels[$model->status] ?? $model->status
+                    ) ?>
+                </span>
+            <?php endif; ?>
         </section>
 
         <section class="admin-panel">
@@ -179,44 +230,150 @@ $roleLabels = [
                 Роль в админке
             </h2>
             <div class="admin-panel-subtitle mb-3">
-                Текущая роль: <?= Html::encode(
-                    $roleLabels[$currentRole] ?? $currentRole
-                ) ?>.
+                Текущая роль:
+                <strong><?= Html::encode($currentRoleLabel) ?></strong>
+                <code><?= Html::encode($currentRole) ?></code>
             </div>
 
-            <div class="admin-status-row">
-                <?php foreach($roleLabels as $role => $label): ?>
-                    <?= Html::beginForm(
-                        [
-                            '/user/role',
-                            'id' => $model->id,
-                            'role' => $role,
-                        ],
-                        'post',
-                        ['class' => 'd-inline']
-                    ) ?>
-                        <?= Html::submitButton(
-                            $label,
+            <?php if(
+                $canManageTarget
+                && Yii::$app->user->can('manageUserRoles')
+                && $assignableRoles
+            ): ?>
+                <div class="d-grid gap-2">
+                    <?php foreach($assignableRoles as $roleName => $roleData): ?>
+                        <?= Html::beginForm(
                             [
-                                'class' => 'btn btn-sm '
-                                    .($currentRole === $role
-                                        ? 'admin-status-button is-current'
-                                        : 'btn-outline-primary'
-                                    ),
-                                'disabled' => $currentRole === $role,
-                                'data-confirm' => $currentRole !== $role
-                                    ? 'Изменить роль пользователя на «'
-                                        .$label
-                                        .'»?'
-                                    : null,
-                            ]
+                                '/user/role',
+                                'id' => $model->id,
+                                'role' => $roleName,
+                            ],
+                            'post'
                         ) ?>
-                    <?= Html::endForm() ?>
-                <?php endforeach; ?>
-            </div>
+                            <?= Html::submitButton(
+                                $roleData['label']
+                                    . ' · level '
+                                    . $roleData['level'],
+                                [
+                                    'class' => 'btn btn-sm w-100 text-start '
+                                        .($currentRole === $roleName
+                                            ? 'admin-status-button is-current'
+                                            : 'btn-outline-primary'
+                                        ),
+                                    'disabled' => $currentRole === $roleName,
+                                    'data-confirm' => $currentRole !== $roleName
+                                        ? 'Назначить роль «'
+                                            .$roleData['label']
+                                            .'»?'
+                                        : null,
+                                ]
+                            ) ?>
+                        <?= Html::endForm() ?>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </section>
     </div>
 </div>
+
+<?php if(Yii::$app->user->can('viewModeration')): ?>
+    <section class="admin-panel mt-3">
+        <div class="admin-section-head">
+            <div>
+                <h2 class="admin-panel-title">
+                    Игровая модерация
+                </h2>
+                <div class="admin-panel-subtitle">
+                    Последние 10 наказаний игрока.
+                </div>
+            </div>
+
+            <div class="admin-actions">
+                <?= Html::a(
+                    'Вся история',
+                    ['/moderation/index', 'q' => $model->username],
+                    ['class' => 'btn btn-sm btn-outline-primary']
+                ) ?>
+            </div>
+        </div>
+
+        <?php if(!$moderationActions): ?>
+            <div class="admin-muted">
+                Наказаний нет.
+            </div>
+        <?php else: ?>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Тип</th>
+                        <th>Область</th>
+                        <th>Причина</th>
+                        <th>Статус</th>
+                        <th>До</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach($moderationActions as $action): ?>
+                        <tr>
+                            <td>#<?= (int)$action->id ?></td>
+                            <td>
+                                <?= Html::encode(
+                                    $moderationTypeLabels[$action->type]
+                                    ?? $action->type
+                                ) ?>
+                            </td>
+                            <td>
+                                <?= $action->scope === ModerationAction::SCOPE_GLOBAL
+                                    ? 'Все серверы'
+                                    : Html::encode(
+                                        $action->server?->name ?: 'Сервер'
+                                    )
+                                ?>
+                            </td>
+                            <td>
+                                <?= Html::encode(
+                                    mb_substr(
+                                        (string)$action->reason,
+                                        0,
+                                        100
+                                    )
+                                ) ?>
+                            </td>
+                            <td>
+                                <?= Html::encode(
+                                    $moderationStatusLabels[$action->status]
+                                    ?? $action->status
+                                ) ?>
+                            </td>
+                            <td>
+                                <?= Html::encode(
+                                    $action->expires_at ?: 'Навсегда'
+                                ) ?>
+                            </td>
+                            <td>
+                                <?= Html::a(
+                                    'Открыть',
+                                    [
+                                        '/moderation/view',
+                                        'id' => $action->id,
+                                    ],
+                                    [
+                                        'class' =>
+                                            'btn btn-sm btn-outline-primary',
+                                    ]
+                                ) ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+    </section>
+<?php endif; ?>
 
 <section class="admin-panel mt-3">
     <div class="admin-section-head">
@@ -238,24 +395,34 @@ $roleLabels = [
                         <?= Html::encode($permission->name) ?>
                     </span>
 
-                    <?= Html::beginForm(
-                        [
-                            '/user/delete-launcher-permission',
-                            'id' => $model->id,
-                            'name' => $permission->name,
-                        ],
-                        'post',
-                        ['class' => 'd-inline']
-                    ) ?>
-                        <?= Html::submitButton(
-                            '×',
+                    <?php if(
+                        $canManageTarget
+                        && Yii::$app->user->can(
+                            'manageLauncherPermissions'
+                        )
+                    ): ?>
+                        <?= Html::beginForm(
                             [
-                                'class' => 'btn btn-link btn-sm text-white p-0 border-0',
-                                'title' => 'Удалить permission',
-                                'data-confirm' => 'Удалить это разрешение?',
-                            ]
+                                '/user/delete-launcher-permission',
+                                'id' => $model->id,
+                                'name' => $permission->name,
+                            ],
+                            'post',
+                            ['class' => 'd-inline']
                         ) ?>
-                    <?= Html::endForm() ?>
+                            <?= Html::submitButton(
+                                '×',
+                                [
+                                    'class' =>
+                                        'btn btn-link btn-sm text-white p-0 border-0',
+                                    'title' =>
+                                        'Удалить permission',
+                                    'data-confirm' =>
+                                        'Удалить это разрешение?',
+                                ]
+                            ) ?>
+                        <?= Html::endForm() ?>
+                    <?php endif; ?>
                 </span>
             <?php endforeach; ?>
         </div>
@@ -265,21 +432,34 @@ $roleLabels = [
         </div>
     <?php endif; ?>
 
-    <?= Html::beginForm(
-        ['/user/add-launcher-permission', 'id' => $model->id],
-        'post',
-        ['class' => 'd-flex gap-2 flex-wrap']
-    ) ?>
-        <input
-            class="form-control flex-grow-1"
-            style="min-width:260px"
-            name="permission"
-            maxlength="100"
-            placeholder="launchserver.profile.<uuid>.*"
-            autocomplete="off"
-        >
-        <button class="btn btn-outline-primary" type="submit">
-            Добавить
-        </button>
-    <?= Html::endForm() ?>
+    <?php if(
+        $canManageTarget
+        && Yii::$app->user->can(
+            'manageLauncherPermissions'
+        )
+    ): ?>
+        <?= Html::beginForm(
+            [
+                '/user/add-launcher-permission',
+                'id' => $model->id,
+            ],
+            'post',
+            ['class' => 'd-flex gap-2 flex-wrap']
+        ) ?>
+            <input
+                class="form-control flex-grow-1"
+                style="min-width:260px"
+                name="permission"
+                maxlength="100"
+                placeholder="launchserver.profile.<uuid>.*"
+                autocomplete="off"
+            >
+            <button
+                class="btn btn-outline-primary"
+                type="submit"
+            >
+                Добавить
+            </button>
+        <?= Html::endForm() ?>
+    <?php endif; ?>
 </section>

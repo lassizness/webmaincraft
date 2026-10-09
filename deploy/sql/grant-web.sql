@@ -9,8 +9,8 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`user_tokens` TO 'hivete
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`web_sessions` TO 'hivetech_web'@'10.140.0.141';
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`login_attempts` TO 'hivetech_web'@'10.140.0.141';
 GRANT SELECT ON `hivetech_core`.`auth_rule` TO 'hivetech_web'@'10.140.0.141';
-GRANT SELECT ON `hivetech_core`.`auth_item` TO 'hivetech_web'@'10.140.0.141';
-GRANT SELECT ON `hivetech_core`.`auth_item_child` TO 'hivetech_web'@'10.140.0.141';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`auth_item` TO 'hivetech_web'@'10.140.0.141';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`auth_item_child` TO 'hivetech_web'@'10.140.0.141';
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`auth_assignment` TO 'hivetech_web'@'10.140.0.141';
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`news_categories` TO 'hivetech_web'@'10.140.0.141';
@@ -32,8 +32,10 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`servers` TO 'hivetech_w
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`delivery_queue` TO 'hivetech_web'@'10.140.0.141';
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`settings` TO 'hivetech_web'@'10.140.0.141';
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`audit_log` TO 'hivetech_web'@'10.140.0.141';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`rbac_role_meta` TO 'hivetech_web'@'10.140.0.141';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`moderation_actions` TO 'hivetech_web'@'10.140.0.141';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`moderation_action_history` TO 'hivetech_web'@'10.140.0.141';
 GRANT SELECT ON `hivetech_core`.`migration` TO 'hivetech_web'@'10.140.0.141';
-FLUSH PRIVILEGES;
 GRANT SELECT, UPDATE (`banned`) ON `hivetech_core`.`hwids` TO 'hivetech_web'@'10.140.0.141';
 GRANT SELECT ON `hivetech_core`.`hwidLog` TO 'hivetech_web'@'10.140.0.141';
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`privilege_groups` TO 'hivetech_web'@'10.140.0.141';
@@ -44,3 +46,4 @@ GRANT SELECT, INSERT ON `hivetech_core`.`privilege_notification_log` TO 'hivetec
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`user_permissions` TO 'hivetech_web'@'10.140.0.141';
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`vote_services` TO 'hivetech_web'@'10.140.0.141';
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`votes` TO 'hivetech_web'@'10.140.0.141';
+FLUSH PRIVILEGES;
