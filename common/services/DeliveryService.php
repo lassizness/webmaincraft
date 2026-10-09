@@ -118,7 +118,12 @@ final class DeliveryService
         DeliveryQueue $queue
     ): bool
     {
-        if(!$queue->moderation_action_id)
+        if(
+            !$queue->hasAttribute(
+                'moderation_action_id'
+            )
+            || !$queue->moderation_action_id
+        )
         {
             return true;
         }
