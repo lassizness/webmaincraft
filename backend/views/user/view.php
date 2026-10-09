@@ -327,6 +327,12 @@ foreach($minecraftServers as $server)
                         'd-flex gap-2 flex-wrap align-items-end mb-3',
                 ]
             ) ?>
+                <?= Html::hiddenInput(
+                    'operation',
+                    '',
+                    ['id' => 'minecraft-operator-operation']
+                ) ?>
+
                 <div style="min-width:260px">
                     <label class="form-label">
                         Сервер
@@ -346,8 +352,8 @@ foreach($minecraftServers as $server)
                     'Выдать OP',
                     [
                         'class' => 'btn btn-outline-primary',
-                        'name' => 'operation',
-                        'value' => 'grant',
+                        'onclick' =>
+                            "this.form.elements['operation'].value='grant';",
                         'data-confirm' =>
                             'Выдать игроку '
                             . $model->username
@@ -359,8 +365,8 @@ foreach($minecraftServers as $server)
                     'Снять OP',
                     [
                         'class' => 'btn btn-outline-danger',
-                        'name' => 'operation',
-                        'value' => 'revoke',
+                        'onclick' =>
+                            "this.form.elements['operation'].value='revoke';",
                         'data-confirm' =>
                             'Снять OP у игрока '
                             . $model->username
