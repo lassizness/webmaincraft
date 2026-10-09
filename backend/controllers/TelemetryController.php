@@ -8,6 +8,7 @@ use backend\components\AdminController;
 use common\models\{
     AchievementUnlock,
     PlayerSession,
+    ServerTelemetryStatus,
     TelemetryEvent
 };
 use Yii;
@@ -25,21 +26,34 @@ final class TelemetryController extends AdminController
         $today = date('Y-m-d 00:00:00');
 
         $serverRows = (new Query())
-            ->from(['e' => '{{%telemetry_events}}'])
-            ->leftJoin(['s' => '{{%servers}}'], 's.id = e.server_id')
+            ->from(['s' => '{{%servers}}'])
+            ->leftJoin(
+                ['t' => '{{%server_telemetry_status}}'],
+                't.server_id = s.id'
+            )
+            ->where(['s.enabled' => 1])
             ->select([
-                'server_id' => 'e.server_id',
+                'server_id' => 's.id',
                 'server_name' => 's.name',
                 'server_code' => 's.code',
-                'last_event' => 'MAX(e.received_at)',
-                'events_5m' => new \yii\db\Expression(
-                    'SUM(CASE WHEN e.received_at >= :since THEN 1 ELSE 0 END)',
-                    [':since' => $fiveMinutesAgo]
-                ),
-                'events_total' => 'COUNT(*)',
+                'telemetry_version' => 't.telemetry_version',
+                'minecraft_version' => 't.minecraft_version',
+                'forge_version' => 't.forge_version',
+                'online_players' => 'COALESCE(t.online_players, 0)',
+                'queue_size' => 'COALESCE(t.queue_size, 0)',
+                'buffered_events' => 'COALESCE(t.buffered_events, 0)',
+                'events_received_total' => 'COALESCE(t.events_received_total, 0)',
+                'last_batch_size' => 'COALESCE(t.last_batch_size, 0)',
+                'last_batch_at' => 't.last_batch_at',
+                'last_event_at' => 't.last_event_at',
+                'last_heartbeat_at' => 't.last_heartbeat_at',
+                'last_seen_ip' => 't.last_seen_ip',
+                'last_error' => 't.last_error',
             ])
-            ->groupBy(['e.server_id', 's.name', 's.code'])
-            ->orderBy(['last_event' => SORT_DESC])
+            ->orderBy([
+                's.sort' => SORT_ASC,
+                's.id' => SORT_ASC,
+            ])
             ->all();
 
         return $this->render('index', [

@@ -101,6 +101,11 @@ return [
                 'POST internal/game/bridge/heartbeat' =>
                     'internal-game/bridge-heartbeat',
 
+                'POST internal/game/telemetry/events' =>
+                    'internal-game/telemetry-events',
+                'POST internal/game/telemetry/heartbeat' =>
+                    'internal-game/telemetry-heartbeat',
+
                 'forum/sso' => 'forum/sso',
                 'page/<slug:[a-z0-9-]+>' => 'page/view',
             ],

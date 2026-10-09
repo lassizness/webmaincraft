@@ -95,6 +95,24 @@ final class PrivilegeService
         );
     }
 
+    public function grantByAchievement(
+        int $userId,
+        int $serverId,
+        PrivilegeGroup $group,
+        int $days
+    ): UserPrivilege
+    {
+        return $this->grant(
+            $userId,
+            $serverId,
+            $group,
+            $days,
+            'achievement',
+            null,
+            true
+        );
+    }
+
     public function revoke(
         int $privilegeId,
         string $source = 'admin'

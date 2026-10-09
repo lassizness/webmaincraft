@@ -21,6 +21,14 @@ final class Server extends ActiveRecord
         );
     }
 
+    public function getTelemetryStatus()
+    {
+        return $this->hasOne(
+            ServerTelemetryStatus::class,
+            ['server_id' => 'id']
+        );
+    }
+
     public function rules(): array
     {
         return [
