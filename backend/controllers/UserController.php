@@ -99,10 +99,21 @@ final class UserController extends AdminController
         $model = $this->find($id);
         $rbac = new RbacService();
 
+        $actorId = (int)Yii::$app->user->id;
+        $canManageTarget =
+            $actorId !== $id
+            && $rbac->userLevel($id)
+                < $rbac->userLevel($actorId);
+
+        $canViewModeration =
+            Yii::$app->user->can('viewModeration');
+
         return $this->render('view', [
             'model' => $model,
             'currentRole' =>
                 $rbac->primaryRoleName($id),
+            'canManageTarget' =>
+                $canManageTarget,
             'assignableRoles' =>
                 Yii::$app->user->can('manageUserRoles')
                     ? $rbac->assignableRoles(
@@ -117,27 +128,31 @@ final class UserController extends AdminController
                     ->orderBy('name')
                     ->all(),
             'moderationActions' =>
-                ModerationAction::find()
-                    ->with([
-                        'server',
-                        'creator',
-                    ])
-                    ->where([
-                        'user_id' => $model->id,
-                    ])
-                    ->orderBy([
-                        'id' => SORT_DESC,
-                    ])
-                    ->limit(10)
-                    ->all(),
+                $canViewModeration
+                    ? ModerationAction::find()
+                        ->with([
+                            'server',
+                            'creator',
+                        ])
+                        ->where([
+                            'user_id' => $model->id,
+                        ])
+                        ->orderBy([
+                            'id' => SORT_DESC,
+                        ])
+                        ->limit(10)
+                        ->all()
+                    : [],
             'activeModerationCount' =>
-                ModerationAction::find()
-                    ->where([
-                        'user_id' => $model->id,
-                        'status' =>
-                            ModerationAction::STATUS_ACTIVE,
-                    ])
-                    ->count(),
+                $canViewModeration
+                    ? ModerationAction::find()
+                        ->where([
+                            'user_id' => $model->id,
+                            'status' =>
+                                ModerationAction::STATUS_ACTIVE,
+                        ])
+                        ->count()
+                    : 0,
         ]);
     }
 
