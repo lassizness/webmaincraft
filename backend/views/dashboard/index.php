@@ -52,10 +52,14 @@ $metrics = [
     <?php foreach($metrics as $metric): ?>
         <?php
         $canOpen = Yii::$app->user->can($metric['permission']);
-        $tag = $canOpen ? 'a' : 'div';
-        $href = $canOpen
-            ? ' href="' . Html::encode(Url::to($metric['url'])) . '"'
-            : '';
+
+        if(!$canOpen)
+        {
+            continue;
+        }
+
+        $tag = 'a';
+        $href = ' href="' . Html::encode(Url::to($metric['url'])) . '"';
         ?>
         <<?= $tag ?>
             class="admin-kpi <?= Html::encode($metric['class']) ?>"
