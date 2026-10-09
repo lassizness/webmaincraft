@@ -272,6 +272,43 @@ Achievement rewards are marked `pending` when configured. Reward execution
 is deliberately separate from event ingestion so a failed external reward
 cannot cause an accepted telemetry batch to be replayed.
 
+The reward worker is:
+
+```text
+php yii achievement/process-rewards 50
+```
+
+Supported reward payloads:
+
+```json
+{"amount":500}
+```
+
+for `wallet`;
+
+```json
+{"server_id":1,"command":"give {username} minecraft:diamond 1"}
+```
+
+for `rcon`;
+
+```json
+{"name":"launchserver.permission.example"}
+```
+
+for `permission`;
+
+```json
+{"server_id":1,"group_id":2,"days":30}
+```
+
+for `privilege`.
+
+Each unlock/reward pair has a unique delivery record. Wallet, permission,
+privilege and RCON-queue writes happen inside a database transaction before
+the delivery is marked done. Failed rewards retry with backoff up to five
+attempts.
+
 ## POST /telemetry/heartbeat
 
 Recommended cadence: every 60 seconds.
