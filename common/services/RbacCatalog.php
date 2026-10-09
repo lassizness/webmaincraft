@@ -20,6 +20,7 @@ final class RbacCatalog
                 'viewModeration' => 'Просмотр наказаний',
                 'createWarn' => 'Предупреждения',
                 'createMute' => 'Мут',
+                'createGlobalMute' => 'Глобальный мут',
                 'createBan' => 'Бан отдельного сервера',
                 'createGlobalBan' => 'Глобальный бан',
                 'revokePunishment' => 'Снятие наказаний',
