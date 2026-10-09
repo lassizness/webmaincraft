@@ -388,6 +388,14 @@ final class m261009_000001_add_rbac_moderation extends Migration
             $this->dropTable('{{%rbac_role_meta}}');
         }
 
+        $this->delete('{{%auth_item_child}}', [
+            'parent' => 'admin',
+            'child' => [
+                'manageContent',
+                'manageSupport',
+            ],
+        ]);
+
         $this->execute(
             'INSERT IGNORE INTO {{%auth_item_child}} (parent,child) '
             . 'VALUES (\'moderator\',\'manageContent\'),'
