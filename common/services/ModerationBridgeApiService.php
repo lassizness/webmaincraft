@@ -246,6 +246,11 @@ final class ModerationBridgeApiService
                         ModerationAction::STATUS_ACTIVE,
                 ],
                 [
+                    '<=',
+                    'm.starts_at',
+                    date('Y-m-d H:i:s'),
+                ],
+                [
                     'm.type' => [
                         ModerationAction::TYPE_BAN,
                         ModerationAction::TYPE_MUTE,
