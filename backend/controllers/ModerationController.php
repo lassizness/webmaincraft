@@ -157,20 +157,20 @@ final class ModerationController extends AdminController
                 (string)Yii::$app->request->post('internal_comment')
             );
 
-            $expiresAt = $this->resolveExpiry(
-                $type,
-                (string)Yii::$app->request->post(
-                    'duration',
-                    '1d'
-                ),
-                (string)Yii::$app->request->post(
-                    'expires_at',
-                    ''
-                )
-            );
-
             try
             {
+                $expiresAt = $this->resolveExpiry(
+                    $type,
+                    (string)Yii::$app->request->post(
+                        'duration',
+                        '1d'
+                    ),
+                    (string)Yii::$app->request->post(
+                        'expires_at',
+                        ''
+                    )
+                );
+
                 $action = (new ModerationService())->create(
                     (int)Yii::$app->user->id,
                     (int)$user->id,
