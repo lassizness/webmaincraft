@@ -32,8 +32,6 @@ final class SettingController extends AdminController
         'recaptcha.site_key',
         'payments.paypalych.shop_id',
         'payments.paypalych.base_url',
-        'achievements.enabled',
-        'ratings.public_enabled',
     ];
 
     private const SCORE_KEYS = [
@@ -59,6 +57,8 @@ final class SettingController extends AdminController
         'payments.paypalych.enabled',
         'payments.paypalych.shop_id',
         'payments.paypalych.base_url',
+        'achievements.enabled',
+        'ratings.public_enabled',
     ];
 
     public function actionIndex()
