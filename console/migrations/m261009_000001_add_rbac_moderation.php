@@ -213,12 +213,18 @@ final class m261009_000001_add_rbac_moderation extends Migration
             ]
         );
 
+        $schema = $this->db->schema->getTableSchema(
+            '{{%delivery_queue}}',
+            true
+        );
+
         if(
-            !$this->db->schema->getTableSchema(
-                '{{%delivery_queue}}',
-                true
-            )?->getForeignKeys()['fk_delivery_moderation_action']
-            ?? true
+            $schema
+            && !isset(
+                $schema->foreignKeys[
+                    'fk_delivery_moderation_action'
+                ]
+            )
         )
         {
             $this->addForeignKey(
@@ -425,7 +431,7 @@ final class m261009_000001_add_rbac_moderation extends Migration
 
         if($deliverySchema?->getColumn('moderation_action_id'))
         {
-            $foreignKeys = $deliverySchema->getForeignKeys();
+            $foreignKeys = $deliverySchema->foreignKeys;
 
             if(isset($foreignKeys['fk_delivery_moderation_action']))
             {
