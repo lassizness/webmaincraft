@@ -22,6 +22,8 @@ final class SettingController extends AdminController
         'recaptcha.monitoring_only',
         'recaptcha.fail_open_on_service_error',
         'payments.paypalych.enabled',
+        'achievements.enabled',
+        'ratings.public_enabled',
     ];
 
     private const TEXT_KEYS = [
@@ -55,6 +57,8 @@ final class SettingController extends AdminController
         'payments.paypalych.enabled',
         'payments.paypalych.shop_id',
         'payments.paypalych.base_url',
+        'achievements.enabled',
+        'ratings.public_enabled',
     ];
 
     public function actionIndex()
@@ -123,6 +127,7 @@ final class SettingController extends AdminController
             $default = match($key)
             {
                 'registration.enabled',
+                'achievements.enabled',
                 'recaptcha.login.enabled',
                 'recaptcha.register.enabled',
                 'recaptcha.monitoring_only',

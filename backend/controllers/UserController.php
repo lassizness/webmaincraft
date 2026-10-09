@@ -8,11 +8,14 @@ use backend\components\AdminController;
 use common\models\{
     DeliveryQueue,
     ModerationAction,
+    PlayerSession,
     Server,
+    TelemetryEvent,
     User,
     UserPermission
 };
 use common\services\{
+    AchievementProfileService,
     AuditService,
     MinecraftOperatorService,
     RbacService,
@@ -116,6 +119,12 @@ final class UserController extends AdminController
                 'manageMinecraftOperators'
             );
 
+        $canViewTelemetry =
+            Yii::$app->user->can('viewTelemetry');
+
+        $achievementService =
+            new AchievementProfileService();
+
         return $this->render('view', [
             'model' => $model,
             'currentRole' =>
@@ -190,6 +199,59 @@ final class UserController extends AdminController
                         ->limit(10)
                         ->all()
                     : [],
+            'playerStats' =>
+                $canViewTelemetry
+                    ? $achievementService->statsForUser(
+                        (int)$model->id
+                    )
+                    : [],
+            'achievementSummary' =>
+                $canViewTelemetry
+                    ? $achievementService->summary(
+                        (int)$model->id
+                    )
+                    : [],
+            'achievementUnlocks' =>
+                $canViewTelemetry
+                    ? $achievementService->unlocksForUser(
+                        (int)$model->id
+                    )
+                    : [],
+            'recentTelemetry' =>
+                $canViewTelemetry
+                    ? TelemetryEvent::find()
+                        ->with('server')
+                        ->where([
+                            'user_id' => $model->id,
+                        ])
+                        ->orderBy([
+                            'occurred_at' => SORT_DESC,
+                            'id' => SORT_DESC,
+                        ])
+                        ->limit(20)
+                        ->all()
+                    : [],
+            'activeGameSession' =>
+                $canViewTelemetry
+                    ? PlayerSession::find()
+                        ->with('server')
+                        ->where([
+                            'user_id' => $model->id,
+                            'ended_at' => null,
+                        ])
+                        ->andWhere([
+                            '>=',
+                            'last_event_at',
+                            date(
+                                'Y-m-d H:i:s',
+                                time() - 300
+                            ),
+                        ])
+                        ->orderBy([
+                            'started_at' => SORT_DESC,
+                        ])
+                        ->one()
+                    : null,
         ]);
     }
 

@@ -297,6 +297,224 @@ foreach($minecraftServers as $server)
     </div>
 </div>
 
+<?php if(Yii::$app->user->can('viewTelemetry')): ?>
+    <?php
+    $telemetryStatLabels = [
+        'playtime_seconds' => 'Игровое время',
+        'blocks.break.total' => 'Блоков сломано',
+        'blocks.place.total' => 'Блоков установлено',
+        'entity.kill.total' => 'Мобов убито',
+        'player.death.total' => 'Смертей',
+        'item.craft.total' => 'Предметов создано',
+        'item.smelt.total' => 'Переплавлено',
+        'dimensions.visited' => 'Измерений',
+    ];
+
+    $formatTelemetryStat = static function(
+        string $key,
+        int $value
+    ): string {
+        if($key === 'playtime_seconds')
+        {
+            return intdiv($value, 3600)
+                . ' ч '
+                . intdiv($value % 3600, 60)
+                . ' мин';
+        }
+
+        return number_format($value, 0, ',', ' ');
+    };
+    ?>
+
+    <section class="admin-panel mt-3">
+        <div class="admin-section-head">
+            <div>
+                <h2 class="admin-panel-title">
+                    Игровая статистика
+                </h2>
+                <div class="admin-panel-subtitle">
+                    Данные HiveTechTelemetry, достижения и последние события игрока.
+                </div>
+            </div>
+
+            <div class="admin-actions">
+                <?php if($activeGameSession): ?>
+                    <span class="badge bg-success">
+                        Online · <?= Html::encode(
+                            $activeGameSession->server?->name ?: 'сервер'
+                        ) ?>
+                    </span>
+                <?php else: ?>
+                    <span class="badge bg-secondary">
+                        Offline
+                    </span>
+                <?php endif; ?>
+
+                <?= Html::a(
+                    'Все события',
+                    [
+                        '/telemetry/events',
+                        'q' => $model->username,
+                    ],
+                    ['class' => 'btn btn-sm btn-outline-primary']
+                ) ?>
+            </div>
+        </div>
+
+        <div class="admin-kpi-grid mb-3">
+            <div class="admin-kpi">
+                <div class="admin-kpi-label">
+                    Achievement score
+                </div>
+                <div class="admin-kpi-value">
+                    <?= number_format(
+                        (int)($achievementSummary['score'] ?? 0),
+                        0,
+                        ',',
+                        ' '
+                    ) ?>
+                </div>
+                <div class="admin-kpi-note">
+                    очков достижений
+                </div>
+            </div>
+
+            <div class="admin-kpi">
+                <div class="admin-kpi-label">
+                    Достижения
+                </div>
+                <div class="admin-kpi-value">
+                    <?= (int)($achievementSummary['unlocked'] ?? 0) ?>
+                    /
+                    <?= (int)($achievementSummary['total'] ?? 0) ?>
+                </div>
+                <div class="admin-kpi-note">
+                    разблокировано
+                </div>
+            </div>
+
+            <div class="admin-kpi">
+                <div class="admin-kpi-label">
+                    Последнее достижение
+                </div>
+                <div
+                    class="admin-kpi-value"
+                    style="font-size:18px"
+                >
+                    <?= Html::encode(
+                        (string)($achievementSummary['last_unlock'] ?? '—')
+                    ) ?>
+                </div>
+            </div>
+        </div>
+
+        <?php if(!$playerStats): ?>
+            <div class="admin-muted mb-3">
+                Игровая статистика пока не поступала.
+            </div>
+        <?php else: ?>
+            <div class="admin-detail-grid mb-3">
+                <?php
+                $renderedStats = 0;
+                foreach($telemetryStatLabels as $key => $label):
+                    if(!array_key_exists($key, $playerStats))
+                    {
+                        continue;
+                    }
+
+                    $renderedStats++;
+                ?>
+                    <div class="admin-detail-item">
+                        <div class="admin-detail-label">
+                            <?= Html::encode($label) ?>
+                        </div>
+                        <div class="admin-detail-value fw-bold">
+                            <?= Html::encode(
+                                $formatTelemetryStat(
+                                    $key,
+                                    (int)$playerStats[$key]
+                                )
+                            ) ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+
+                <?php if($renderedStats === 0): ?>
+                    <?php foreach(array_slice($playerStats, 0, 8, true) as $key => $value): ?>
+                        <div class="admin-detail-item">
+                            <div class="admin-detail-label font-monospace">
+                                <?= Html::encode((string)$key) ?>
+                            </div>
+                            <div class="admin-detail-value fw-bold">
+                                <?= number_format((int)$value, 0, ',', ' ') ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+
+        <h3 class="admin-panel-title mt-4 mb-2">
+            Последние события
+        </h3>
+
+        <?php if(!$recentTelemetry): ?>
+            <div class="admin-muted">
+                Событий пока нет.
+            </div>
+        <?php else: ?>
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                    <tr>
+                        <th>Время</th>
+                        <th>Событие</th>
+                        <th>Object</th>
+                        <th>Источник</th>
+                        <th class="text-end">Amount</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach($recentTelemetry as $event): ?>
+                        <tr>
+                            <td>
+                                <?= Html::encode(
+                                    (string)$event->occurred_at
+                                ) ?>
+                            </td>
+                            <td>
+                                <code><?= Html::encode(
+                                    (string)$event->event_type
+                                ) ?></code>
+                            </td>
+                            <td>
+                                <?= $event->object_id
+                                    ? Html::tag(
+                                        'code',
+                                        Html::encode(
+                                            (string)$event->object_id
+                                        )
+                                    )
+                                    : '—'
+                                ?>
+                            </td>
+                            <td>
+                                <?= Html::encode(
+                                    (string)$event->source
+                                ) ?>
+                            </td>
+                            <td class="text-end">
+                                <?= (int)$event->amount ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+    </section>
+<?php endif; ?>
+
 <?php if(Yii::$app->user->can('manageMinecraftOperators')): ?>
     <section class="admin-panel mt-3">
         <div class="admin-section-head">
