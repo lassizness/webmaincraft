@@ -13,6 +13,7 @@ final class m261009_000001_add_rbac_moderation extends Migration
     {
         $this->createRbacMeta();
         $this->createModeration();
+        $this->extendDeliveryQueue();
         $this->extendServers();
         $this->seedRbac();
     }
@@ -165,6 +166,66 @@ final class m261009_000001_add_rbac_moderation extends Migration
                 '{{%moderation_action_history}}',
                 'actor_id',
                 '{{%users}}',
+                'id',
+                'SET NULL',
+                'CASCADE'
+            );
+        }
+    }
+
+    private function extendDeliveryQueue(): void
+    {
+        $schema = $this->db->schema->getTableSchema(
+            '{{%delivery_queue}}',
+            true
+        );
+
+        if(!$schema?->getColumn('moderation_action_id'))
+        {
+            $this->addColumn(
+                '{{%delivery_queue}}',
+                'moderation_action_id',
+                $this->bigInteger()->unsigned()->null()
+            );
+
+        }
+
+        $schema = $this->db->schema->getTableSchema(
+            '{{%delivery_queue}}',
+            true
+        );
+
+        if(!$schema?->getColumn('moderation_operation'))
+        {
+            $this->addColumn(
+                '{{%delivery_queue}}',
+                'moderation_operation',
+                $this->string(16)->null()
+            );
+        }
+
+        $this->createIndex(
+            'idx_delivery_moderation',
+            '{{%delivery_queue}}',
+            [
+                'moderation_action_id',
+                'moderation_operation',
+            ]
+        );
+
+        if(
+            !$this->db->schema->getTableSchema(
+                '{{%delivery_queue}}',
+                true
+            )?->getForeignKeys()['fk_delivery_moderation_action']
+            ?? true
+        )
+        {
+            $this->addForeignKey(
+                'fk_delivery_moderation_action',
+                '{{%delivery_queue}}',
+                'moderation_action_id',
+                '{{%moderation_actions}}',
                 'id',
                 'SET NULL',
                 'CASCADE'
@@ -357,6 +418,42 @@ final class m261009_000001_add_rbac_moderation extends Migration
 
     public function safeDown(): void
     {
+        $deliverySchema = $this->db->schema->getTableSchema(
+            '{{%delivery_queue}}',
+            true
+        );
+
+        if($deliverySchema?->getColumn('moderation_action_id'))
+        {
+            $foreignKeys = $deliverySchema->getForeignKeys();
+
+            if(isset($foreignKeys['fk_delivery_moderation_action']))
+            {
+                $this->dropForeignKey(
+                    'fk_delivery_moderation_action',
+                    '{{%delivery_queue}}'
+                );
+            }
+
+            $this->dropIndex(
+                'idx_delivery_moderation',
+                '{{%delivery_queue}}'
+            );
+
+            if($deliverySchema?->getColumn('moderation_operation'))
+            {
+                $this->dropColumn(
+                    '{{%delivery_queue}}',
+                    'moderation_operation'
+                );
+            }
+
+            $this->dropColumn(
+                '{{%delivery_queue}}',
+                'moderation_action_id'
+            );
+        }
+
         foreach([
             'moderation_warn_command',
             'moderation_unmute_command',
