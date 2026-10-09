@@ -47,4 +47,18 @@ GRANT SELECT, INSERT ON `hivetech_core`.`privilege_notification_log` TO 'hivetec
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`user_permissions` TO 'hivetech_web'@'10.140.0.141';
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`vote_services` TO 'hivetech_web'@'10.140.0.141';
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`votes` TO 'hivetech_web'@'10.140.0.141';
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`telemetry_events` TO 'hivetech_web'@'10.140.0.141';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`player_stats` TO 'hivetech_web'@'10.140.0.141';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`player_sessions` TO 'hivetech_web'@'10.140.0.141';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`player_discoveries` TO 'hivetech_web'@'10.140.0.141';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`server_telemetry_status` TO 'hivetech_web'@'10.140.0.141';
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`achievement_seasons` TO 'hivetech_web'@'10.140.0.141';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`achievements` TO 'hivetech_web'@'10.140.0.141';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`achievement_conditions` TO 'hivetech_web'@'10.140.0.141';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`achievement_rewards` TO 'hivetech_web'@'10.140.0.141';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`achievement_progress` TO 'hivetech_web'@'10.140.0.141';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`achievement_unlocks` TO 'hivetech_web'@'10.140.0.141';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hivetech_core`.`player_profile_settings` TO 'hivetech_web'@'10.140.0.141';
 FLUSH PRIVILEGES;
