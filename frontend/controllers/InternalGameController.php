@@ -13,6 +13,7 @@ use Yii;
 use yii\filters\VerbFilter;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
+use yii\web\UnauthorizedHttpException;
 use yii\web\Response;
 
 final class InternalGameController extends Controller
@@ -51,19 +52,33 @@ final class InternalGameController extends Controller
         $headers =
             Yii::$app->request->headers;
 
-        $this->bridge =
-            (new ServerModerationBridgeService())
-                ->authenticate(
-                    (string)$headers->get(
-                        'X-HiveTech-Server',
-                        ''
-                    ),
-                    (string)$headers->get(
-                        'Authorization',
-                        ''
-                    ),
-                    Yii::$app->request->userIP
-                );
+        try
+        {
+            $this->bridge =
+                (new ServerModerationBridgeService())
+                    ->authenticate(
+                        (string)$headers->get(
+                            'X-HiveTech-Server',
+                            ''
+                        ),
+                        (string)$headers->get(
+                            'Authorization',
+                            ''
+                        ),
+                        Yii::$app->request->userIP
+                    );
+        }
+        catch(UnauthorizedHttpException)
+        {
+            Yii::$app->response->statusCode = 401;
+            Yii::$app->response->data = [
+                'api_version' =>
+                    ModerationBridgeApiService::API_VERSION,
+                'error' => 'unauthorized',
+            ];
+
+            return false;
+        }
 
         return true;
     }
