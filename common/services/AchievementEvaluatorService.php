@@ -6,7 +6,8 @@ namespace common\services;
 
 use common\models\{
     Achievement,
-    AchievementSeason
+    AchievementSeason,
+    Setting
 };
 use Yii;
 use yii\db\Query;
@@ -17,6 +18,16 @@ final class AchievementEvaluatorService
         int $userId
     ): array
     {
+        if(
+            (string)Setting::value(
+                'achievements.enabled',
+                '1'
+            ) !== '1'
+        )
+        {
+            return [];
+        }
+
         $stats = $this->stats($userId);
         $now = time();
         $unlocked = [];
