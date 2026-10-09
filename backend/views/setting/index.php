@@ -124,6 +124,36 @@ $payPalychReady = $payPalychTokenConfigured && $payPalychShopConfigured;
                         Управляет доступностью магазина для игроков.
                     </div>
                 </div>
+
+                <div class="admin-toggle-card">
+                    <?= Html::checkbox(
+                        'settings[achievements.enabled]',
+                        (string)$settings['achievements.enabled'] === '1',
+                        [
+                            'value' => '1',
+                            'class' => 'form-check-input me-2',
+                            'label' => 'Достижения включены',
+                        ]
+                    ) ?>
+                    <div class="admin-toggle-description">
+                        Показывает раздел достижений игрокам и разрешает обработку прогресса.
+                    </div>
+                </div>
+
+                <div class="admin-toggle-card">
+                    <?= Html::checkbox(
+                        'settings[ratings.public_enabled]',
+                        (string)$settings['ratings.public_enabled'] === '1',
+                        [
+                            'value' => '1',
+                            'class' => 'form-check-input me-2',
+                            'label' => 'Публичные рейтинги',
+                        ]
+                    ) ?>
+                    <div class="admin-toggle-description">
+                        Открывает /ratings и публичные профили игроков. По умолчанию выключено.
+                    </div>
+                </div>
             </div>
         </section>
     </div>
