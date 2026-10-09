@@ -6,12 +6,15 @@ namespace backend\controllers;
 
 use backend\components\AdminController;
 use common\models\{
+    DeliveryQueue,
     ModerationAction,
+    Server,
     User,
     UserPermission
 };
 use common\services\{
     AuditService,
+    MinecraftOperatorService,
     RbacService,
     SessionTracker
 };
@@ -108,6 +111,11 @@ final class UserController extends AdminController
         $canViewModeration =
             Yii::$app->user->can('viewModeration');
 
+        $canManageMinecraftOperators =
+            Yii::$app->user->can(
+                'manageMinecraftOperators'
+            );
+
         return $this->render('view', [
             'model' => $model,
             'currentRole' =>
@@ -153,6 +161,122 @@ final class UserController extends AdminController
                         ])
                         ->count()
                     : 0,
+            'minecraftServers' =>
+                $canManageMinecraftOperators
+                    ? Server::find()
+                        ->where([
+                            'enabled' => 1,
+                        ])
+                        ->orderBy([
+                            'sort' => SORT_ASC,
+                            'id' => SORT_ASC,
+                        ])
+                        ->all()
+                    : [],
+            'operatorDeliveries' =>
+                $canManageMinecraftOperators
+                    ? DeliveryQueue::find()
+                        ->with('server')
+                        ->where([
+                            'user_id' => $model->id,
+                            'delivery_type' =>
+                                'rcon_command',
+                            'payload' =>
+                                MinecraftOperatorService::payloads(),
+                        ])
+                        ->orderBy([
+                            'id' => SORT_DESC,
+                        ])
+                        ->limit(10)
+                        ->all()
+                    : [],
+        ]);
+    }
+
+    public function actionMinecraftOperator(
+        int $id
+    )
+    {
+        $this->requirePermission(
+            'manageMinecraftOperators'
+        );
+
+        if(!Yii::$app->request->isPost)
+        {
+            throw new \yii\web\MethodNotAllowedHttpException();
+        }
+
+        $user = $this->find($id);
+
+        $serverId = (int)Yii::$app->request->post(
+            'server_id'
+        );
+
+        $operation = trim(
+            (string)Yii::$app->request->post(
+                'operation'
+            )
+        );
+
+        $server = Server::findOne([
+            'id' => $serverId,
+            'enabled' => 1,
+        ]);
+
+        if(!$server)
+        {
+            throw new \yii\web\BadRequestHttpException(
+                'Сервер не найден или отключён.'
+            );
+        }
+
+        if(!in_array(
+            $operation,
+            [
+                MinecraftOperatorService::OPERATION_GRANT,
+                MinecraftOperatorService::OPERATION_REVOKE,
+            ],
+            true
+        ))
+        {
+            throw new \yii\web\BadRequestHttpException(
+                'Неизвестная операция.'
+            );
+        }
+
+        $queue =
+            (new MinecraftOperatorService())
+                ->enqueue(
+                    $user,
+                    $server,
+                    $operation
+                );
+
+        AuditService::log(
+            $operation
+                === MinecraftOperatorService::OPERATION_GRANT
+                    ? 'admin.minecraft.op.grant'
+                    : 'admin.minecraft.op.revoke',
+            'user',
+            (string)$user->id,
+            [
+                'serverId' => (int)$server->id,
+                'serverCode' => (string)$server->code,
+                'queueId' => (int)$queue->id,
+            ]
+        );
+
+        Yii::$app->session->setFlash(
+            'success',
+            $operation
+                === MinecraftOperatorService::OPERATION_GRANT
+                    ? 'Выдача OP поставлена в очередь.'
+                    : 'Снятие OP поставлено в очередь.'
+        );
+
+        return $this->redirect([
+            'view',
+            'id' => $user->id,
         ]);
     }
 
