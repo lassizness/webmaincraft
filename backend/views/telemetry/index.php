@@ -31,44 +31,116 @@ $metrics = [
 
 <div class="admin-section-head">
     <div>
-        <h2 class="admin-panel-title">Состояние телеметрии</h2>
+        <h2 class="admin-panel-title">Состояние HiveTechTelemetry</h2>
         <div class="admin-panel-subtitle">
-            Пока HiveTechTelemetry не подключён, здесь будет пустое состояние.
-            После запуска мода серверы появятся автоматически по входящим событиям.
+            Сервер считается online, если heartbeat был не более 120 секунд назад.
         </div>
     </div>
     <div class="admin-actions">
         <a class="btn btn-outline-primary" href="<?= Url::to(['/telemetry/events']) ?>">
-            Каталог событий
+            События игры
         </a>
     </div>
 </div>
 
-<section class="admin-panel">
+<section class="admin-panel p-0 overflow-hidden">
     <?php if(!$serverRows): ?>
-        <div class="admin-muted">
-            Событий ещё нет. Схема backend готова к приёму HiveTechTelemetry.
+        <div class="admin-muted p-3">
+            Нет включённых Minecraft-серверов.
         </div>
     <?php else: ?>
         <div class="table-responsive">
-            <table class="table align-middle">
+            <table class="table align-middle mb-0">
                 <thead>
                 <tr>
                     <th>Сервер</th>
-                    <th>Код</th>
-                    <th>Событий / 5 мин</th>
-                    <th>Всего</th>
-                    <th>Последнее событие</th>
+                    <th>Статус</th>
+                    <th>Telemetry</th>
+                    <th>Minecraft / Forge</th>
+                    <th>Online</th>
+                    <th>Queue</th>
+                    <th>Buffered</th>
+                    <th>Последний batch</th>
+                    <th>Всего событий</th>
+                    <th>IP</th>
+                    <th>Ошибка</th>
                 </tr>
                 </thead>
                 <tbody>
                 <?php foreach($serverRows as $row): ?>
+                    <?php
+                    $heartbeatAt = $row['last_heartbeat_at']
+                        ? strtotime((string)$row['last_heartbeat_at'])
+                        : false;
+                    $online = $heartbeatAt !== false
+                        && $heartbeatAt >= time() - 120;
+                    ?>
                     <tr>
-                        <td><?= Html::encode((string)($row['server_name'] ?: 'Удалённый сервер')) ?></td>
-                        <td><code><?= Html::encode((string)($row['server_code'] ?: '—')) ?></code></td>
-                        <td><?= (int)$row['events_5m'] ?></td>
-                        <td><?= number_format((int)$row['events_total'], 0, ',', ' ') ?></td>
-                        <td><?= Html::encode((string)$row['last_event']) ?></td>
+                        <td>
+                            <strong><?= Html::encode((string)$row['server_name']) ?></strong>
+                            <div class="small admin-muted">
+                                <code><?= Html::encode((string)$row['server_code']) ?></code>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge <?= $online ? 'bg-success' : 'bg-secondary' ?>">
+                                <?= $online ? 'Online' : 'Offline' ?>
+                            </span>
+                            <?php if($row['last_heartbeat_at']): ?>
+                                <div class="small admin-muted mt-1">
+                                    <?= Html::encode((string)$row['last_heartbeat_at']) ?>
+                                </div>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <?= Html::encode((string)($row['telemetry_version'] ?: '—')) ?>
+                        </td>
+                        <td>
+                            <div>
+                                <?= Html::encode((string)($row['minecraft_version'] ?: '—')) ?>
+                            </div>
+                            <div class="small admin-muted">
+                                <?= Html::encode((string)($row['forge_version'] ?: '—')) ?>
+                            </div>
+                        </td>
+                        <td><?= (int)$row['online_players'] ?></td>
+                        <td><?= (int)$row['queue_size'] ?></td>
+                        <td><?= (int)$row['buffered_events'] ?></td>
+                        <td>
+                            <?= Html::encode((string)($row['last_batch_at'] ?: '—')) ?>
+                            <div class="small admin-muted">
+                                size: <?= (int)$row['last_batch_size'] ?>
+                            </div>
+                        </td>
+                        <td>
+                            <?= number_format(
+                                (int)$row['events_received_total'],
+                                0,
+                                ',',
+                                ' '
+                            ) ?>
+                        </td>
+                        <td>
+                            <code><?= Html::encode((string)($row['last_seen_ip'] ?: '—')) ?></code>
+                        </td>
+                        <td>
+                            <?php if($row['last_error']): ?>
+                                <code
+                                    class="small"
+                                    title="<?= Html::encode((string)$row['last_error']) ?>"
+                                >
+                                    <?= Html::encode(
+                                        mb_substr(
+                                            (string)$row['last_error'],
+                                            0,
+                                            120
+                                        )
+                                    ) ?>
+                                </code>
+                            <?php else: ?>
+                                —
+                            <?php endif; ?>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
                 </tbody>
