@@ -1,6 +1,7 @@
 <?php
 
 use common\components\LanguageBootstrap;
+use common\models\Setting;
 use common\services\SiteCounterService;
 use frontend\assets\AppAsset;
 use yii\helpers\{Html, Url};
@@ -69,6 +70,12 @@ $lang = Yii::$app->language;
             <a href="<?= Url::to(['/vote/index']) ?>">
                 <?= Yii::t('app', 'Голосовать') ?>
             </a>
+
+            <?php if((string)Setting::value('ratings.public_enabled', '0') === '1'): ?>
+                <a href="<?= Url::to(['/ratings/index']) ?>">
+                    <?= Yii::t('app', 'Рейтинги') ?>
+                </a>
+            <?php endif; ?>
 
             <a href="<?= Url::to(['/page/view', 'slug' => 'rules']) ?>">
                 <?= Yii::t('app', 'Правила') ?>
