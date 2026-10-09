@@ -16,7 +16,7 @@ final class RatingController extends AdminController
     {
         return $this->render('index', [
             'rows' => (new AchievementProfileService())
-                ->leaderboard(200),
+                ->leaderboard(200, false),
             'publicEnabled' =>
                 (string)Setting::value(
                     'ratings.public_enabled',
