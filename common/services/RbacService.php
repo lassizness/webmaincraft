@@ -155,7 +155,10 @@ final class RbacService
 
     public function assertCanEditRole(int $actorId, string $roleName): void
     {
-        if(!Yii::$app->user->can('manageRbac'))
+        if(!Yii::$app->authManager->checkAccess(
+            $actorId,
+            'manageRbac'
+        ))
         {
             throw new ForbiddenHttpException();
         }
