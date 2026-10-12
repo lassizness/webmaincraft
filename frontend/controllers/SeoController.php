@@ -98,9 +98,10 @@ final class SeoController extends Controller
             ) === '1'
         )
         {
-            $this->addGeneric(
+            $this->addLocalized(
                 $entries,
                 '/ratings',
+                ['ru'],
                 null
             );
         }
