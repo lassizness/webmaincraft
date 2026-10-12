@@ -21,11 +21,33 @@ $seoDescription = SeoService::description(
 $seoTitle = $this->title
     ? $this->title . ' — ' . $app
     : $app;
-$seoCanonical = $seoIndexable
-    ? SeoService::canonicalUrl()
-    : null;
 $seoLanguages = $this->params['seoLanguages']
     ?? null;
+
+$seoCanonicalLanguage = $lang;
+
+if(
+    is_array($seoLanguages)
+    && $seoLanguages
+    && !in_array(
+        $seoCanonicalLanguage,
+        $seoLanguages,
+        true
+    )
+)
+{
+    $seoCanonicalLanguage =
+        in_array('ru', $seoLanguages, true)
+            ? 'ru'
+            : (string)reset($seoLanguages);
+}
+
+$seoCanonical = $seoIndexable
+    ? SeoService::canonicalUrl(
+        $seoCanonicalLanguage
+    )
+    : null;
+
 $seoAlternates = $seoIndexable
     ? SeoService::alternateUrls($seoLanguages)
     : [];
