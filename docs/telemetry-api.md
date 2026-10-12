@@ -366,7 +366,7 @@ them and report them through `unresolved_players`.
 
 ## Retention
 
-Raw `telemetry_events` are retained for 90 days by default.
+Raw `telemetry_events` are retained for 30 days by default.
 
 The following are not deleted by raw-event retention:
 
