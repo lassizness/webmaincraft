@@ -4,5 +4,5 @@
 12 * * * * www-data cd /opt/hivetech/portal && HIVETECH_ENV_FILE=/etc/hivetech/portal.env php yii privilege/notify 200 >> /var/log/hivetech-maintenance.log 2>&1
 17 * * * * www-data cd /opt/hivetech/portal && HIVETECH_ENV_FILE=/etc/hivetech/portal.env php yii maintenance/cleanup >> /var/log/hivetech-maintenance.log 2>&1
 */5 * * * * www-data cd /opt/hivetech/portal && HIVETECH_ENV_FILE=/etc/hivetech/portal.env php yii telemetry/close-sessions 300 >> /var/log/hivetech-telemetry.log 2>&1
-37 4 * * * www-data cd /opt/hivetech/portal && HIVETECH_ENV_FILE=/etc/hivetech/portal.env php yii telemetry/cleanup 90 10000 20 >> /var/log/hivetech-telemetry.log 2>&1
+37 * * * * www-data cd /opt/hivetech/portal && HIVETECH_ENV_FILE=/etc/hivetech/portal.env php yii telemetry/cleanup 30 10000 20 >> /var/log/hivetech-telemetry.log 2>&1
 * * * * * www-data cd /opt/hivetech/portal && HIVETECH_ENV_FILE=/etc/hivetech/portal.env php yii achievement/process-rewards 50 >> /var/log/hivetech-achievement.log 2>&1
