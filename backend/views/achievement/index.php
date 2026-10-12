@@ -27,7 +27,7 @@ $this->title = 'Достижения';
             class="form-control"
             name="category"
             value="<?= Html::encode($category) ?>"
-            placeholder="general, ic2, ae2, thermal, forestry"
+            placeholder="general, ae2, ic2, forestry, thermal, immersiveengineering, industrialforegoing"
         >
     </div>
     <div class="admin-search-actions">
