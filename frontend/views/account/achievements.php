@@ -308,8 +308,10 @@ $formatStat = static function(string $key, int $value): string {
                                     <div class="achievement-catalog-head">
                                         <?= AchievementIconService::render(
                                             $achievement,
-                                            !$isSecret,
-                                            'lg'
+                                            (bool)$unlock,
+                                            'lg',
+                                            null,
+                                            $isSecret
                                         ) ?>
 
                                         <div class="achievement-catalog-title">
