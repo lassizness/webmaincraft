@@ -60,6 +60,24 @@ final class AchievementProfileService
         return $result;
     }
 
+    public function recentUnlocksForUser(
+        int $userId,
+        int $limit = 8
+    ): array
+    {
+        return AchievementUnlock::find()
+            ->with('achievement')
+            ->where(['user_id' => $userId])
+            ->orderBy([
+                'unlocked_at' => SORT_DESC,
+                'id' => SORT_DESC,
+            ])
+            ->limit(
+                max(1, min(50, $limit))
+            )
+            ->all();
+    }
+
     public function progressForUser(int $userId): array
     {
         $rows = AchievementProgress::find()
@@ -100,6 +118,15 @@ final class AchievementProfileService
             ])
             ->one();
 
+        $lastUnlock = AchievementUnlock::find()
+            ->with('achievement')
+            ->where(['user_id' => $userId])
+            ->orderBy([
+                'unlocked_at' => SORT_DESC,
+                'id' => SORT_DESC,
+            ])
+            ->one();
+
         $total = (int)Achievement::find()
             ->where(['enabled' => 1])
             ->count();
@@ -108,6 +135,12 @@ final class AchievementProfileService
             'unlocked' => (int)($row['unlocked'] ?? 0),
             'score' => (int)($row['score'] ?? 0),
             'last_unlock' => $row['last_unlock'] ?? null,
+            'last_unlock_title' =>
+                $lastUnlock?->achievement?->title,
+            'last_unlock_rarity' =>
+                $lastUnlock?->achievement?->rarity,
+            'last_unlock_achievement_id' =>
+                $lastUnlock?->achievement_id,
             'total' => $total,
         ];
     }
