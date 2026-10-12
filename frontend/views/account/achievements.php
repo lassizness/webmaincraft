@@ -1,5 +1,6 @@
 <?php
 
+use common\services\AchievementIconService;
 use yii\helpers\{Html, Url};
 
 $this->title = Yii::t('ui', 'Достижения');
@@ -115,11 +116,105 @@ $formatStat = static function(string $key, int $value): string {
                         <div class="muted">Последнее достижение</div>
                         <div class="mt-2 fw-bold">
                             <?= Html::encode(
-                                $summary['last_unlock'] ?: 'Пока нет'
+                                $summary['last_unlock_title']
+                                ?: 'Пока нет'
                             ) ?>
                         </div>
+                        <?php if(!empty($summary['last_unlock'])): ?>
+                            <div class="small muted mt-1">
+                                <?= Html::encode(
+                                    Yii::$app->formatter->asDatetime(
+                                        $summary['last_unlock'],
+                                        'php:d.m.Y H:i'
+                                    )
+                                ) ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
+            </div>
+
+            <div class="ht-card mb-4 achievement-collection">
+                <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+                    <div>
+                        <div class="eyebrow mb-1">COLLECTION</div>
+                        <h3 class="mb-1">Полученные достижения</h3>
+                        <p class="muted mb-0">
+                            Твоя коллекция разблокированных достижений.
+                        </p>
+                    </div>
+
+                    <div class="achievement-collection-score">
+                        <strong><?= number_format($score, 0, ',', ' ') ?></strong>
+                        <span class="muted">Achievement Score</span>
+                    </div>
+                </div>
+
+                <?php if(!$unlocks): ?>
+                    <div class="achievement-empty">
+                        <div class="achievement-empty-icon">✦</div>
+                        <div>
+                            <strong>Пока ничего не разблокировано</strong>
+                            <div class="muted small mt-1">
+                                Первые достижения появятся здесь автоматически после выполнения условий.
+                            </div>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <div class="achievement-unlock-grid">
+                        <?php foreach(array_values($unlocks) as $unlock): ?>
+                            <?php $achievement = $unlock->achievement; ?>
+                            <?php if(!$achievement) continue; ?>
+
+                            <article class="achievement-unlock-card achievement-unlock-card--<?= Html::encode((string)$achievement->rarity) ?>">
+                                <?= AchievementIconService::render(
+                                    $achievement,
+                                    true,
+                                    'xl'
+                                ) ?>
+
+                                <div class="achievement-unlock-copy">
+                                    <div class="achievement-unlock-category">
+                                        <?= Html::encode(
+                                            $categoryLabels[$achievement->category]
+                                            ?? $achievement->category
+                                        ) ?>
+                                    </div>
+
+                                    <h4 class="achievement-unlock-title">
+                                        <?= Html::encode((string)$achievement->title) ?>
+                                    </h4>
+
+                                    <p class="achievement-unlock-description">
+                                        <?= Html::encode(
+                                            (string)(
+                                                $achievement->description
+                                                ?: 'Достижение получено.'
+                                            )
+                                        ) ?>
+                                    </p>
+
+                                    <div class="achievement-unlock-footer">
+                                        <span class="achievement-rarity achievement-rarity--<?= Html::encode((string)$achievement->rarity) ?>">
+                                            <?= Html::encode(strtoupper((string)$achievement->rarity)) ?>
+                                        </span>
+
+                                        <strong>+<?= (int)$unlock->score_awarded ?></strong>
+
+                                        <span class="muted">
+                                            <?= Html::encode(
+                                                Yii::$app->formatter->asDatetime(
+                                                    $unlock->unlocked_at,
+                                                    'php:d.m.Y H:i'
+                                                )
+                                            ) ?>
+                                        </span>
+                                    </div>
+                                </div>
+                            </article>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             </div>
 
             <div class="ht-card mb-4">
@@ -209,9 +304,17 @@ $formatStat = static function(string $key, int $value): string {
                             $isSecret = (bool)$achievement->hidden && !$unlock;
                             ?>
                             <div class="col-lg-6">
-                                <div class="ht-card h-100 border">
-                                    <div class="d-flex justify-content-between gap-3 align-items-start">
-                                        <div>
+                                <div class="ht-card h-100 border achievement-catalog-card <?= $unlock ? 'is-earned' : 'is-locked' ?>">
+                                    <div class="achievement-catalog-head">
+                                        <?= AchievementIconService::render(
+                                            $achievement,
+                                            (bool)$unlock,
+                                            'lg',
+                                            null,
+                                            $isSecret
+                                        ) ?>
+
+                                        <div class="achievement-catalog-title">
                                             <div class="small text-uppercase muted mb-1">
                                                 <?= Html::encode(
                                                     $categoryLabels[$achievement->category]
@@ -227,7 +330,7 @@ $formatStat = static function(string $key, int $value): string {
                                             </h4>
                                         </div>
 
-                                        <span class="badge text-bg-secondary">
+                                        <span class="achievement-rarity achievement-rarity--<?= Html::encode((string)$achievement->rarity) ?>">
                                             <?= Html::encode(
                                                 strtoupper($achievement->rarity)
                                             ) ?>
@@ -283,6 +386,15 @@ $formatStat = static function(string $key, int $value): string {
                             <tbody>
                             <?php foreach(array_slice(array_values($unlocks), 0, 20) as $unlock): ?>
                                 <tr>
+                                    <td style="width:58px">
+                                        <?php if($unlock->achievement): ?>
+                                            <?= AchievementIconService::render(
+                                                $unlock->achievement,
+                                                true,
+                                                'sm'
+                                            ) ?>
+                                        <?php endif; ?>
+                                    </td>
                                     <td>
                                         <strong>
                                             <?= Html::encode(
