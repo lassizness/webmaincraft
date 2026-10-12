@@ -49,6 +49,17 @@ final class AccountController extends Controller
         /** @var User $user */
         $user = Yii::$app->user->identity;
 
+        $achievementsEnabled =
+            (string)Setting::value(
+                'achievements.enabled',
+                '1'
+            ) === '1';
+
+        $achievementService =
+            $achievementsEnabled
+                ? new AchievementProfileService()
+                : null;
+
         return $this->render('index', [
             'user' => $user,
             'wallet' => (new WalletService())->wallet((int)$user->id),
@@ -64,6 +75,22 @@ final class AccountController extends Controller
                     'id' => SORT_ASC,
                 ])
                 ->all(),
+            'achievementsEnabled' =>
+                $achievementsEnabled,
+            'achievementSummary' =>
+                $achievementService
+                    ? $achievementService->summary(
+                        (int)$user->id
+                    )
+                    : null,
+            'recentAchievements' =>
+                $achievementService
+                    ? $achievementService
+                        ->recentUnlocksForUser(
+                            (int)$user->id,
+                            6
+                        )
+                    : [],
         ]);
     }
 
