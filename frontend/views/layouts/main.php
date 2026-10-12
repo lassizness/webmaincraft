@@ -2,7 +2,10 @@
 
 use common\components\LanguageBootstrap;
 use common\models\Setting;
-use common\services\SiteCounterService;
+use common\services\{
+    SeoService,
+    SiteCounterService
+};
 use frontend\assets\AppAsset;
 use yii\helpers\{Html, Url};
 
@@ -10,6 +13,42 @@ AppAsset::register($this);
 
 $app = Yii::$app->params['appName'];
 $lang = Yii::$app->language;
+
+$seoIndexable = SeoService::isIndexable();
+$seoDescription = SeoService::description(
+    $this->params['seoDescription'] ?? null
+);
+$seoTitle = $this->title
+    ? $this->title . ' — ' . $app
+    : $app;
+$seoCanonical = $seoIndexable
+    ? SeoService::canonicalUrl()
+    : null;
+$seoLanguages = $this->params['seoLanguages']
+    ?? null;
+$seoAlternates = $seoIndexable
+    ? SeoService::alternateUrls($seoLanguages)
+    : [];
+$seoImage = trim((string)(
+    $this->params['seoImage']
+    ?? SeoService::logoUrl()
+));
+$seoType = trim((string)(
+    $this->params['seoType']
+    ?? 'website'
+));
+$seoPublishedTime = trim((string)(
+    $this->params['seoPublishedTime']
+    ?? ''
+));
+
+if(!$seoIndexable)
+{
+    Yii::$app->response->headers->set(
+        'X-Robots-Tag',
+        'noindex, nofollow, noarchive'
+    );
+}
 ?>
 <?php $this->beginPage() ?>
 <!doctype html>
@@ -17,16 +56,104 @@ $lang = Yii::$app->language;
 <head>
     <meta charset="<?= Yii::$app->charset ?>">
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#04152d">
 
     <?php $this->registerCsrfMetaTags() ?>
 
-    <title>
-        <?= Html::encode(
-            $this->title
-                ? $this->title . ' — ' . $app
-                : $app
-        ) ?>
-    </title>
+    <title><?= Html::encode($seoTitle) ?></title>
+
+    <meta
+        name="description"
+        content="<?= Html::encode($seoDescription) ?>"
+    >
+    <meta
+        name="robots"
+        content="<?= $seoIndexable
+            ? 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
+            : 'noindex, nofollow, noarchive'
+        ?>"
+    >
+
+    <?php foreach(SeoService::verificationMeta() as $name => $value): ?>
+        <meta
+            name="<?= Html::encode($name) ?>"
+            content="<?= Html::encode($value) ?>"
+        >
+    <?php endforeach; ?>
+
+    <?php if($seoCanonical !== null): ?>
+        <link
+            rel="canonical"
+            href="<?= Html::encode($seoCanonical) ?>"
+        >
+
+        <?php foreach($seoAlternates as $language => $url): ?>
+            <link
+                rel="alternate"
+                hreflang="<?= Html::encode($language) ?>"
+                href="<?= Html::encode($url) ?>"
+            >
+        <?php endforeach; ?>
+    <?php endif; ?>
+
+    <meta property="og:site_name" content="<?= Html::encode($app) ?>">
+    <meta property="og:type" content="<?= Html::encode($seoType) ?>">
+    <meta property="og:title" content="<?= Html::encode($seoTitle) ?>">
+    <meta property="og:description" content="<?= Html::encode($seoDescription) ?>">
+    <meta property="og:locale" content="<?= Html::encode(SeoService::locale()) ?>">
+    <meta property="og:image" content="<?= Html::encode($seoImage) ?>">
+
+    <?php if($seoCanonical !== null): ?>
+        <meta property="og:url" content="<?= Html::encode($seoCanonical) ?>">
+    <?php endif; ?>
+
+    <?php foreach(array_keys($seoAlternates) as $language): ?>
+        <?php if($language !== 'x-default' && $language !== $lang): ?>
+            <meta
+                property="og:locale:alternate"
+                content="<?= Html::encode(
+                    SeoService::locale($language)
+                ) ?>"
+            >
+        <?php endif; ?>
+    <?php endforeach; ?>
+
+    <?php if($seoType === 'article' && $seoPublishedTime !== ''): ?>
+        <meta
+            property="article:published_time"
+            content="<?= Html::encode($seoPublishedTime) ?>"
+        >
+    <?php endif; ?>
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="<?= Html::encode($seoTitle) ?>">
+    <meta name="twitter:description" content="<?= Html::encode($seoDescription) ?>">
+    <meta name="twitter:image" content="<?= Html::encode($seoImage) ?>">
+
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+
+    <?php if($seoIndexable): ?>
+        <?php
+        $structuredData = array_merge(
+            SeoService::websiteStructuredData(),
+            (array)($this->params['seoStructuredData'] ?? [])
+        );
+        ?>
+        <?php foreach($structuredData as $schema): ?>
+            <script type="application/ld+json"><?= json_encode(
+                $schema,
+                JSON_UNESCAPED_UNICODE
+                | JSON_UNESCAPED_SLASHES
+                | JSON_HEX_TAG
+                | JSON_HEX_AMP
+                | JSON_HEX_APOS
+                | JSON_HEX_QUOT
+            ) ?></script>
+        <?php endforeach; ?>
+    <?php endif; ?>
 
     <?php $this->head() ?>
 
