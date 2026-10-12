@@ -1,5 +1,6 @@
 <?php
 
+use common\services\AchievementIconService;
 use yii\helpers\{Html, Url};
 
 $this->title = Yii::t('ui', 'Личный кабинет');
@@ -117,6 +118,86 @@ $translateShopText = static function (?string $value): string {
                 </div>
 
             </div>
+
+            <?php if($achievementsEnabled): ?>
+                <div class="ht-card mt-4 achievement-dashboard">
+                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+                        <div>
+                            <div class="eyebrow mb-1">ACHIEVEMENTS</div>
+                            <h3 class="mb-1">
+                                <?= Yii::t('ui', 'Полученные достижения') ?>
+                            </h3>
+                            <p class="muted mb-0">
+                                <?= (int)($achievementSummary['unlocked'] ?? 0) ?>
+                                из
+                                <?= (int)($achievementSummary['total'] ?? 0) ?>
+                                ·
+                                <?= number_format(
+                                    (int)($achievementSummary['score'] ?? 0),
+                                    0,
+                                    ',',
+                                    ' '
+                                ) ?>
+                                очков
+                            </p>
+                        </div>
+
+                        <a
+                            class="btn btn-outline-light"
+                            href="<?= Url::to(['/account/achievements']) ?>"
+                        >
+                            Все достижения
+                        </a>
+                    </div>
+
+                    <?php if(!$recentAchievements): ?>
+                        <div class="achievement-empty">
+                            <div class="achievement-empty-icon">✦</div>
+                            <div>
+                                <strong>Коллекция пока пуста</strong>
+                                <div class="muted small mt-1">
+                                    Играй на сервере, развивай технологии и открывай достижения.
+                                </div>
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <div class="achievement-earned-grid">
+                            <?php foreach($recentAchievements as $unlock): ?>
+                                <?php $achievement = $unlock->achievement; ?>
+                                <?php if(!$achievement) continue; ?>
+
+                                <div class="achievement-earned-card achievement-earned-card--<?= Html::encode((string)$achievement->rarity) ?>">
+                                    <?= AchievementIconService::render(
+                                        $achievement,
+                                        true,
+                                        'lg'
+                                    ) ?>
+
+                                    <div class="achievement-earned-copy">
+                                        <div class="achievement-earned-title">
+                                            <?= Html::encode((string)$achievement->title) ?>
+                                        </div>
+                                        <div class="achievement-earned-meta">
+                                            <span class="achievement-rarity achievement-rarity--<?= Html::encode((string)$achievement->rarity) ?>">
+                                                <?= Html::encode(strtoupper((string)$achievement->rarity)) ?>
+                                            </span>
+                                            <span>+<?= (int)$unlock->score_awarded ?></span>
+                                        </div>
+                                        <div class="small muted mt-1">
+                                            <?= Html::encode(
+                                                Yii::$app->formatter->asDatetime(
+                                                    $unlock->unlocked_at,
+                                                    'php:d.m.Y H:i'
+                                                )
+                                            ) ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
 
             <div class="ht-card mt-4">
                 <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
