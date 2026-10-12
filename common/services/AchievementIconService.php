@@ -131,11 +131,12 @@ final class AchievementIconService
         Achievement $achievement,
         bool $unlocked = true,
         string $size = 'md',
-        ?string $title = null
+        ?string $title = null,
+        bool $secret = false
     ): string {
-        $key = $unlocked
-            ? self::key($achievement)
-            : 'question';
+        $key = $secret
+            ? 'question'
+            : self::key($achievement);
 
         $rarity = in_array(
             (string)$achievement->rarity,
@@ -153,9 +154,9 @@ final class AchievementIconService
 
         $label = $title
             ?? (
-                $unlocked
-                    ? (string)$achievement->title
-                    : 'Секретное достижение'
+                $secret
+                    ? 'Секретное достижение'
+                    : (string)$achievement->title
             );
 
         $classes = [
