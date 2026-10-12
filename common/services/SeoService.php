@@ -271,7 +271,7 @@ final class SeoService
         return rtrim(
             (string)Yii::$app->params['appUrl'],
             '/'
-        ) . '/favicon-512.png';
+        ) . '/favicon-192.png';
     }
 
     public static function verificationMeta(): array
