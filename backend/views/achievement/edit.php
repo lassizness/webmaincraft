@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Achievement;
+use common\services\AchievementIconService;
 use yii\helpers\{Html, Url};
 use yii\widgets\ActiveForm;
 
@@ -109,9 +110,16 @@ foreach($rewards as $reward)
                     <?= $form->field($model, 'sort')->input('number') ?>
                 </div>
                 <div class="col-md-3">
-                    <?= $form->field($model, 'icon')->textInput([
-                        'placeholder' => 'icon key / URL',
-                    ]) ?>
+                    <?= $form->field($model, 'icon')->dropDownList(
+                        AchievementIconService::options(),
+                        [
+                            'prompt' => 'Автоматически по коду',
+                        ]
+                    ) ?>
+                    <div class="form-text">
+                        Векторный тематический значок. Если не выбран,
+                        значок определяется автоматически по code.
+                    </div>
                 </div>
                 <div class="col-md-6">
                     <?= $form->field($model, 'hidden')->checkbox() ?>
