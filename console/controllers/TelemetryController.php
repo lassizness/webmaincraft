@@ -30,7 +30,7 @@ final class TelemetryController extends Controller
     }
 
     public function actionCleanup(
-        int $retentionDays = 90,
+        int $retentionDays = 30,
         int $batchSize = 10000,
         int $maxBatches = 20
     ): int
