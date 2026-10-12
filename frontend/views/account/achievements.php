@@ -21,6 +21,9 @@ $categoryLabels = [
     'ae2' => 'AE2',
     'thermal' => 'Thermal',
     'forestry' => 'Forestry',
+    'immersiveengineering' => 'Immersive Engineering',
+    'industrialforegoing' => 'Industrial Foregoing',
+    'engineering' => 'Инженерия',
 ];
 
 $statLabels = [
