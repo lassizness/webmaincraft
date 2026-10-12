@@ -123,6 +123,7 @@ if(!Yii::$app->user->isGuest)
 <head>
     <meta charset="<?= Yii::$app->charset ?>">
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="robots" content="noindex,nofollow,noarchive">
     <?php $this->registerCsrfMetaTags() ?>
     <title><?= Html::encode(
         $this->title

@@ -24,6 +24,23 @@ final class LanguageBootstrap implements BootstrapInterface
         }
 
         /*
+         * 0. Язык в URL имеет приоритет для поисковых роботов,
+         * sitemap/hreflang и явных ссылок на локализованную версию.
+         * Он не записывается в cookie автоматически.
+         */
+        $urlLanguage = trim((string)$app->request->get(
+            'lang',
+            ''
+        ));
+
+        if(isset(self::LANGUAGES[$urlLanguage]))
+        {
+            $app->language = $urlLanguage;
+            $app->sourceLanguage = 'ru';
+            return;
+        }
+
+        /*
          * 1. Ручной выбор пользователя всегда имеет приоритет.
          */
         $cookieLanguage = trim((string)$app->request->cookies->getValue(

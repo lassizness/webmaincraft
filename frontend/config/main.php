@@ -60,6 +60,8 @@ return [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                'robots.txt' => 'seo/robots',
+                'sitemap.xml' => 'seo/sitemap',
                 'language/<lang:ru|en|de>' => 'language/switch',
                 '' => 'site/index',
                 'login' => 'auth/login',

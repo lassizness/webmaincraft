@@ -1,1 +1,33 @@
-<?php use yii\helpers\Html;$this->title=$model->meta_title ?: $model->title;?><div class="container ht-section"><article class="ht-card"><h1><?= Html::encode($model->title) ?></h1><div class="mt-4 content-body"><?= Yii::$app->formatter->asHtml($model->body) ?></div></article></div>
+<?php
+
+use common\services\SeoService;
+use yii\helpers\Html;
+
+$this->title =
+    $model->meta_title
+    ?: $model->title;
+
+$this->params['seoDescription'] =
+    $model->meta_description
+    ?: SeoService::plainText(
+        (string)$model->body,
+        220
+    );
+
+$this->params['seoLanguages'] =
+    SeoService::contentLanguages(
+        'page',
+        (int)$model->id
+    );
+
+?>
+
+<div class="container ht-section">
+    <article class="ht-card">
+        <h1><?= Html::encode($model->title) ?></h1>
+
+        <div class="mt-4 content-body">
+            <?= Yii::$app->formatter->asHtml($model->body) ?>
+        </div>
+    </article>
+</div>

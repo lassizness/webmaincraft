@@ -2,6 +2,13 @@
 
 use yii\helpers\{Html, Url};
 
+$this->title = match(Yii::$app->language)
+{
+    'ru' => 'Технологический Minecraft-сервер 1.12.2',
+    'de' => 'Technischer Minecraft-Server 1.12.2',
+    default => 'Technology Minecraft Server 1.12.2',
+};
+
 ?>
 
 <section class="ht-hero">

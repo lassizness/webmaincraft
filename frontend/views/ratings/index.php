@@ -3,6 +3,7 @@
 use yii\helpers\{Html, Url};
 
 $this->title = 'Рейтинги';
+$this->params['seoLanguages'] = ['ru'];
 ?>
 
 <div class="container ht-section">
