@@ -362,7 +362,11 @@ $renderAchievementDetail = static function(
             <?php else: ?>
                 <div class="achievement-browser">
                     <div class="achievement-toolbar">
-                        <div class="achievement-status-tabs" role="group" aria-label="Фильтр достижений">
+                        <div
+                            class="achievement-status-tabs"
+                            role="group"
+                            aria-label="<?= Html::encode(Yii::t('ui', 'Фильтр достижений')) ?>"
+                        >
                             <button
                                 class="achievement-filter is-active"
                                 type="button"
@@ -413,7 +417,7 @@ $renderAchievementDetail = static function(
                             <select
                                 class="form-select achievement-sort"
                                 data-achievement-sort
-                                aria-label="Сортировка достижений"
+                                aria-label="<?= Html::encode(Yii::t('ui', 'Сортировка достижений')) ?>"
                             >
                                 <option value="catalog"><?= Yii::t('ui', 'По каталогу') ?></option>
                                 <option value="progress"><?= Yii::t('ui', 'По прогрессу') ?></option>
@@ -564,7 +568,9 @@ $renderAchievementDetail = static function(
                                         data-achievement-rarity="<?= (int)($rarityWeight[$achievement->rarity] ?? 0) ?>"
                                         data-achievement-title="<?= Html::encode(mb_strtolower($displayTitle)) ?>"
                                         data-achievement-order="<?= (int)$index ?>"
-                                        aria-label="<?= Html::encode('Открыть достижение ' . $displayTitle) ?>"
+                                        aria-label="<?= Html::encode(Yii::t('ui', 'Открыть достижение {title}', [
+                                            'title' => $displayTitle,
+                                        ])) ?>"
                                     >
                                         <div class="achievement-browser-card-top">
                                             <?= AchievementIconService::render(
@@ -776,6 +782,7 @@ $renderAchievementDetail = static function(
 $achievementJsTranslations = [
     'emptyTitle' => Yii::t('ui', 'Нет достижений по фильтру'),
     'emptyText' => Yii::t('ui', 'Измени категорию или параметры поиска.'),
+    'locale' => Yii::$app->language,
 ];
 $achievementJsJson = json_encode(
     $achievementJsTranslations,
@@ -866,7 +873,7 @@ $this->registerJs(<<<JS
                 if (mode === 'name') {
                     return a.dataset.achievementTitle.localeCompare(
                         b.dataset.achievementTitle,
-                        'ru'
+                        i18n.locale
                     );
                 }
 
@@ -888,7 +895,7 @@ $this->registerJs(<<<JS
 
     function applyFilters() {
         const query = search
-            ? search.value.trim().toLocaleLowerCase('ru')
+            ? search.value.trim().toLocaleLowerCase(i18n.locale)
             : '';
 
         let visible = 0;
