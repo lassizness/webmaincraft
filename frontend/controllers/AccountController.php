@@ -91,6 +91,12 @@ final class AccountController extends Controller
                             6
                         )
                     : [],
+            'achievementStats' =>
+                $achievementService
+                    ? $achievementService->statsForUser(
+                        (int)$user->id
+                    )
+                    : [],
         ]);
     }
 
@@ -141,7 +147,6 @@ final class AccountController extends Controller
             'catalog' => $service->catalog(),
             'unlocks' => $service->unlocksForUser((int)$user->id),
             'progress' => $service->progressForUser((int)$user->id),
-            'stats' => $service->statsForUser((int)$user->id),
             'summary' => $service->summary((int)$user->id),
             'rank' => $service->rankForUser((int)$user->id),
             'profileSettings' => $profileSettings,
