@@ -13,18 +13,18 @@ $percent = $totalCount > 0
     : 0;
 
 $categoryLabels = [
-    'general' => 'Общие',
-    'exploration' => 'Исследование',
-    'mining' => 'Добыча',
-    'building' => 'Строительство',
-    'combat' => 'Бой',
+    'general' => Yii::t('ui', 'Общие'),
+    'exploration' => Yii::t('ui', 'Исследование'),
+    'mining' => Yii::t('ui', 'Добыча'),
+    'building' => Yii::t('ui', 'Строительство'),
+    'combat' => Yii::t('ui', 'Бой'),
     'ae2' => 'AE2',
     'ic2' => 'IC2',
     'forestry' => 'Forestry',
     'thermal' => 'Thermal',
     'immersiveengineering' => 'Immersive Engineering',
     'industrialforegoing' => 'Industrial Foregoing',
-    'engineering' => 'Инженерия',
+    'engineering' => Yii::t('ui', 'Инженерия'),
 ];
 
 $categoryOrder = [
@@ -41,29 +41,6 @@ $categoryOrder = [
     'industrialforegoing',
     'engineering',
 ];
-
-$statLabels = [
-    'playtime_seconds' => 'Игровое время',
-    'blocks.break.total' => 'Блоков сломано',
-    'blocks.place.total' => 'Блоков установлено',
-    'entity.kill.total' => 'Мобов убито',
-    'player.death.total' => 'Смертей',
-    'item.craft.total' => 'Предметов создано',
-    'item.smelt.total' => 'Предметов переплавлено',
-    'dimensions.visited' => 'Измерений посещено',
-];
-
-$formatStat = static function(string $key, int $value): string {
-    if($key === 'playtime_seconds')
-    {
-        $hours = intdiv($value, 3600);
-        $minutes = intdiv($value % 3600, 60);
-
-        return $hours . ' ч ' . $minutes . ' мин';
-    }
-
-    return number_format($value, 0, ',', ' ');
-};
 
 $catalogMeta = [];
 $categoryCounts = [];
@@ -160,16 +137,22 @@ $renderAchievementDetail = static function(
 
     $title = $isSecret
         ? '???'
-        : (string)$achievement->title;
+        : $achievement->getDisplayTitle();
 
     $description = $isSecret
         ? (
-            $achievement->hint
-            ?: 'Секретное достижение. Условие откроется после выполнения.'
+            $achievement->getDisplayHint()
+            ?: Yii::t(
+                'ui',
+                'Секретное достижение. Условие откроется после выполнения.'
+            )
         )
         : (
-            $achievement->description
-            ?: 'Описание достижения пока не задано.'
+            $achievement->getDisplayDescription()
+            ?: Yii::t(
+                'ui',
+                'Описание достижения пока не задано.'
+            )
         );
 
     $categoryLabel =
@@ -205,7 +188,9 @@ $renderAchievementDetail = static function(
             </span>
 
             <span class="achievement-detail-score">
-                +<?= (int)$achievement->score ?> очков
+                <?= Yii::t('ui', '+{score} очков', [
+                    'score' => (int)$achievement->score,
+                ]) ?>
             </span>
         </div>
 
@@ -215,7 +200,7 @@ $renderAchievementDetail = static function(
 
         <div class="achievement-detail-progress">
             <div class="d-flex justify-content-between gap-3 mb-2">
-                <span class="muted">Прогресс</span>
+                <span class="muted"><?= Yii::t('ui', 'Прогресс') ?></span>
                 <strong><?= $progressPercent ?>%</strong>
             </div>
 
@@ -233,30 +218,31 @@ $renderAchievementDetail = static function(
 
         <div class="achievement-detail-facts">
             <div>
-                <span>Статус</span>
+                <span><?= Yii::t('ui', 'Статус') ?></span>
                 <strong>
                     <?= $unlock
-                        ? 'Получено'
+                        ? Yii::t('ui', 'Получено')
                         : (
                             $progressPercent > 0
-                                ? 'В процессе'
-                                : 'Не получено'
+                                ? Yii::t('ui', 'В процессе')
+                                : Yii::t('ui', 'Не получено')
                         )
                     ?>
                 </strong>
             </div>
 
             <div>
-                <span>Награда</span>
+                <span><?= Yii::t('ui', 'Награда') ?></span>
                 <strong>
-                    <?= (int)$achievement->score ?>
-                    Achievement Score
+                    <?= Yii::t('ui', '{score} Achievement Score', [
+                        'score' => (int)$achievement->score,
+                    ]) ?>
                 </strong>
             </div>
 
             <?php if($achievement->season): ?>
                 <div>
-                    <span>Сезон</span>
+                    <span><?= Yii::t('ui', 'Сезон') ?></span>
                     <strong>
                         <?= Html::encode(
                             (string)$achievement->season->title
@@ -267,7 +253,7 @@ $renderAchievementDetail = static function(
 
             <?php if($unlock): ?>
                 <div>
-                    <span>Получено</span>
+                    <span><?= Yii::t('ui', 'Получено') ?></span>
                     <strong>
                         <?= Html::encode(
                             Yii::$app->formatter->asDatetime(
@@ -294,10 +280,12 @@ $renderAchievementDetail = static function(
             <div class="achievement-hero">
                 <div class="achievement-hero-copy">
                     <div class="eyebrow mb-2">HIVETECH PROGRESS</div>
-                    <h1>Достижения</h1>
+                    <h1><?= Yii::t('ui', 'Достижения') ?></h1>
                     <p>
-                        Развивайся, исследуй сборку и собирай коллекцию
-                        достижений во всех технологических ветках.
+                        <?= Yii::t(
+                            'ui',
+                            'Развивайся, исследуй сборку и собирай коллекцию достижений во всех технологических ветках.'
+                        ) ?>
                     </p>
                 </div>
 
@@ -306,7 +294,7 @@ $renderAchievementDetail = static function(
                         class="btn btn-outline-light achievement-hero-rating"
                         href="<?= Url::to(['/ratings/index']) ?>"
                     >
-                        Открыть рейтинг
+                        <?= Yii::t('ui', 'Открыть рейтинг') ?>
                     </a>
                 <?php endif; ?>
 
@@ -318,7 +306,7 @@ $renderAchievementDetail = static function(
                                 <?= $unlockedCount ?>
                                 <small>/ <?= $totalCount ?></small>
                             </strong>
-                            <span>Получено</span>
+                            <span><?= Yii::t('ui', 'Получено') ?></span>
                         </div>
                     </div>
 
@@ -341,7 +329,7 @@ $renderAchievementDetail = static function(
                         <span class="achievement-summary-mark">◒</span>
                         <div>
                             <strong><?= $percent ?>%</strong>
-                            <span>Общий прогресс</span>
+                            <span><?= Yii::t('ui', 'Общий прогресс') ?></span>
                         </div>
                     </div>
 
@@ -356,8 +344,8 @@ $renderAchievementDetail = static function(
                             </strong>
                             <span>
                                 <?= $publicRatingsEnabled
-                                    ? 'Место в рейтинге'
-                                    : 'Рейтинг отключён'
+                                    ? Yii::t('ui', 'Место в рейтинге')
+                                    : Yii::t('ui', 'Рейтинг отключён')
                                 ?>
                             </span>
                         </div>
@@ -368,7 +356,7 @@ $renderAchievementDetail = static function(
             <?php if(!$catalog): ?>
                 <div class="ht-card">
                     <div class="muted">
-                        Каталог пока пуст. Достижения создаются в админ-панели.
+                        <?= Yii::t('ui', 'Каталог пока пуст. Достижения создаются в админ-панели.') ?>
                     </div>
                 </div>
             <?php else: ?>
@@ -380,7 +368,7 @@ $renderAchievementDetail = static function(
                                 type="button"
                                 data-achievement-status="all"
                             >
-                                Все
+                                <?= Yii::t('ui', 'Все') ?>
                                 <span><?= (int)$statusCounts['all'] ?></span>
                             </button>
 
@@ -389,7 +377,7 @@ $renderAchievementDetail = static function(
                                 type="button"
                                 data-achievement-status="unlocked"
                             >
-                                Полученные
+                                <?= Yii::t('ui', 'Полученные') ?>
                                 <span><?= (int)$statusCounts['unlocked'] ?></span>
                             </button>
 
@@ -398,7 +386,7 @@ $renderAchievementDetail = static function(
                                 type="button"
                                 data-achievement-status="progress"
                             >
-                                В процессе
+                                <?= Yii::t('ui', 'В процессе') ?>
                                 <span><?= (int)$statusCounts['progress'] ?></span>
                             </button>
 
@@ -407,7 +395,7 @@ $renderAchievementDetail = static function(
                                 type="button"
                                 data-achievement-status="locked"
                             >
-                                Недоступные
+                                <?= Yii::t('ui', 'Недоступные') ?>
                                 <span><?= (int)$statusCounts['locked'] ?></span>
                             </button>
                         </div>
@@ -417,7 +405,7 @@ $renderAchievementDetail = static function(
                                 <span aria-hidden="true">⌕</span>
                                 <input
                                     type="search"
-                                    placeholder="Поиск достижений..."
+                                    placeholder="<?= Html::encode(Yii::t('ui', 'Поиск достижений...')) ?>"
                                     data-achievement-search
                                 >
                             </label>
@@ -427,10 +415,10 @@ $renderAchievementDetail = static function(
                                 data-achievement-sort
                                 aria-label="Сортировка достижений"
                             >
-                                <option value="catalog">По каталогу</option>
-                                <option value="progress">По прогрессу</option>
-                                <option value="rarity">По редкости</option>
-                                <option value="name">По названию</option>
+                                <option value="catalog"><?= Yii::t('ui', 'По каталогу') ?></option>
+                                <option value="progress"><?= Yii::t('ui', 'По прогрессу') ?></option>
+                                <option value="rarity"><?= Yii::t('ui', 'По редкости') ?></option>
+                                <option value="name"><?= Yii::t('ui', 'По названию') ?></option>
                             </select>
                         </div>
                     </div>
@@ -443,7 +431,7 @@ $renderAchievementDetail = static function(
                         >
                             <span class="achievement-category-glyph">✦</span>
                             <span>
-                                Все
+                                <?= Yii::t('ui', 'Все') ?>
                                 <small>
                                     <?= $unlockedCount ?>/<?= $totalCount ?>
                                 </small>
@@ -504,13 +492,13 @@ $renderAchievementDetail = static function(
                                 <?= $totalCount ?>
                             </strong>
                             <span class="muted">
-                                достижений найдено
+                                <?= Yii::t('ui', 'достижений найдено') ?>
                             </span>
                         </div>
 
                         <?php if(!empty($summary['last_unlock_title'])): ?>
                             <div class="muted">
-                                Последнее:
+                                <?= Yii::t('ui', 'Последнее:') ?>
                                 <strong class="text-light">
                                     <?= Html::encode(
                                         (string)$summary['last_unlock_title']
@@ -538,15 +526,15 @@ $renderAchievementDetail = static function(
                                         && !$unlock;
                                     $displayTitle = $isSecret
                                         ? '???'
-                                        : (string)$achievement->title;
+                                        : $achievement->getDisplayTitle();
                                     $displayDescription = $isSecret
                                         ? (
-                                            $achievement->hint
-                                            ?: 'Секретное достижение'
+                                            $achievement->getDisplayHint()
+                                            ?: Yii::t('ui', 'Секретное достижение')
                                         )
                                         : (
-                                            $achievement->description
-                                            ?: 'Без описания'
+                                            $achievement->getDisplayDescription()
+                                            ?: Yii::t('ui', 'Без описания')
                                         );
                                     $searchText = $isSecret
                                         ? implode(' ', [
@@ -556,8 +544,8 @@ $renderAchievementDetail = static function(
                                             ] ?? $achievement->category,
                                         ])
                                         : implode(' ', [
-                                            $achievement->title,
-                                            $achievement->description,
+                                            $achievement->getDisplayTitle(),
+                                            $achievement->getDisplayDescription(),
                                             $categoryLabels[
                                                 $achievement->category
                                             ] ?? $achievement->category,
@@ -606,7 +594,7 @@ $renderAchievementDetail = static function(
                                             <?php if($unlock): ?>
                                                 <span
                                                     class="achievement-complete-mark"
-                                                    title="Получено"
+                                                    title="<?= Html::encode(Yii::t('ui', 'Получено')) ?>"
                                                 >✓</span>
                                             <?php endif; ?>
                                         </div>
@@ -682,10 +670,10 @@ $renderAchievementDetail = static function(
                                 <div class="achievement-empty-icon">⌕</div>
                                 <div>
                                     <strong>
-                                        Ничего не найдено
+                                        <?= Yii::t('ui', 'Ничего не найдено') ?>
                                     </strong>
                                     <div class="muted small mt-1">
-                                        Попробуй изменить фильтр или строку поиска.
+                                        <?= Yii::t('ui', 'Попробуй изменить фильтр или строку поиска.') ?>
                                     </div>
                                 </div>
                             </div>
@@ -733,126 +721,10 @@ $renderAchievementDetail = static function(
                 </div>
             <?php endif; ?>
 
-            <div class="achievement-secondary-grid mt-4">
-                <div class="ht-card">
-                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
-                        <div>
-                            <h3 class="mb-1">
-                                Игровая статистика
-                            </h3>
-                            <p class="muted mb-0">
-                                Долговременные показатели HiveTechTelemetry.
-                            </p>
-                        </div>
-                    </div>
-
-                    <?php if(!$stats): ?>
-                        <div class="muted">
-                            Телеметрия по этому игроку пока не поступала.
-                        </div>
-                    <?php else: ?>
-                        <div class="achievement-stat-grid">
-                            <?php
-                            $shown = 0;
-
-                            foreach($statLabels as $key => $label):
-                                if(!array_key_exists($key, $stats))
-                                {
-                                    continue;
-                                }
-
-                                $shown++;
-                            ?>
-                                <div class="achievement-stat">
-                                    <span>
-                                        <?= Html::encode($label) ?>
-                                    </span>
-                                    <strong>
-                                        <?= Html::encode(
-                                            $formatStat(
-                                                $key,
-                                                (int)$stats[$key]
-                                            )
-                                        ) ?>
-                                    </strong>
-                                </div>
-                            <?php endforeach; ?>
-
-                            <?php if($shown === 0): ?>
-                                <?php foreach(array_slice($stats, 0, 8, true) as $key => $value): ?>
-                                    <div class="achievement-stat">
-                                        <span class="font-monospace">
-                                            <?= Html::encode((string)$key) ?>
-                                        </span>
-                                        <strong>
-                                            <?= number_format(
-                                                (int)$value,
-                                                0,
-                                                ',',
-                                                ' '
-                                            ) ?>
-                                        </strong>
-                                    </div>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </div>
-                    <?php endif; ?>
-                </div>
-
-                <div class="ht-card">
-                    <h3 class="mb-1">Последние достижения</h3>
-                    <p class="muted mb-3">
-                        Последние разблокировки персонажа.
-                    </p>
-
-                    <?php if(!$unlocks): ?>
-                        <div class="muted">
-                            Пока ничего не разблокировано.
-                        </div>
-                    <?php else: ?>
-                        <div class="achievement-recent-list">
-                            <?php foreach(array_slice(array_values($unlocks), 0, 6) as $unlock): ?>
-                                <?php if(!$unlock->achievement) continue; ?>
-                                <div class="achievement-recent-row">
-                                    <?= AchievementIconService::render(
-                                        $unlock->achievement,
-                                        true,
-                                        'sm'
-                                    ) ?>
-
-                                    <div>
-                                        <strong>
-                                            <?= Html::encode(
-                                                (string)$unlock
-                                                    ->achievement
-                                                    ->title
-                                            ) ?>
-                                        </strong>
-                                        <span class="muted">
-                                            <?= Html::encode(
-                                                Yii::$app->formatter
-                                                    ->asDatetime(
-                                                        $unlock->unlocked_at,
-                                                        'php:d.m.Y H:i'
-                                                    )
-                                            ) ?>
-                                        </span>
-                                    </div>
-
-                                    <b>
-                                        +<?= (int)$unlock->score_awarded ?>
-                                    </b>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-
-            <div class="ht-card mt-4">
-                <h3 class="mb-1">Публичный профиль</h3>
+            <div class="ht-card mt-4 achievement-profile-settings">
+                <h3 class="mb-1"><?= Yii::t('ui', 'Публичный профиль') ?></h3>
                 <p class="muted mb-3">
-                    Эти настройки применяются только если публичные рейтинги включены администрацией проекта.
+                    <?= Yii::t('ui', 'Эти настройки применяются только если публичные рейтинги включены администрацией проекта.') ?>
                 </p>
 
                 <?= Html::beginForm(['/account/achievements'], 'post') ?>
@@ -863,7 +735,7 @@ $renderAchievementDetail = static function(
                                 (bool)$profileSettings->public_achievements,
                                 [
                                     'value' => '1',
-                                    'label' => 'Показывать достижения',
+                                    'label' => Yii::t('ui', 'Показывать достижения'),
                                 ]
                             ) ?>
                         </div>
@@ -874,7 +746,7 @@ $renderAchievementDetail = static function(
                                 (bool)$profileSettings->public_playtime,
                                 [
                                     'value' => '1',
-                                    'label' => 'Показывать игровое время',
+                                    'label' => Yii::t('ui', 'Показывать игровое время'),
                                 ]
                             ) ?>
                         </div>
@@ -885,14 +757,14 @@ $renderAchievementDetail = static function(
                                 (bool)$profileSettings->public_ranking,
                                 [
                                     'value' => '1',
-                                    'label' => 'Участвовать в рейтинге',
+                                    'label' => Yii::t('ui', 'Участвовать в рейтинге'),
                                 ]
                             ) ?>
                         </div>
                     </div>
 
                     <button class="btn btn-primary mt-3" type="submit">
-                        Сохранить
+                        <?= Yii::t('ui', 'Сохранить') ?>
                     </button>
                 <?= Html::endForm() ?>
             </div>
@@ -901,8 +773,18 @@ $renderAchievementDetail = static function(
 </div>
 
 <?php
-$this->registerJs(<<<'JS'
+$achievementJsTranslations = [
+    'emptyTitle' => Yii::t('ui', 'Нет достижений по фильтру'),
+    'emptyText' => Yii::t('ui', 'Измени категорию или параметры поиска.'),
+];
+$achievementJsJson = json_encode(
+    $achievementJsTranslations,
+    JSON_UNESCAPED_UNICODE
+    | JSON_UNESCAPED_SLASHES
+);
+$this->registerJs(<<<JS
 (function () {
+    const i18n = {$achievementJsJson};
     const root = document.querySelector('.achievement-browser');
 
     if (!root) {
@@ -1056,8 +938,8 @@ $this->registerJs(<<<'JS'
             detail.innerHTML =
                 '<div class="achievement-detail-empty">'
                 + '<div class="achievement-empty-icon">⌕</div>'
-                + '<strong>Нет достижений по фильтру</strong>'
-                + '<span>Измени категорию или параметры поиска.</span>'
+                + '<strong>' + i18n.emptyTitle + '</strong>'
+                + '<span>' + i18n.emptyText + '</span>'
                 + '</div>';
         }
     }
