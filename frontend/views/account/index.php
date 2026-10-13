@@ -242,7 +242,7 @@ $formatAchievementStat = static function (
                     <div class="ht-card achievement-dashboard">
                         <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
                             <div>
-                                <div class="eyebrow mb-1">ACHIEVEMENTS</div>
+                                <div class="eyebrow mb-1"><?= Yii::t('ui', 'ДОСТИЖЕНИЯ') ?></div>
                                 <h3 class="mb-1">
                                     <?= Yii::t('ui', 'Последние достижения') ?>
                                 </h3>
@@ -324,7 +324,7 @@ $formatAchievementStat = static function (
                 <section class="ht-card account-activity-card account-vote-panel" aria-labelledby="account-vote-heading">
                     <div class="account-activity-heading">
                         <div class="account-activity-heading-copy">
-                            <span class="eyebrow">COMMUNITY</span>
+                            <span class="eyebrow"><?= Yii::t('ui', 'СООБЩЕСТВО') ?></span>
                             <h3 id="account-vote-heading">
                                 <?= Yii::t('ui', 'Голосование за сервер') ?>
                             </h3>
@@ -374,7 +374,7 @@ $formatAchievementStat = static function (
                 <section class="ht-card account-activity-card account-purchases-panel" aria-labelledby="account-purchases-heading">
                     <div class="account-activity-heading">
                         <div class="account-activity-heading-copy">
-                            <span class="eyebrow">STORE</span>
+                            <span class="eyebrow"><?= Yii::t('ui', 'МАГАЗИН') ?></span>
                             <h3 id="account-purchases-heading">
                                 <?= Yii::t('ui', 'Последние покупки') ?>
                             </h3>

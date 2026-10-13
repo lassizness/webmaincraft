@@ -18,13 +18,21 @@ $categoryLabels = [
     'mining' => Yii::t('ui', 'Добыча'),
     'building' => Yii::t('ui', 'Строительство'),
     'combat' => Yii::t('ui', 'Бой'),
-    'ae2' => 'AE2',
-    'ic2' => 'IC2',
-    'forestry' => 'Forestry',
-    'thermal' => 'Thermal',
-    'immersiveengineering' => 'Immersive Engineering',
-    'industrialforegoing' => 'Industrial Foregoing',
+    'ae2' => Yii::t('ui', 'AE2 · Хранение'),
+    'ic2' => Yii::t('ui', 'IC2 · Энергетика'),
+    'forestry' => Yii::t('ui', 'Forestry · Пчеловодство'),
+    'thermal' => Yii::t('ui', 'Thermal · Механизмы'),
+    'immersiveengineering' => Yii::t('ui', 'Immersive Engineering · Промышленность'),
+    'industrialforegoing' => Yii::t('ui', 'Industrial Foregoing · Автоматизация'),
     'engineering' => Yii::t('ui', 'Инженерия'),
+];
+
+$rarityLabels = [
+    'common' => Yii::t('ui', 'Обычное'),
+    'uncommon' => Yii::t('ui', 'Необычное'),
+    'rare' => Yii::t('ui', 'Редкое'),
+    'epic' => Yii::t('ui', 'Эпическое'),
+    'legendary' => Yii::t('ui', 'Легендарное'),
 ];
 
 $categoryOrder = [
@@ -130,7 +138,7 @@ $renderAchievementDetail = static function(
     $progressItem,
     int $progressPercent,
     array $categoryLabels
-): string {
+) use ($rarityLabels): string {
     $isSecret =
         (bool)$achievement->hidden
         && !$unlock;
@@ -183,7 +191,8 @@ $renderAchievementDetail = static function(
         <div class="achievement-detail-badges">
             <span class="achievement-rarity achievement-rarity--<?= Html::encode((string)$achievement->rarity) ?>">
                 <?= Html::encode(
-                    strtoupper((string)$achievement->rarity)
+                    $rarityLabels[(string)$achievement->rarity]
+                    ?? strtoupper((string)$achievement->rarity)
                 ) ?>
             </span>
 
@@ -279,7 +288,7 @@ $renderAchievementDetail = static function(
         <section class="achievement-page">
             <div class="achievement-hero">
                 <div class="achievement-hero-copy">
-                    <div class="eyebrow mb-2">HIVETECH PROGRESS</div>
+                    <div class="eyebrow mb-2"><?= Yii::t('ui', 'ПРОГРЕСС HIVETECH') ?></div>
                     <h1><?= Yii::t('ui', 'Достижения') ?></h1>
                     <p>
                         <?= Yii::t(
@@ -459,6 +468,7 @@ $renderAchievementDetail = static function(
                                 class="achievement-category"
                                 type="button"
                                 data-achievement-category="<?= Html::encode($category) ?>"
+                                title="<?= Html::encode($categoryLabels[$category] ?? $category) ?>"
                             >
                                 <span class="achievement-category-glyph">
                                     <?= match($category) {
@@ -631,9 +641,8 @@ $renderAchievementDetail = static function(
                                         <div class="achievement-browser-card-footer">
                                             <span class="achievement-rarity achievement-rarity--<?= Html::encode((string)$achievement->rarity) ?>">
                                                 <?= Html::encode(
-                                                    strtoupper(
-                                                        (string)$achievement->rarity
-                                                    )
+                                                    $rarityLabels[(string)$achievement->rarity]
+                                                    ?? strtoupper((string)$achievement->rarity)
                                                 ) ?>
                                             </span>
 
