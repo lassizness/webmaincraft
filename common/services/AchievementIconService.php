@@ -156,7 +156,7 @@ final class AchievementIconService
             ?? (
                 $secret
                     ? 'Секретное достижение'
-                    : (string)$achievement->title
+                    : $achievement->getDisplayTitle()
             );
 
         $classes = [
