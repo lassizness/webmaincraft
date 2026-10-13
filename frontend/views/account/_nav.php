@@ -1,56 +1,56 @@
 <?php
 
 use common\models\Setting;
-use yii\helpers\Url;
+use yii\helpers\{Html, Url};
+
+$route = Yii::$app->controller?->route ?? '';
+
+$items = [
+    ['account/index', ['/account/index'], Yii::t('ui', 'Обзор')],
+    ['account/settings', ['/account/settings'], Yii::t('ui', 'Профиль')],
+    ['account/security', ['/account/security'], Yii::t('ui', 'Безопасность')],
+    ['account/sessions', ['/account/sessions'], Yii::t('ui', 'Сессии')],
+    ['skin/index', ['/skin/index'], Yii::t('ui', 'Персонализация персонажа')],
+    ['wallet/index', ['/wallet/index'], Yii::t('ui', 'Баланс')],
+    ['privilege/index', ['/privilege/index'], Yii::t('ui', 'Статус')],
+    ['shop/promo', ['/shop/promo'], Yii::t('ui', 'Промокод')],
+    ['vote/index', ['/vote/index'], Yii::t('ui', 'Голосование')],
+];
+
+if((string)Setting::value('achievements.enabled', '1') === '1')
+{
+    $items[] = [
+        'account/achievements',
+        ['/account/achievements'],
+        Yii::t('ui', 'Достижения'),
+    ];
+}
+
+$items[] = [
+    'support/index',
+    ['/support/index'],
+    Yii::t('ui', 'Поддержка'),
+];
 
 ?>
 
-<aside class="account-nav">
-    <a href="<?= Url::to(['/account/index']) ?>">
-        <?= Yii::t('ui', 'Обзор') ?>
-    </a>
-
-    <a href="<?= Url::to(['/account/settings']) ?>">
-        <?= Yii::t('ui', 'Профиль') ?>
-    </a>
-
-    <a href="<?= Url::to(['/account/security']) ?>">
-        <?= Yii::t('ui', 'Безопасность') ?>
-    </a>
-
-    <a href="<?= Url::to(['/account/sessions']) ?>">
-        <?= Yii::t('ui', 'Сессии') ?>
-    </a>
-
-    <a href="<?= Url::to(['/skin/index']) ?>">
-        <?= Yii::t('ui', 'Персонализация персонажа') ?>
-    </a>
-
-    <a href="<?= Url::to(['/wallet/index']) ?>">
-        <?= Yii::t('ui', 'Баланс') ?>
-    </a>
-
-    <a href="<?= Url::to(['/privilege/index']) ?>">
-        <?= Yii::t('ui', 'Статус') ?>
-    </a>
-
-    <a href="<?= Url::to(['/shop/promo']) ?>">
-        <?= Yii::t('ui', 'Промокод') ?>
-    </a>
-
-    <a href="<?= Url::to(['/vote/index']) ?>">
-        <?= Yii::t('ui', 'Голосование') ?>
-    </a>
-
-    <?php if((string)Setting::value('achievements.enabled', '1') === '1'): ?>
-        <a href="<?= Url::to(['/account/achievements']) ?>">
-            <?= Yii::t('ui', 'Достижения') ?>
+<aside class="account-nav" aria-label="<?= Html::encode(Yii::t('ui', 'Навигация личного кабинета')) ?>">
+    <?php foreach($items as [$itemRoute, $url, $label]): ?>
+        <?php
+        $active = $route === $itemRoute
+            || (
+                $itemRoute === 'support/index'
+                && str_starts_with($route, 'support/')
+            );
+        ?>
+        <a
+            href="<?= Url::to($url) ?>"
+            class="<?= $active ? 'is-active' : '' ?>"
+            <?= $active ? 'aria-current="page"' : '' ?>
+        >
+            <?= Html::encode($label) ?>
         </a>
-    <?php endif; ?>
-
-    <a href="<?= Url::to(['/support/index']) ?>">
-        <?= Yii::t('ui', 'Поддержка') ?>
-    </a>
+    <?php endforeach; ?>
 
     <?php if(Yii::$app->user->can('admin')): ?>
         <a href="/admin/">
