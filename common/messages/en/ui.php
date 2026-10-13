@@ -343,4 +343,6 @@ return [
     'Фильтр достижений' => 'Achievement filter',
     'Сортировка достижений' => 'Achievement sorting',
     'Открыть достижение {title}' => 'Open achievement {title}',
+
+    'Настройки публичного профиля сохранены.' => 'Public profile settings saved.',
 ];
