@@ -160,11 +160,29 @@ final class AchievementIconService
                     : $achievement->getDisplayTitle()
             );
 
+        // New illustrated medals are keyed by achievement code, not database ID.
+        // Keep legacy SVG as a fallback until the assets are installed.
+        $badgeSrc = null;
+        $code = trim((string)$achievement->code);
+
+        if (!$secret && preg_match('/^[a-z0-9_.-]+$/', $code) === 1) {
+            $fileName = $code . '.webp';
+            $badgePath = Yii::getAlias('@frontend/web/images/achievements/v2')
+                . '/' . $fileName;
+
+            if (is_file($badgePath)) {
+                $badgeSrc = rtrim((string)(Yii::$app->params['appUrl'] ?? ''), '/')
+                    . '/images/achievements/v2/' . rawurlencode($fileName)
+                    . '?v=2';
+            }
+        }
+
         $classes = [
             'achievement-icon',
             'achievement-icon--' . $size,
             'achievement-icon--' . $rarity,
             'achievement-icon--category-' . $category,
+            ...($badgeSrc !== null ? ['achievement-icon--illustrated'] : []),
             $unlocked
                 ? 'is-unlocked'
                 : 'is-locked',
@@ -172,7 +190,17 @@ final class AchievementIconService
 
         return Html::tag(
             'span',
-            self::svg($key),
+            $badgeSrc !== null
+                ? Html::img($badgeSrc, [
+                    'class' => 'achievement-badge-image',
+                    'alt' => '',
+                    'aria-hidden' => 'true',
+                    'loading' => 'lazy',
+                    'decoding' => 'async',
+                    'width' => 256,
+                    'height' => 256,
+                ])
+                : self::svg($key),
             [
                 'class' => implode(' ', $classes),
                 'title' => $label,
