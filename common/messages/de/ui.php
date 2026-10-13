@@ -343,4 +343,6 @@ return [
     'Фильтр достижений' => 'Erfolgsfilter',
     'Сортировка достижений' => 'Erfolgssortierung',
     'Открыть достижение {title}' => 'Erfolg {title} öffnen',
+
+    'Настройки публичного профиля сохранены.' => 'Einstellungen des öffentlichen Profils gespeichert.',
 ];
