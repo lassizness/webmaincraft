@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace common\services;
 
 use common\models\Achievement;
+use Yii;
 use yii\helpers\Html;
 
 final class AchievementIconService
@@ -155,7 +156,7 @@ final class AchievementIconService
         $label = $title
             ?? (
                 $secret
-                    ? 'Секретное достижение'
+                    ? Yii::t('ui', 'Секретное достижение')
                     : $achievement->getDisplayTitle()
             );
 
