@@ -13,6 +13,10 @@ return [
 
     'Личный кабинет' => 'Account',
     'Привет, {username}' => 'Hello, {username}',
+    'История последних заказов в магазине.' => 'Your latest orders from the store.',
+    'В обработке' => 'Processing',
+    'Отменено' => 'Cancelled',
+    'Ошибка' => 'Failed',
     'Последние покупки' => 'Recent Purchases',
     'Покупок пока нет.' => 'No purchases yet.',
     'Товар' => 'Product',
