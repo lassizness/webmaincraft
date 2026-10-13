@@ -44,6 +44,36 @@ $translateShopText = static function (?string $value): string {
         : $value;
 };
 
+$achievementStatLabels = [
+    'playtime_seconds' => Yii::t('ui', 'Игровое время'),
+    'blocks.break.total' => Yii::t('ui', 'Блоков сломано'),
+    'blocks.place.total' => Yii::t('ui', 'Блоков установлено'),
+    'entity.kill.total' => Yii::t('ui', 'Мобов убито'),
+    'player.death.total' => Yii::t('ui', 'Смертей'),
+    'item.craft.total' => Yii::t('ui', 'Предметов создано'),
+    'item.smelt.total' => Yii::t('ui', 'Предметов переплавлено'),
+    'dimensions.visited' => Yii::t('ui', 'Измерений посещено'),
+];
+
+$formatAchievementStat = static function (
+    string $key,
+    int $value
+): string {
+    if($key === 'playtime_seconds')
+    {
+        $hours = intdiv($value, 3600);
+        $minutes = intdiv($value % 3600, 60);
+
+        return Yii::t('ui', '{hours} ч {minutes} мин', [
+            'hours' => $hours,
+            'minutes' => $minutes,
+        ]);
+    }
+
+    return number_format($value, 0, ',', ' ');
+};
+
+
 ?>
 
 <div class="container ht-section">
@@ -120,82 +150,160 @@ $translateShopText = static function (?string $value): string {
             </div>
 
             <?php if($achievementsEnabled): ?>
-                <div class="ht-card mt-4 achievement-dashboard">
-                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
-                        <div>
-                            <div class="eyebrow mb-1">ACHIEVEMENTS</div>
-                            <h3 class="mb-1">
-                                <?= Yii::t('ui', 'Полученные достижения') ?>
-                            </h3>
-                            <p class="muted mb-0">
-                                <?= (int)($achievementSummary['unlocked'] ?? 0) ?>
-                                из
-                                <?= (int)($achievementSummary['total'] ?? 0) ?>
-                                ·
-                                <?= number_format(
-                                    (int)($achievementSummary['score'] ?? 0),
-                                    0,
-                                    ',',
-                                    ' '
-                                ) ?>
-                                очков
-                            </p>
-                        </div>
-
-                        <a
-                            class="btn btn-outline-light"
-                            href="<?= Url::to(['/account/achievements']) ?>"
-                        >
-                            Все достижения
-                        </a>
-                    </div>
-
-                    <?php if(!$recentAchievements): ?>
-                        <div class="achievement-empty">
-                            <div class="achievement-empty-icon">✦</div>
+                <div class="account-overview-grid mt-4">
+                    <div class="ht-card achievement-overview-stats">
+                        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
                             <div>
-                                <strong>Коллекция пока пуста</strong>
-                                <div class="muted small mt-1">
-                                    Играй на сервере, развивай технологии и открывай достижения.
+                                <div class="eyebrow mb-1">
+                                    <?= Yii::t('ui', 'ИГРОВАЯ СТАТИСТИКА') ?>
                                 </div>
+                                <h3 class="mb-1">
+                                    <?= Yii::t('ui', 'Игровая статистика') ?>
+                                </h3>
+                                <p class="muted mb-0">
+                                    <?= Yii::t('ui', 'Долговременные показатели HiveTechTelemetry.') ?>
+                                </p>
                             </div>
+
+                            <a
+                                class="btn btn-outline-light btn-sm"
+                                href="<?= Url::to(['/account/achievements']) ?>"
+                            >
+                                <?= Yii::t('ui', 'Достижения') ?>
+                            </a>
                         </div>
-                    <?php else: ?>
-                        <div class="achievement-earned-grid">
-                            <?php foreach($recentAchievements as $unlock): ?>
-                                <?php $achievement = $unlock->achievement; ?>
-                                <?php if(!$achievement) continue; ?>
 
-                                <div class="achievement-earned-card achievement-earned-card--<?= Html::encode((string)$achievement->rarity) ?>">
-                                    <?= AchievementIconService::render(
-                                        $achievement,
-                                        true,
-                                        'lg'
-                                    ) ?>
+                        <?php if(!$achievementStats): ?>
+                            <div class="muted">
+                                <?= Yii::t('ui', 'Телеметрия по этому игроку пока не поступала.') ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="achievement-stat-grid">
+                                <?php
+                                $shownStats = 0;
 
-                                    <div class="achievement-earned-copy">
-                                        <div class="achievement-earned-title">
-                                            <?= Html::encode((string)$achievement->title) ?>
-                                        </div>
-                                        <div class="achievement-earned-meta">
-                                            <span class="achievement-rarity achievement-rarity--<?= Html::encode((string)$achievement->rarity) ?>">
-                                                <?= Html::encode(strtoupper((string)$achievement->rarity)) ?>
-                                            </span>
-                                            <span>+<?= (int)$unlock->score_awarded ?></span>
-                                        </div>
-                                        <div class="small muted mt-1">
+                                foreach($achievementStatLabels as $key => $label):
+                                    if(!array_key_exists($key, $achievementStats))
+                                    {
+                                        continue;
+                                    }
+
+                                    $shownStats++;
+                                ?>
+                                    <div class="achievement-stat">
+                                        <span>
+                                            <?= Html::encode($label) ?>
+                                        </span>
+                                        <strong>
                                             <?= Html::encode(
-                                                Yii::$app->formatter->asDatetime(
-                                                    $unlock->unlocked_at,
-                                                    'php:d.m.Y H:i'
+                                                $formatAchievementStat(
+                                                    $key,
+                                                    (int)$achievementStats[$key]
                                                 )
                                             ) ?>
+                                        </strong>
+                                    </div>
+                                <?php endforeach; ?>
+
+                                <?php if($shownStats === 0): ?>
+                                    <?php foreach(array_slice($achievementStats, 0, 6, true) as $key => $value): ?>
+                                        <div class="achievement-stat">
+                                            <span class="font-monospace">
+                                                <?= Html::encode((string)$key) ?>
+                                            </span>
+                                            <strong>
+                                                <?= number_format(
+                                                    (int)$value,
+                                                    0,
+                                                    ',',
+                                                    ' '
+                                                ) ?>
+                                            </strong>
                                         </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="ht-card achievement-dashboard">
+                        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+                            <div>
+                                <div class="eyebrow mb-1">ACHIEVEMENTS</div>
+                                <h3 class="mb-1">
+                                    <?= Yii::t('ui', 'Последние достижения') ?>
+                                </h3>
+                                <p class="muted mb-0">
+                                    <?= Yii::t('ui', '{unlocked} из {total} · {score} очков', [
+                                        'unlocked' => (int)($achievementSummary['unlocked'] ?? 0),
+                                        'total' => (int)($achievementSummary['total'] ?? 0),
+                                        'score' => number_format(
+                                            (int)($achievementSummary['score'] ?? 0),
+                                            0,
+                                            ',',
+                                            ' '
+                                        ),
+                                    ]) ?>
+                                </p>
+                            </div>
+
+                            <a
+                                class="btn btn-outline-light btn-sm"
+                                href="<?= Url::to(['/account/achievements']) ?>"
+                            >
+                                <?= Yii::t('ui', 'Все достижения') ?>
+                            </a>
+                        </div>
+
+                        <?php if(!$recentAchievements): ?>
+                            <div class="achievement-empty">
+                                <div class="achievement-empty-icon">✦</div>
+                                <div>
+                                    <strong>
+                                        <?= Yii::t('ui', 'Коллекция пока пуста') ?>
+                                    </strong>
+                                    <div class="muted small mt-1">
+                                        <?= Yii::t('ui', 'Играй на сервере, развивай технологии и открывай достижения.') ?>
                                     </div>
                                 </div>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="achievement-recent-list">
+                                <?php foreach($recentAchievements as $unlock): ?>
+                                    <?php $achievement = $unlock->achievement; ?>
+                                    <?php if(!$achievement) continue; ?>
+
+                                    <div class="achievement-recent-row">
+                                        <?= AchievementIconService::render(
+                                            $achievement,
+                                            true,
+                                            'sm'
+                                        ) ?>
+
+                                        <div>
+                                            <strong>
+                                                <?= Html::encode(
+                                                    $achievement->getDisplayTitle()
+                                                ) ?>
+                                            </strong>
+                                            <span class="muted">
+                                                <?= Html::encode(
+                                                    Yii::$app->formatter->asDatetime(
+                                                        $unlock->unlocked_at,
+                                                        'php:d.m.Y H:i'
+                                                    )
+                                                ) ?>
+                                            </span>
+                                        </div>
+
+                                        <b>
+                                            +<?= (int)$unlock->score_awarded ?>
+                                        </b>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
             <?php endif; ?>
 
