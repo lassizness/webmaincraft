@@ -44,6 +44,19 @@ $translateShopText = static function (?string $value): string {
         : $value;
 };
 
+$formatQuarks = static function (float $amount): string {
+    $precision = abs($amount - round($amount)) < 0.00001 ? 0 : 2;
+    return Yii::$app->formatter->asDecimal($amount, $precision);
+};
+
+$purchaseStatusLabels = [
+    'paid' => Yii::t('ui', 'Оплачено'),
+    'new' => Yii::t('ui', 'В обработке'),
+    'pending' => Yii::t('ui', 'В обработке'),
+    'cancelled' => Yii::t('ui', 'Отменено'),
+    'failed' => Yii::t('ui', 'Ошибка'),
+];
+
 $achievementStatLabels = [
     'playtime_seconds' => Yii::t('ui', 'Игровое время'),
     'blocks.break.total' => Yii::t('ui', 'Блоков сломано'),
@@ -307,87 +320,130 @@ $formatAchievementStat = static function (
                 </div>
             <?php endif; ?>
 
-            <div class="ht-card mt-4">
-                <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
-                    <div>
-                        <h3 class="mb-1">
-                            <?= Yii::t('ui', 'Голосование за сервер') ?>
-                        </h3>
-                        <p class="muted mb-0">
-                            <?= Yii::t('ui', 'Поддержи HiveGrid голосом и получай кварки.') ?>
-                        </p>
-                    </div>
+            <div class="account-activity-grid mt-4">
+                <section class="ht-card account-activity-card account-vote-panel" aria-labelledby="account-vote-heading">
+                    <div class="account-activity-heading">
+                        <div class="account-activity-heading-copy">
+                            <span class="eyebrow">COMMUNITY</span>
+                            <h3 id="account-vote-heading">
+                                <?= Yii::t('ui', 'Голосование за сервер') ?>
+                            </h3>
+                            <p class="muted">
+                                <?= Yii::t('ui', 'Поддержи HiveGrid голосом и получай кварки.') ?>
+                            </p>
+                        </div>
 
-                    <div class="d-flex gap-2 flex-wrap justify-content-end">
-                        <?php foreach (($voteServices ?? []) as $voteService): ?>
-                            <a
-                                class="btn btn-outline-light"
-                                href="<?= Url::to(['/vote/index']) ?>#vote-service-<?= Html::encode((string)$voteService->code) ?>"
-                            >
-                                <?= Html::encode((string)$voteService->name) ?>
-                            </a>
-                        <?php endforeach; ?>
-
-                        <a class="btn btn-primary" href="<?= Url::to(['/vote/index']) ?>">
+                        <a class="btn btn-outline-light btn-sm account-activity-all" href="<?= Url::to(['/vote/index']) ?>">
                             <?= Yii::t('ui', 'Все рейтинги') ?>
+                            <span aria-hidden="true">↗</span>
                         </a>
                     </div>
-                </div>
-            </div>
 
-            <div class="ht-card mt-4">
+                    <?php if(empty($voteServices)): ?>
+                        <div class="account-activity-empty">
+                            <span class="account-activity-empty-mark" aria-hidden="true">✦</span>
+                            <p class="muted mb-0">
+                                <?= Yii::t('ui', 'Сервисы голосования пока не настроены.') ?>
+                            </p>
+                        </div>
+                    <?php else: ?>
+                        <div class="account-vote-list">
+                            <?php foreach($voteServices as $voteService): ?>
+                                <a
+                                    class="account-vote-link"
+                                    href="<?= Url::to(['/vote/index']) ?>#vote-service-<?= rawurlencode((string)$voteService->code) ?>"
+                                >
+                                    <span class="account-vote-mark" aria-hidden="true">✦</span>
+                                    <span class="account-vote-copy">
+                                        <strong><?= Html::encode((string)$voteService->name) ?></strong>
+                                        <small class="muted">
+                                            +<?= Html::encode($formatQuarks((float)$voteService->reward_amount)) ?>
+                                            <?= Yii::t('ui', 'кварков') ?>
+                                        </small>
+                                    </span>
+                                    <span class="account-vote-cta">
+                                        <?= Yii::t('ui', 'Голосовать') ?>
+                                        <span aria-hidden="true">↗</span>
+                                    </span>
+                                </a>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </section>
 
-                <h3>
-                    <?= Yii::t('ui', 'Последние покупки') ?>
-                </h3>
+                <section class="ht-card account-activity-card account-purchases-panel" aria-labelledby="account-purchases-heading">
+                    <div class="account-activity-heading">
+                        <div class="account-activity-heading-copy">
+                            <span class="eyebrow">STORE</span>
+                            <h3 id="account-purchases-heading">
+                                <?= Yii::t('ui', 'Последние покупки') ?>
+                            </h3>
+                            <p class="muted">
+                                <?= Yii::t('ui', 'История последних заказов в магазине.') ?>
+                            </p>
+                        </div>
 
-                <?php if(!$purchases): ?>
+                        <a class="btn btn-outline-light btn-sm account-activity-all" href="<?= Url::to(['/shop/index']) ?>">
+                            <?= Yii::t('ui', 'Магазин') ?>
+                            <span aria-hidden="true">↗</span>
+                        </a>
+                    </div>
 
-                    <p class="muted">
-                        <?= Yii::t('ui', 'Покупок пока нет.') ?>
-                    </p>
+                    <?php if(empty($purchases)): ?>
+                        <div class="account-activity-empty">
+                            <span class="account-activity-empty-mark account-activity-empty-mark--shop" aria-hidden="true">◇</span>
+                            <p class="muted mb-0">
+                                <?= Yii::t('ui', 'Покупок пока нет.') ?>
+                            </p>
+                        </div>
+                    <?php else: ?>
+                        <div class="account-purchase-list">
+                            <?php foreach($purchases as $purchase): ?>
+                                <?php
+                                $purchaseStatus = (string)$purchase->status;
+                                $purchaseStatusClass = in_array(
+                                    $purchaseStatus,
+                                    ['paid', 'new', 'pending', 'cancelled', 'failed'],
+                                    true
+                                ) ? $purchaseStatus : 'other';
+                                $purchaseStatusLabel = $purchaseStatusLabels[$purchaseStatus]
+                                    ?? $purchaseStatus;
+                                ?>
+                                <div class="account-purchase-row">
+                                    <div class="account-purchase-info">
+                                        <strong>
+                                            <?= Html::encode(
+                                                $purchase->product
+                                                    ? $translateShopText((string)$purchase->product->name)
+                                                    : Yii::t('ui', 'Товар')
+                                            ) ?>
+                                        </strong>
+                                        <span class="account-purchase-meta">
+                                            #<?= (int)$purchase->id ?>
+                                            <span aria-hidden="true">·</span>
+                                            <?= Html::encode(
+                                                Yii::$app->formatter->asDate(
+                                                    $purchase->created_at,
+                                                    'php:d.m.Y'
+                                                )
+                                            ) ?>
+                                        </span>
+                                    </div>
 
-                <?php else: ?>
-
-                    <table class="table">
-                        <tbody>
-
-                        <?php foreach($purchases as $purchase): ?>
-                            <tr>
-                                <td>#<?= $purchase->id ?></td>
-
-                                <td>
-                                    <?= Html::encode(
-                                        $purchase->product
-                                            ? $translateShopText((string)$purchase->product->name)
-                                            : Yii::t('ui', 'Товар')
-                                    ) ?>
-                                </td>
-
-                                <td>
-                                    <?= number_format(
-                                        (float)$purchase->price,
-                                        2,
-                                        ',',
-                                        ' '
-                                    ) ?>
-                                </td>
-
-                                <td>
-                                    <?= Html::encode(
-                                        $purchase->status === 'paid'
-                                            ? Yii::t('ui', 'Оплачено')
-                                            : $purchase->status
-                                    ) ?>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-
-                        </tbody>
-                    </table>
-
-                <?php endif; ?>
-
+                                    <div class="account-purchase-right">
+                                        <strong class="account-purchase-price">
+                                            <?= Html::encode($formatQuarks((float)$purchase->price)) ?>
+                                            <span><?= Yii::t('ui', 'кварков') ?></span>
+                                        </strong>
+                                        <span class="account-purchase-status account-purchase-status--<?= Html::encode($purchaseStatusClass) ?>">
+                                            <?= Html::encode($purchaseStatusLabel) ?>
+                                        </span>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </section>
             </div>
 
         </section>
