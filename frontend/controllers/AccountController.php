@@ -64,6 +64,7 @@ final class AccountController extends Controller
             'user' => $user,
             'wallet' => (new WalletService())->wallet((int)$user->id),
             'purchases' => ShopPurchase::find()
+                ->with('product')
                 ->where(['user_id' => $user->id])
                 ->orderBy(['id' => SORT_DESC])
                 ->limit(5)
