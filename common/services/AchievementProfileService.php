@@ -136,7 +136,7 @@ final class AchievementProfileService
             'score' => (int)($row['score'] ?? 0),
             'last_unlock' => $row['last_unlock'] ?? null,
             'last_unlock_title' =>
-                $lastUnlock?->achievement?->title,
+                $lastUnlock?->achievement?->getDisplayTitle(),
             'last_unlock_rarity' =>
                 $lastUnlock?->achievement?->rarity,
             'last_unlock_achievement_id' =>
