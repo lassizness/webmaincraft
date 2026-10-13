@@ -1,6 +1,22 @@
 <?php
 
 return [
+    'ДОСТИЖЕНИЯ' => 'ACHIEVEMENTS',
+    'СООБЩЕСТВО' => 'COMMUNITY',
+    'МАГАЗИН' => 'STORE',
+    'ПРОГРЕСС HIVETECH' => 'HIVETECH PROGRESS',
+    'AE2 · Хранение' => 'AE2 · Storage',
+    'IC2 · Энергетика' => 'IC2 · Power',
+    'Forestry · Пчеловодство' => 'Forestry · Beekeeping',
+    'Thermal · Механизмы' => 'Thermal · Machinery',
+    'Immersive Engineering · Промышленность' => 'Immersive Engineering · Industry',
+    'Industrial Foregoing · Автоматизация' => 'Industrial Foregoing · Automation',
+    'Обычное' => 'Common',
+    'Необычное' => 'Uncommon',
+    'Редкое' => 'Rare',
+    'Эпическое' => 'Epic',
+    'Легендарное' => 'Legendary',
+
     'Обзор' => 'Overview',
     'Профиль' => 'Profile',
     'Безопасность' => 'Security',
