@@ -1896,3 +1896,30 @@ table {
         height: 2px;
     }
 }
+
+/* Illustrated Minecraft badges v2; maintain SVG fallback above. */
+.achievement-icon.achievement-icon--illustrated {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    overflow: visible;
+}
+.achievement-icon--illustrated::before,
+.achievement-icon--illustrated::after {
+    display: none;
+}
+.achievement-icon--illustrated .achievement-badge-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 5px 8px rgba(0,0,0,.3));
+}
+.achievement-icon--illustrated.is-locked {
+    opacity: .55;
+    filter: grayscale(1) saturate(.25);
+}
+.achievement-icon--illustrated.is-unlocked {
+    opacity: 1;
+}
