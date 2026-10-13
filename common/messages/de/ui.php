@@ -2,7 +2,7 @@
 
 return [
     'ДОСТИЖЕНИЯ' => 'ERFOLGE',
-    'СООБЩЕСТВО' => 'COMMUNITY',
+    'СООБЩЕСТВО' => 'GEMEINSCHAFT',
     'МАГАЗИН' => 'SHOP',
     'ПРОГРЕСС HIVETECH' => 'HIVETECH-FORTSCHRITT',
     'AE2 · Хранение' => 'AE2 · Speicherung',
