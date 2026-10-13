@@ -153,4 +153,6 @@ return [
     'Подтвердить новый email' => 'Confirm new email',
 
     'Не удалось пройти проверку защиты от ботов. Повторите попытку.' => 'Bot protection verification failed. Please try again.',
+
+    'Основная навигация' => 'Main navigation',
 ];

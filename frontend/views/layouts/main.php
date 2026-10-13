@@ -13,6 +13,23 @@ AppAsset::register($this);
 
 $app = Yii::$app->params['appName'];
 $lang = Yii::$app->language;
+$route = Yii::$app->controller?->route ?? '';
+$pageSlug = $route === 'page/view'
+    ? (string)Yii::$app->request->get('slug', '')
+    : '';
+
+$navActive = static function (
+    array $routes,
+    ?string $slug = null
+) use ($route, $pageSlug): bool {
+    if(!in_array($route, $routes, true))
+    {
+        return false;
+    }
+
+    return $slug === null
+        || $pageSlug === $slug;
+};
 
 $seoIndexable = SeoService::isIndexable();
 $seoDescription = SeoService::description(
@@ -195,42 +212,78 @@ if(!$seoIndexable)
             <span>HiveTech</span>
         </a>
 
-        <nav>
-            <a href="<?= Url::to(['/news/index']) ?>">
+        <nav aria-label="<?= Html::encode(Yii::t('app', 'Основная навигация')) ?>">
+            <a
+                href="<?= Url::to(['/news/index']) ?>"
+                class="<?= $navActive(['news/index', 'news/view']) ? 'is-active' : '' ?>"
+                <?= $navActive(['news/index', 'news/view']) ? 'aria-current="page"' : '' ?>
+            >
                 <?= Yii::t('app', 'Новости') ?>
             </a>
 
-            <a href="<?= Url::to(['/server/index']) ?>">
+            <a
+                href="<?= Url::to(['/server/index']) ?>"
+                class="<?= $navActive(['server/index']) ? 'is-active' : '' ?>"
+                <?= $navActive(['server/index']) ? 'aria-current="page"' : '' ?>
+            >
                 <?= Yii::t('app', 'Серверы') ?>
             </a>
 
-            <a href="<?= Url::to(['/page/view', 'slug' => 'play']) ?>">
+            <a
+                href="<?= Url::to(['/page/view', 'slug' => 'play']) ?>"
+                class="<?= $navActive(['page/view'], 'play') ? 'is-active' : '' ?>"
+                <?= $navActive(['page/view'], 'play') ? 'aria-current="page"' : '' ?>
+            >
                 <?= Yii::t('app', 'Начать играть') ?>
             </a>
 
-            <a href="<?= Url::to(['/page/view', 'slug' => 'guides']) ?>">
+            <a
+                href="<?= Url::to(['/page/view', 'slug' => 'guides']) ?>"
+                class="<?= $navActive(['page/view'], 'guides') ? 'is-active' : '' ?>"
+                <?= $navActive(['page/view'], 'guides') ? 'aria-current="page"' : '' ?>
+            >
                 <?= Yii::t('app', 'Гайды') ?>
             </a>
 
-            <a href="<?= Url::to(['/shop/index']) ?>">
+            <a
+                href="<?= Url::to(['/shop/index']) ?>"
+                class="<?= $navActive(['shop/index']) ? 'is-active' : '' ?>"
+                <?= $navActive(['shop/index']) ? 'aria-current="page"' : '' ?>
+            >
                 <?= Yii::t('app', 'Магазин') ?>
             </a>
 
-            <a href="<?= Url::to(['/vote/index']) ?>">
+            <a
+                href="<?= Url::to(['/vote/index']) ?>"
+                class="<?= $navActive(['vote/index']) ? 'is-active' : '' ?>"
+                <?= $navActive(['vote/index']) ? 'aria-current="page"' : '' ?>
+            >
                 <?= Yii::t('app', 'Голосовать') ?>
             </a>
 
             <?php if((string)Setting::value('ratings.public_enabled', '0') === '1'): ?>
-                <a href="<?= Url::to(['/ratings/index']) ?>">
+                <a
+                    href="<?= Url::to(['/ratings/index']) ?>"
+                    class="<?= $navActive(['ratings/index', 'ratings/player']) ? 'is-active' : '' ?>"
+                    <?= $navActive(['ratings/index', 'ratings/player']) ? 'aria-current="page"' : '' ?>
+                >
                     <?= Yii::t('app', 'Рейтинги') ?>
                 </a>
             <?php endif; ?>
 
-            <a href="<?= Url::to(['/page/view', 'slug' => 'rules']) ?>">
+            <a
+                href="<?= Url::to(['/page/view', 'slug' => 'rules']) ?>"
+                class="<?= $navActive(['page/view'], 'rules') ? 'is-active' : '' ?>"
+                <?= $navActive(['page/view'], 'rules') ? 'aria-current="page"' : '' ?>
+            >
                 <?= Yii::t('app', 'Правила') ?>
             </a>
 
-            <a href="<?= Url::to(['/support/index']) ?>">
+            <a
+                href="<?= Url::to(['/support/index']) ?>"
+                class="<?= str_starts_with($route, 'support/') ? 'is-active' : '' ?>"
+                <?= str_starts_with($route, 'support/') ? 'aria-current="page"' : '' ?>
+            >
                 <?= Yii::t('app', 'Поддержка') ?>
             </a>
         </nav>
@@ -278,7 +331,18 @@ if(!$seoIndexable)
 
                 <a
                     href="<?= Url::to(['/account/index']) ?>"
-                    class="ht-user"
+                    class="ht-user <?= (
+                        str_starts_with($route, 'account/')
+                        || str_starts_with($route, 'skin/')
+                        || str_starts_with($route, 'wallet/')
+                        || str_starts_with($route, 'privilege/')
+                    ) ? 'is-active' : '' ?>"
+                    <?= (
+                        str_starts_with($route, 'account/')
+                        || str_starts_with($route, 'skin/')
+                        || str_starts_with($route, 'wallet/')
+                        || str_starts_with($route, 'privilege/')
+                    ) ? 'aria-current="page"' : '' ?>
                 >
                     <?= Html::encode(Yii::$app->user->identity->username) ?>
                 </a>

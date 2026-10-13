@@ -149,4 +149,6 @@ return [
     'Подтвердить новый email' => 'Neue E-Mail bestätigen',
 
     'Не удалось пройти проверку защиты от ботов. Повторите попытку.' => 'Die Bot-Schutzprüfung ist fehlgeschlagen. Bitte versuche es erneut.',
+
+    'Основная навигация' => 'Hauptnavigation',
 ];

@@ -22,8 +22,10 @@ html {
 }
 
 body {
+    display: flex;
     min-width: 0;
     min-height: 100vh;
+    flex-direction: column;
     margin: 0;
     overflow-x: hidden;
     background:
@@ -32,6 +34,11 @@ body {
         var(--bg);
     color: var(--text);
     font-family: Inter, system-ui, sans-serif;
+}
+
+main {
+    min-width: 0;
+    flex: 1 0 auto;
 }
 
 a {
@@ -95,6 +102,34 @@ a {
 .ht-nav nav a:hover,
 .ht-user:hover {
     color: #fff;
+}
+
+.ht-nav nav a {
+    position: relative;
+}
+
+.ht-nav nav a.is-active {
+    color: #fff;
+}
+
+.ht-nav nav a.is-active::after {
+    position: absolute;
+    right: 0;
+    bottom: -25px;
+    left: 0;
+    height: 3px;
+    border-radius: 999px 999px 0 0;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    box-shadow: 0 0 14px rgba(56, 189, 248, .26);
+    content: "";
+}
+
+.ht-user.is-active {
+    border-radius: 9px;
+    padding: 7px 9px;
+    background: rgba(56, 189, 248, .1);
+    color: #fff;
+    box-shadow: inset 0 0 0 1px rgba(56, 189, 248, .18);
 }
 
 .ht-auth {
@@ -346,6 +381,21 @@ a:focus-visible,
     color: #fff;
 }
 
+.account-nav a.is-active {
+    position: relative;
+    background:
+        linear-gradient(
+            90deg,
+            rgba(34, 197, 94, .14),
+            rgba(56, 189, 248, .12)
+        );
+    color: #fff;
+    font-weight: 750;
+    box-shadow:
+        inset 3px 0 0 var(--accent2),
+        inset 0 0 0 1px rgba(56, 189, 248, .14);
+}
+
 .news-grid,
 .shop-grid {
     display: grid;
@@ -383,6 +433,7 @@ a:focus-visible,
 }
 
 .ht-footer {
+    flex: 0 0 auto;
     margin-top: 70px;
     border-top: 1px solid var(--line);
     padding: 28px 0;
@@ -1808,5 +1859,40 @@ table {
 
     .achievement-detail-panel {
         padding: 17px;
+    }
+}
+
+
+/* Account overview dashboard */
+.account-overview-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
+    gap: 14px;
+    align-items: stretch;
+}
+
+.account-overview-grid > .ht-card {
+    height: auto;
+}
+
+.achievement-profile-settings {
+    height: auto !important;
+    min-height: 0;
+}
+
+.achievement-page > .ht-card {
+    height: auto;
+}
+
+@media (max-width: 900px) {
+    .account-overview-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ht-nav nav a.is-active::after {
+        right: 8px;
+        bottom: -4px;
+        left: 8px;
+        height: 2px;
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace common\models;
 
+use Yii;
 use yii\db\ActiveRecord;
 
 final class Achievement extends ActiveRecord
@@ -68,5 +69,52 @@ final class Achievement extends ActiveRecord
             'sort' => SORT_ASC,
             'id' => SORT_ASC,
         ]);
+    }
+
+    public function getDisplayTitle(): string
+    {
+        return $this->localizedField(
+            'title',
+            (string)$this->title
+        );
+    }
+
+    public function getDisplayDescription(): string
+    {
+        return $this->localizedField(
+            'description',
+            (string)$this->description
+        );
+    }
+
+    public function getDisplayHint(): string
+    {
+        return $this->localizedField(
+            'hint',
+            (string)$this->hint
+        );
+    }
+
+    private function localizedField(
+        string $field,
+        string $fallback
+    ): string {
+        if(
+            Yii::$app->language === 'ru'
+            || trim((string)$this->code) === ''
+        )
+        {
+            return $fallback;
+        }
+
+        $key = $field . '.' . $this->code;
+        $translated = Yii::t(
+            'achievements',
+            $key
+        );
+
+        return $translated !== $key
+            ? $translated
+            : $fallback;
     }
 }

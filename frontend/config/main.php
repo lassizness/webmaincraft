@@ -19,6 +19,14 @@ return [
                     'basePath' => '@common/messages',
                     'sourceLanguage' => 'ru',
                 ],
+                'achievements*' => [
+                    'class' => yii\i18n\PhpMessageSource::class,
+                    'basePath' => '@common/messages',
+                    'sourceLanguage' => 'ru',
+                    'fileMap' => [
+                        'achievements' => 'achievements.php',
+                    ],
+                ],
                 'app*' => [
                     'class' => yii\i18n\PhpMessageSource::class,
                     'basePath' => '@common/messages',
