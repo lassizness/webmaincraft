@@ -120,11 +120,11 @@ foreach($rewards as $reward)
                         Иллюстрированная медаль v2 по коду достижения используется автоматически,
                         когда её WebP-файл установлен. Старый SVG остаётся резервным.
                     </div>
-                    <div class="col-12">
-                        <div class="achievement-admin-badge-preview">
+                </div>
+                <div class="col-12">
+                    <div class="achievement-admin-badge-preview">
                             <?= AchievementIconService::render($model, true, 'lg') ?>
                             <span>Предпросмотр текущей иконки</span>
-                        </div>
                     </div>
                 </div>
                 <div class="col-md-6">
