@@ -1,5 +1,6 @@
 <?php
 
+use common\services\AchievementIconService;
 use yii\grid\GridView;
 use yii\helpers\{Html, Url};
 
@@ -41,6 +42,11 @@ $this->title = 'Достижения';
     'tableOptions' => ['class' => 'table table-hover align-middle'],
     'columns' => [
         'id',
+        [
+            'label' => 'Иконка',
+            'format' => 'raw',
+            'value' => static fn($m) => AchievementIconService::render($m, true, 'sm'),
+        ],
         [
             'attribute' => 'title',
             'format' => 'raw',
